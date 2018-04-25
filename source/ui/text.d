@@ -1,0 +1,265 @@
+/**
+Grimoire
+Copyright (c) 2017 Enalye
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising
+from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute
+it freely, subject to the following restrictions:
+
+	1. The origin of this software must not be misrepresented;
+	   you must not claim that you wrote the original software.
+	   If you use this software in a product, an acknowledgment
+	   in the product documentation would be appreciated but
+	   is not required.
+
+	2. Altered source versions must be plainly marked as such,
+	   and must not be misrepresented as being the original software.
+
+	3. This notice may not be removed or altered from any source distribution.
+*/
+
+module ui.text;
+
+import std.utf;
+import std.conv: to;
+
+import derelict.sdl2.sdl;
+import derelict.sdl2.ttf;
+
+import core.all;
+import render.all;
+import common.all;
+
+import ui.widget;
+
+private {
+	CharacterCache _standardCache, _italicCache, _boldCache, _italicBoldCache;
+}
+
+private class CharacterCache {
+	private {
+		Font _font;
+		Sprite[dchar] _cache;
+	}
+
+	this(Font newFont) {
+		_font = newFont;
+	}
+
+	Sprite get(dchar c) {
+		Sprite* cachedSprite = (c in _cache);
+		if(cachedSprite is null) {
+			auto texture = new Texture;
+			texture.loadFromSurface(TTF_RenderUTF8_Blended(_font.font, toUTFz!(const char*)([c].toUTF8), Color.white.toSDL()));
+			Sprite sprite = texture;
+			_cache[c] = sprite;
+			return sprite;
+		}
+		else {
+			return *cachedSprite;
+		}
+	}
+}
+
+void initializeTextCache() {
+	_standardCache = new CharacterCache(fetch!Font("VeraMono"));
+	_italicCache = new CharacterCache(fetch!Font("VeraMoIt"));
+	_boldCache = new CharacterCache(fetch!Font("VeraMoBd"));
+	_italicBoldCache = new CharacterCache(fetch!Font("VeraMoBI"));
+}
+
+private {
+	enum TextTokenType {
+		CharacterType,
+		NewLineType,
+		ColorType,
+		StandardType,
+		ItalicType,
+		BoldType,
+		ItalicBoldType
+	}
+	
+	struct TextToken {
+		TextTokenType type;
+
+		Sprite charSprite;
+		Color color;
+
+		this(TextTokenType newType) {
+			type = newType;
+		}
+	}
+}
+
+class Text: Widget {
+	private {
+		dstring _text;
+		TextToken[] _tokens;
+		int[] _lineLengths;
+		int _rowLength, _maxLineLength, _lineLimit;
+		Vec2f charSize = Vec2f.zero;
+		CharacterCache _currentCache;
+	}
+
+	@property {
+		string text() const { return to!string(_text); }
+		string text(string newText) {
+			_text = to!dstring(newText);
+			reload();
+			return newText;
+		}
+	}
+
+	this(int newLineLimit = 0) {
+		_lineLimit = newLineLimit;
+	}
+
+	this(string newText, int newLineLimit = 0) {
+		_lineLimit = newLineLimit;
+		text(newText);
+	}
+
+	private uint parseTag(uint i) {
+		dstring tag;
+		if(_text[i] != '{')
+			throw new Exception("Text: A tag must start with a \'{\'");
+		//'{'
+		i ++;
+		while(_text[i] != '}') {
+			tag ~= _text[i];
+			i ++;
+			if(i >= _text.length)
+				throw new Exception("Text: An opened tag must be closed with \'}\'");
+		}
+		TextToken token;
+		switch(tag) {
+		case "n"d:
+			token.type = TextTokenType.NewLineType;
+			_lineLengths.length ++;
+			_rowLength ++;
+			_lineLengths[_rowLength] = 0;
+			break;
+		case "s"d:
+			token.type = TextTokenType.StandardType;
+			_currentCache = _standardCache;
+			break;
+		case "b"d:
+			token.type = TextTokenType.BoldType;
+			_currentCache = _boldCache;
+			break;
+		case "i"d:
+			token.type = TextTokenType.ItalicType;
+			_currentCache = _italicCache;
+			break;
+		case "bi"d:
+			token.type = TextTokenType.ItalicBoldType;
+			_currentCache = _italicBoldCache;
+			break;
+		case "white"d:
+			token.type = TextTokenType.ColorType;
+			token.color = Color.white;
+			break;
+		case "red"d:
+			token.type = TextTokenType.ColorType;
+			token.color = Color.red;
+			break;
+		case "blue"d:
+			token.type = TextTokenType.ColorType;
+			token.color = Color.blue;
+			break;
+		case "green"d:
+			token.type = TextTokenType.ColorType;
+			token.color = Color.green;
+			break;
+		default:
+			throw new Exception("Text: The tag \'" ~ to!string(tag) ~ "\' does not exist");
+		}
+		_tokens ~= token;
+		//'}'
+		i ++;
+		return i;
+	}
+
+	private void reload() {
+		if(!_text.length)
+			return;
+		_tokens.length = 0L;
+		_lineLengths.length = 1;
+		_lineLengths[0] = 0;
+		_rowLength = 0;
+		_maxLineLength = 0;
+		_currentCache = _standardCache;
+		uint i = 0U;
+		while(i < _text.length) {
+			if(_text[i] == '{')
+				i = parseTag(i);
+			else {
+				if(_lineLimit > 0) {
+					//Auto carriage return.
+					if(_lineLengths[_rowLength] > _lineLimit) {
+						TextToken token;
+						token.type = TextTokenType.NewLineType;
+						_lineLengths.length ++;
+						_rowLength ++;
+						_lineLengths[_rowLength] = 0;
+						_tokens ~= token;
+					}
+				}
+				auto token = TextToken(TextTokenType.CharacterType);
+				token.charSprite = _currentCache.get(_text[i]);
+				_tokens ~= token;
+				_lineLengths[_rowLength] ++;
+				if(_lineLengths[_rowLength] > _maxLineLength)
+					_maxLineLength = _lineLengths[_rowLength];
+				i ++;
+			}
+		}
+		if(!_maxLineLength)
+			throw new Exception("Error while fetching cached characters");
+		charSize = _standardCache.get('a').size;
+
+		_size = Vec2f(charSize.x * _maxLineLength, charSize.y * (_rowLength + 1));
+	}
+
+	override void onEvent(Event event) {}
+
+	override void update(float deltaTime) {}
+
+	override void draw() {
+		Color currentColor = Color.white;
+		Vec2i currentPos = Vec2i.zero;
+		foreach(uint i, token; _tokens) {
+			switch(token.type) with(TextTokenType) {
+			case CharacterType:
+				token.charSprite.color = currentColor;
+				token.charSprite.draw(_position + charSize * Vec2f(
+					to!float(currentPos.x) - _maxLineLength / 2f,
+					to!float(currentPos.y) - _rowLength / 2f));
+				token.charSprite.color = Color.white;
+				currentPos.x ++;
+				break;
+			case NewLineType:
+				currentPos.x = 0;
+				currentPos.y ++;
+				break;
+			case StandardType:
+				break;
+			case BoldType:
+				break;
+			case ItalicType:
+				break;
+			case ItalicBoldType:
+				break;
+			case ColorType:
+				currentColor = token.color;
+				break;
+			default:
+				throw new Exception("Text: Invalid token");
+			}
+		}
+	}
+}

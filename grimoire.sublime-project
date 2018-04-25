@@ -1,0 +1,13 @@
+{
+	"folders":
+	[
+		{
+			"path": "source",
+			"name": "Grimoire"
+		},
+		{
+			"path": "test/source",
+			"name": "Test"
+		}
+	]
+}

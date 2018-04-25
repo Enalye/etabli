@@ -1,0 +1,20 @@
+{
+	"name": "grimoire",
+	"description": "Grimoire Framework",
+	"copyright": "Copyright © 2018, Enalye",
+	"license": "Zlib",
+	"authors": [
+		"Enalye"
+	],
+	"dependencies": {
+		"derelict-sdl2": "~>2.1.4"
+	},
+	"targetName": "grimoire",
+	"targetType": "library",
+	"targetPath": "lib",
+	"workingDirectory": "lib",
+
+	"subPackages": [
+		"./test/"
+	]
+}

@@ -1,0 +1,142 @@
+{
+	"gui_tile_selection": {
+		"x": 0,
+		"y": 0,
+		"w": 100,
+		"h": 100
+	},
+	"gui_tile_selection_hex": {
+		"x": 100,
+		"y": 0,
+		"w": 64,
+		"h": 74
+	},
+	"gui_circle": {
+		"x": 0,
+		"y": 128,
+		"w": 128,
+		"h": 128,
+		"scalex": 0.0078125,
+		"scaley": 0.0078125
+	},
+	"gui_unchecked": {
+		"x": 0,
+		"y": 100,
+		"w": 16,
+		"h": 16
+	},
+	"gui_checked": {
+		"x": 16,
+		"y": 100,
+		"w": 16,
+		"h": 16
+	},
+	"gui_button": {
+		"x": 32,
+		"y": 100,
+		"w": 16,
+		"h": 16
+	},
+	"gui_arrow": {
+		"x": 48,
+		"y": 100,
+		"w": 16,
+		"h": 16
+	},
+	"gui_slider": {
+		"x": 64,
+		"y": 100,
+		"w": 16,
+		"h": 24
+	},
+	"gui_rail": {
+		"x": 64,
+		"y": 124,
+		"w": 16,
+		"h": 4
+	},
+	"gui_bar": {
+		"x": 80,
+		"y": 124,
+		"w": 16,
+		"h": 4
+	},
+	"gui_bar_end": {
+		"x": 80,
+		"y": 116,
+		"w": 16,
+		"h": 8
+	},
+	"gui_exit": {
+		"x": 80,
+		"y": 100,
+		"w": 16,
+		"h": 16
+	},
+	"gui_texel": {
+		"x": 96,
+		"y": 100,
+		"w": 1,
+		"h": 1
+	},
+	"gui_window_corner_up_left": {
+		"x": 164,
+		"y": 0,
+		"w": 16,
+		"h": 16
+	},
+	"gui_window_corner_up_right": {
+		"x": 164,
+		"y": 0,
+		"w": 16,
+		"h": 16,
+		"fliph": true
+	},
+	"gui_window_corner_down_left": {
+		"x": 164,
+		"y": 0,
+		"w": 16,
+		"h": 16,
+		"flipv": true
+	},
+	"gui_window_corner_down_right": {
+		"x": 164,
+		"y": 0,
+		"w": 16,
+		"h": 16,
+		"fliph": true,
+		"flipv": true
+	},
+	"gui_window_border_up": {
+		"x": 180,
+		"y": 0,
+		"w": 16,
+		"h": 16
+	},
+	"gui_window_border_down": {
+		"x": 180,
+		"y": 0,
+		"w": 16,
+		"h": 16,
+		"flipv": true
+	},
+	"gui_window_border_left": {
+		"x": 164,
+		"y": 16,
+		"w": 16,
+		"h": 16
+	},
+	"gui_window_border_right": {
+		"x": 164,
+		"y": 16,
+		"w": 16,
+		"h": 16,
+		"fliph": true
+	},
+	"gui_window_exit": {
+		"x": 196,
+		"y": 0,
+		"w": 32,
+		"h": 32
+	}
+}

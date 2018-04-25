@@ -1,0 +1,14 @@
+syntax: glob
+
+build
+lib
+.dub
+.hg
+.git
+docs.json
+__dummy.html
+*.a
+*.o
+*.obj
+*.exe
+*.sublime-workspace
