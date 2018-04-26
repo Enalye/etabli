@@ -170,12 +170,24 @@ class VList: WidgetGroup {
 		_container.layout.addChild(widget);
 	}
 
-	void clear() {
+	override void removeChildren() {
 		_nbElements = 0u;
 		_idElementSelected = 0u;
 		_container.layout.size = Vec2f(size.x, 0f);
 		_container.layout.position = Vec2f.zero;
 		_container.layout.removeChildren();
+	}
+
+	override void removeChild(uint id) {
+		_container.layout.removeChild(id);
+		_nbElements = _container.layout.getChildrenCount();
+		_idElementSelected = 0u;
+		_container.layout.size = Vec2f(size.x, _layoutLength * _nbElements);
+		_container.layout.position = Vec2f(0f, _container.layout.size.y / 2f);
+	}
+
+	override int getChildrenCount() {
+		return _container.layout.getChildrenCount();	
 	}
 
 	Widget[] getList() {

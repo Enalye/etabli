@@ -170,12 +170,24 @@ class HList: WidgetGroup {
 		_container.layout.addChild(widget);
 	}
 
-	void clear() {
+	override void removeChildren() {
 		_nbElements = 0u;
 		_idElementSelected = 0u;
 		_container.layout.size = Vec2f(0f, size.y);
 		_container.layout.position = Vec2f.zero;
 		_container.layout.removeChildren();
+	}
+
+	override void removeChild(uint id) {
+		_container.layout.removeChild(id);
+		_nbElements = _container.layout.getChildrenCount();
+		_idElementSelected = 0u;
+		_container.layout.size = Vec2f(_layoutLength * _nbElements, size.y);
+		_container.layout.position = Vec2f(_container.layout.size.x / 2f, 0f);
+	}
+
+	override int getChildrenCount() {
+		return _container.layout.getChildrenCount();	
 	}
 
 	Widget[] getList() {

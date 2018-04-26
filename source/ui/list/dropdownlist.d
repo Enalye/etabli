@@ -117,6 +117,18 @@ class DropDownList: WidgetGroup {
 		_list.addChild(widget);
 	}
 
+	override void removeChildren() {
+		_list.removeChildren();
+	}
+
+	override void removeChild(uint id) {
+		_list.removeChild(id);
+	}
+
+	override int getChildrenCount() {
+		return _list.getChildrenCount();
+	}
+
 	Widget[] getList() {
 		return _list.getList();
 	}

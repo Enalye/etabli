@@ -153,8 +153,26 @@ class LogList: WidgetGroup {
 		_container.view.position = Vec2f(0f, lerp(min, max, _slider.offset));
 	}
 
+	private void repositionContainer() {
+		_container.layout.position = Vec2f(5f + _container.layout.size.x / 2f - _container.size.x / 2f, _container.layout.size.y / 2f);
+	}
+
 	override void addChild(Widget widget) {
 		_container.layout.addChild(widget);
-		_container.layout.position = Vec2f(5f + _container.layout.size.x / 2f - _container.size.x / 2f, _container.layout.size.y / 2f);
+		repositionContainer();
+	}
+
+	override void removeChildren() {
+		_container.layout.removeChildren();
+		repositionContainer();
+	}
+
+	override void removeChild(uint id) {
+		_container.layout.removeChild(id);
+		repositionContainer();
+	}
+
+	override int getChildrenCount() {
+		return _container.layout.getChildrenCount();
 	}
 }
