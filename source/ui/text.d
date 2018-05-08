@@ -37,10 +37,14 @@ import common.all;
 import ui.widget;
 
 private {
-	CharacterCache _standardCache, _italicCache, _boldCache, _italicBoldCache;
+	ITextCache _standardCache, _italicCache, _boldCache, _italicBoldCache;
 }
 
-private class CharacterCache {
+interface ITextCache {
+	Sprite get(dchar c);
+}
+
+class FontCache: ITextCache {
 	private {
 		Font _font;
 		Sprite[dchar] _cache;
@@ -65,11 +69,20 @@ private class CharacterCache {
 	}
 }
 
-void initializeTextCache() {
-	_standardCache = new CharacterCache(fetch!Font("VeraMono"));
-	_italicCache = new CharacterCache(fetch!Font("VeraMoIt"));
-	_boldCache = new CharacterCache(fetch!Font("VeraMoBd"));
-	_italicBoldCache = new CharacterCache(fetch!Font("VeraMoBI"));
+void setTextStandardFont(ITextCache cache) {
+	_standardCache = cache;
+}
+
+void setTextItalicFont(ITextCache cache) {
+	_italicCache = cache;
+}
+
+void setTextBoldFont(ITextCache cache) {
+	_boldCache = cache;
+}
+
+void setTextItalicBoldFont(ITextCache cache) {
+	_italicBoldCache = cache;
 }
 
 private {
@@ -102,7 +115,7 @@ class Text: Widget {
 		int[] _lineLengths;
 		int _rowLength, _maxLineLength, _lineLimit;
 		Vec2f charSize = Vec2f.zero;
-		CharacterCache _currentCache;
+		ITextCache _currentCache;
 	}
 
 	@property {

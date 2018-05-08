@@ -1,6 +1,7 @@
 syntax: glob
 
 build
+bin
 lib
 .dub
 .hg

@@ -101,6 +101,22 @@ class ColorPicker: ModalWindow {
 			_blendList.addChild(new TextButton(mode));
 		container.addChild(_blendList);
 
+		_redSlider.value01 = newColor.r;
+		_blueSlider.value01 = newColor.g;
+		_greenSlider.value01 = newColor.b;
+		_alphaSlider.value01 = newColor.a;
+
+		_viewer = new ColorViewer;
+		_viewer.size = Vec2f(100f, 100f);
+
+		auto hc2 = new HContainer;
+		hc2.padding = Vec2f(20f, 5f);
+		hc2.addChild(container);
+		hc2.addChild(_viewer);
+
+		super("Couleur", hc2.size);
+		layout.addChild(hc2);
+
 		switch(newBlend) with(Blend) {
 		case AlphaBlending:
 			_blendList.selected = 0U;
@@ -117,22 +133,6 @@ class ColorPicker: ModalWindow {
 		default:
 			_blendList.selected = 0U;
 		}
-
-		_redSlider.value01 = newColor.r;
-		_blueSlider.value01 = newColor.g;
-		_greenSlider.value01 = newColor.b;
-		_alphaSlider.value01 = newColor.a;
-
-		_viewer = new ColorViewer;
-		_viewer.size = Vec2f(100f, 100f);
-
-		auto hc2 = new HContainer;
-		hc2.padding = Vec2f(20f, 5f);
-		hc2.addChild(container);
-		hc2.addChild(_viewer);
-
-		super("Couleur", hc2.size);
-		layout.addChild(hc2);
 	}
 
 	override void update(float deltaTime) {
