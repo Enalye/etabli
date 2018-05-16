@@ -44,7 +44,7 @@ enum LexemeType {
 	Increment, Decrement,
 	Identifier, Integer, Float, Boolean, String,
 	Main,
-	VoidType, IntType, FloatType, BoolType, StringType, ArrayType, ObjectType, AnyType, TaskType, FunctionType,
+	VoidType, IntType, FloatType, BoolType, StringType, ArrayType, ObjectType, AnyType, FunctionType, TaskType,
 	If, Else, While, Do, For, Return, Yield, Break, Continue
 }
 
@@ -578,7 +578,7 @@ class Lexer {
 				lex.type = LexemeType.ObjectType;
 				lex.isType = true;
 				break;
-			case "any":
+			case "var":
 				lex.type = LexemeType.AnyType;
 				lex.isType = true;
 				break;

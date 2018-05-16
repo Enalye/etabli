@@ -38,7 +38,7 @@ import script.primitive;
 
 enum VariableType {
 	VoidType, IntType, FloatType, BoolType, StringType,
-	ArrayType, ObjectType,/* AnyType,*/ FunctionType, TaskType
+	ArrayType, ObjectType, AnyType, FunctionType, TaskType
 }
 
 struct Instruction {
@@ -66,7 +66,7 @@ class Function {
 	Function anonParent;
 	uint position, anonReference, anonIndex;
 
-	uint nbStringParameters, nbIntegerParameters, nbFloatParameters;
+	uint nbStringParameters, nbIntegerParameters, nbFloatParameters, nbAnyParameters;
 }
 
 class FunctionCall {
@@ -104,9 +104,9 @@ dstring mangleName(dstring name, VariableType[] signature) {
 		case ObjectType:
 			mangledName ~= "o";
 			break;
-		/*case AnyType:
+		case AnyType:
 			mangledName ~= "a";
-			break;*/
+			break;
 		case FunctionType:
 			mangledName ~= "f";
 			break;
@@ -292,6 +292,11 @@ class Parser {
 				if(func.isTask)
 					addInstruction(Vm.Opcode.PopGlobalString, 0u);
 				break;
+			case AnyType:
+				func.nbAnyParameters ++;
+				if(func.isTask)
+					addInstruction(Vm.Opcode.PopGlobalAny, 0u);
+				break;
 			case ArrayType:
 				logError("Invalid type", "Array parameters are not yet supported");
 				break;
@@ -311,6 +316,8 @@ class Parser {
 			addInstruction(Vm.Opcode.DecreaseFloatStack, func.nbFloatParameters);
 		if(func.nbStringParameters > 0u)
 			addInstruction(Vm.Opcode.DecreaseStringStack, func.nbStringParameters);
+		if(func.nbAnyParameters > 0u)
+			addInstruction(Vm.Opcode.DecreaseAnyStack, func.nbAnyParameters);
 	}
 
 	void endFunction() {
@@ -392,6 +399,8 @@ class Parser {
 	}
 
 	void addOperator(LexemeType lexType, VariableType varType) {
+		import std.stdio;
+		writeln("addOp:", varType);
 		switch(varType) with(VariableType) {
 		case BoolType:
 		case IntType:
@@ -461,6 +470,38 @@ class Parser {
 				logError("Unknown operator", "An unknown operator \'" ~ to!string(lexType) ~ "\' is being used");
 			}
 			break;
+		case AnyType:
+			switch(lexType) with(LexemeType) {
+			case Add:
+				addInstruction(Vm.Opcode.AddAny);
+				break;
+			case Substract:
+				addInstruction(Vm.Opcode.SubstractAny);
+				break;
+			case Multiply:
+				addInstruction(Vm.Opcode.MultiplyAny);
+				break;
+			case Divide:
+				addInstruction(Vm.Opcode.DivideAny);
+				break;
+			case Minus:
+				addInstruction(Vm.Opcode.MinusAny);
+				break;
+			case Plus:
+				break;
+			case Increment:
+				addInstruction(Vm.Opcode.IncrementAny);
+				break;
+			case Decrement:
+				addInstruction(Vm.Opcode.DecrementAny);
+				break;
+			case Concatenate:
+				addInstruction(Vm.Opcode.ConcatenateAny);
+				break;
+			default:
+				logError("Unknown operator", "An unknown operator \'" ~ to!string(lexType) ~ "\' is being used");
+			}
+			break;
 		default:
 			logError("Invalid type", "Cannot use a \'" ~ to!string(varType) ~ "\' type in this expression");
 		}
@@ -485,21 +526,24 @@ class Parser {
 			case StringType:
 				addInstruction(Vm.Opcode.SetString, variable.index);
 				break;
+			case AnyType:
+				addInstruction(Vm.Opcode.SetAny, variable.index);
+				break;
 			default:
 				logError("Invalid type", "Cannot assign to a \'" ~ to!string(variable.type) ~ "\' type");
 			}
 		}
 	}
 
-	void addGetInstruction(Variable variable) {
+	void addGetInstruction(Variable variable, VariableType expectedType = VariableType.VoidType) {
 		if(variable.isGlobal) {
 			logError("Internal failure", "Global variable not implemented");
 		}
 		else {
 			switch(variable.type) with(VariableType) {
 			case BoolType:
-			case ObjectType:
 			case IntType:
+			case ObjectType:			
 			case FunctionType:
 			case TaskType:
 				addInstruction(Vm.Opcode.GetInt, variable.index);
@@ -509,6 +553,9 @@ class Parser {
 				break;
 			case StringType:
 				addInstruction(Vm.Opcode.GetString, variable.index);
+				break;
+			case AnyType:
+				addInstruction(Vm.Opcode.GetAny, variable.index);
 				break;
 			default:
 				logError("Invalid type", "Cannot fetch from a \'" ~ to!string(variable.type) ~ "\' type");
@@ -533,6 +580,8 @@ class Parser {
 					addInstruction(Vm.Opcode.PushGlobalFloat, func.nbFloatParameters);
 				if(func.nbIntegerParameters > 0)
 					addInstruction(Vm.Opcode.PushGlobalInt, func.nbIntegerParameters);
+				if(func.nbAnyParameters > 0)
+					addInstruction(Vm.Opcode.PushGlobalAny, func.nbAnyParameters);
 			}
 
 			call.position = cast(uint)currentFunction.instructions.length;
@@ -682,6 +731,9 @@ class Parser {
 			case ObjectType:
 				signature ~= VariableType.ObjectType;
 				break;
+			case AnyType:
+				signature ~= VariableType.AnyType;
+				break;
 			case FunctionType:
 				signature ~= VariableType.FunctionType;
 				break;
@@ -795,6 +847,9 @@ class Parser {
 			case ObjectType:
 				returnType = VariableType.ObjectType;
 				break;
+			case AnyType:
+				returnType = VariableType.AnyType;
+				break;
 			case FunctionType:
 				returnType = VariableType.FunctionType;
 				break;
@@ -836,6 +891,9 @@ class Parser {
 					break;
 				case ObjectType:
 					returnType = VariableType.ObjectType;
+					break;
+				case AnyType:
+					returnType = VariableType.AnyType;
 					break;
 				case FunctionType:
 					returnType = VariableType.FunctionType;
@@ -1020,6 +1078,9 @@ class Parser {
 			break;
 		case StringType:
 			type = VariableType.StringType;
+			break;
+		case AnyType:
+			type = VariableType.AnyType;
 			break;
 		case FunctionType:
 			type = VariableType.FunctionType;
@@ -1209,6 +1270,66 @@ class Parser {
 		}
 	}
 
+	VariableType convertType(VariableType src, VariableType dst) {
+		switch(src) with(VariableType) {
+		case IntType:
+			switch(dst) with(VariableType) {
+			case IntType:
+				return IntType;
+			case AnyType:
+				addInstruction(Vm.Opcode.ConvertIntToAny);
+				return AnyType;
+			default:
+				break;
+			}
+			break;
+		case FloatType:
+			switch(dst) with(VariableType) {
+			case FloatType:
+				return FloatType;
+			case AnyType:
+				addInstruction(Vm.Opcode.ConvertFloatToAny);
+				return AnyType;
+			default:
+				break;
+			}
+			break;
+		case StringType:
+			switch(dst) with(VariableType) {
+			case StringType:
+				return StringType;
+			case AnyType:
+				addInstruction(Vm.Opcode.ConvertStringToAny);
+				return AnyType;
+			default:
+				break;
+			}
+			break;
+		case AnyType:
+			switch(dst) with(VariableType) {
+			case AnyType:
+				return AnyType;
+			case IntType:
+				addInstruction(Vm.Opcode.ConvertAnyToInt);
+				return IntType;
+			case FloatType:
+				addInstruction(Vm.Opcode.ConvertAnyToFloat);
+				return FloatType;
+			case StringType:
+				addInstruction(Vm.Opcode.ConvertAnyToString);
+				return StringType;
+			default:
+				break;
+			}
+			break;
+		default:
+			break;
+		}
+
+		logError("Incompatible types", "Cannot convert \'" ~ to!string(src) ~ "\' to \'" ~ to!string(dst) ~ "\'");
+		return VariableType.VoidType;		
+	}
+
 	void parseExpression(VariableType variableType = VariableType.VoidType) {
 		Variable[] lvalues;
 		LexemeType[] operatorsStack;
@@ -1221,9 +1342,10 @@ class Parser {
 			isReturningValue = true;
 
 		do {
-			if(hasValue && variableType != lastVariableType && lastVariableType != VariableType.VoidType)
-				logError("Incompatible types", "Cannot convert \'" ~ to!string(lastVariableType) ~ "\' to \'" ~ to!string(variableType) ~ "\'");
-			lastVariableType = variableType;
+			if(hasValue && variableType != lastVariableType && lastVariableType != VariableType.VoidType) {
+				lastVariableType = convertType(variableType, lastVariableType);
+				variableType = lastVariableType;
+			}
 
 			isRightUnaryOperator = false;
 			hadValue = hasValue;
@@ -1334,7 +1456,7 @@ class Parser {
 				break;
 			case Identifier:
 				Variable lvalue;
-				variableType = parseIdentifier(lvalue);
+				variableType = parseIdentifier(lvalue, lastVariableType);
 				if(lvalue !is null) {
 					hasLValue = true;
 					lvalues ~= lvalue;
@@ -1402,6 +1524,9 @@ class Parser {
 			case StringType:
 				addInstruction(Vm.Opcode.DecreaseStringStack, 1u);
 				break;
+			case AnyType:
+				addInstruction(Vm.Opcode.DecreaseAnyStack, 1u);
+				break;
 			default:
 				break;
 			}
@@ -1417,8 +1542,7 @@ class Parser {
 
 		do {
 			if(hasValue && variableType != lastVariableType && lastVariableType != VariableType.VoidType)
-				logError("Incompatible types", "Cannot convert \'" ~ to!string(lastVariableType) ~ "\' to \'" ~ to!string(variableType) ~ "\'");
-			lastVariableType = variableType;
+				lastVariableType = convertType(variableType, lastVariableType);
 
 			isRightUnaryOperator = false;
 			hadValue = hasValue;
@@ -1542,7 +1666,7 @@ class Parser {
 				break;
 			case Identifier:
 				Variable lvalue;
-				variableType = parseIdentifier(lvalue);
+				variableType = parseIdentifier(lvalue, lastVariableType);
 
 				if(lvalue !is null) {
 					hasLValue = true;
@@ -1600,7 +1724,7 @@ class Parser {
 	}
 
 	//Parse an identifier or function call and return the deduced return type and lvalue.
-	VariableType parseIdentifier(ref Variable variable) {
+	VariableType parseIdentifier(ref Variable variable, VariableType expectedType = VariableType.VoidType) {
 		VariableType returnType = VariableType.VoidType;
 		Lexeme identifier = get();		
 		bool isFunctionCall = false;
@@ -1662,7 +1786,7 @@ class Parser {
 		else {
 			//Declared variable.
 			variable = getVariable(identifier.svalue);
-			addGetInstruction(variable);
+			addGetInstruction(variable, expectedType);
 			returnType = variable.type;
 		}
 		

@@ -74,8 +74,11 @@ void loadPrimitives() {
 	bindPrimitive(&prints, "print", VariableType.VoidType, [VariableType.StringType]);
 	bindPrimitive(&printi, "print", VariableType.VoidType, [VariableType.IntType]);
 	bindPrimitive(&printf, "print", VariableType.VoidType, [VariableType.FloatType]);
+	bindPrimitive(&printa, "print", VariableType.VoidType, [VariableType.AnyType]);
 	bindPrimitive(&toStringi, "to_string", VariableType.StringType, [VariableType.IntType]);
 	bindPrimitive(&toStringf, "to_string", VariableType.StringType, [VariableType.FloatType]);
+	bindPrimitive(&toInta, "to_int", VariableType.IntType, [VariableType.AnyType]);
+	bindPrimitive(&toAnyi, "to_any", VariableType.AnyType, [VariableType.IntType]);
 	isLoaded = true;
 }
 
@@ -94,6 +97,11 @@ void printf(Vm.Coroutine coro) {
 	coro.sstack.length --;
 }
 
+void printa(Vm.Coroutine coro) {
+	writeln(coro.astack[$ - 1].getString());
+	coro.astack.length --;
+}
+
 void toStringi(Vm.Coroutine coro) {
 	coro.sstack ~= to!dstring(coro.istack[$ - 1]);
 	coro.istack.length --;
@@ -102,4 +110,16 @@ void toStringi(Vm.Coroutine coro) {
 void toStringf(Vm.Coroutine coro) {
 	coro.sstack ~= to!dstring(coro.fstack[$ - 1]);
 	coro.fstack.length --;
+}
+
+void toInta(Vm.Coroutine coro) {
+	coro.istack ~= (coro.astack[$ - 1]).getInteger();
+	coro.astack.length --;
+}
+
+void toAnyi(Vm.Coroutine coro) {
+	Vm.AnyValue value;
+	value.setInteger(coro.istack[$ - 1]);
+	coro.astack ~= value;
+	coro.istack.length --;
 }

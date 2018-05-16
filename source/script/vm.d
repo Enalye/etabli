@@ -36,42 +36,209 @@ import script.compiler;
 
 class Vm {
 	enum Opcode {
-		Kill, Yield, Task, AnonymousTask, DecreaseIntStack, DecreaseFloatStack, DecreaseStringStack,
-		SetInt, SetFloat, SetString,
-		GetInt, GetFloat, GetString,
+		Kill, Yield, Task, AnonymousTask,
+		DecreaseIntStack, DecreaseFloatStack, DecreaseStringStack, DecreaseAnyStack,
+		SetInt, SetFloat, SetString, SetAny,
+		GetInt, GetFloat, GetString, GetAny,
 		LoadInt, LoadFloat, LoadBool, LoadString,
-		PushGlobalInt, PushGlobalFloat, PushGlobalString,
-		PopGlobalInt, PopGlobalFloat, PopGlobalString,
+		PushGlobalInt, PushGlobalFloat, PushGlobalString, PushGlobalAny,
+		PopGlobalInt, PopGlobalFloat, PopGlobalString, PopGlobalAny,
 
-		EqualInt, EqualAssignFloat, EqualString, NotEqualInt, NotEqualAssignFloat, NotEqualString,
-		GreaterOrEqualInt, GreaterOrEqualAssignFloat,
-		LesserOrEqualInt, LesserOrEqualAssignFloat,
+		ConvertIntToAny, ConvertFloatToAny, ConvertStringToAny,
+		ConvertAnyToInt, ConvertAnyToFloat, ConvertAnyToString,
+
+		EqualInt, EqualAssignFloat, EqualString, EqualAny,
+		NotEqualInt, NotEqualAssignFloat, NotEqualString, NotEqualAny,
+		GreaterOrEqualInt, GreaterOrEqualAssignFloat, GreaterOrEqualAssignAny,
+		LesserOrEqualInt, LesserOrEqualAssignFloat, LesserOrEqualAssignAny,
 		GreaterInt, GreaterAssignFloat,
 		LesserInt, LesserAssignFloat,
 
 		And, Or, Not,
-		ConcatenateString,
-		AddInt, AddFloat,
-		SubstractInt, SubstractFloat,
-		MultiplyInt, MultiplyFloat,
-		DivideInt, DivideFloat,
-		ModulusInt, ModulusFloat,
-		MinusInt, MinusFloat,
-		IncrementInt, IncrementFloat,
-		DecrementInt, DecrementFloat,
+		ConcatenateString, ConcatenateAny,
+		AddInt, AddFloat, AddAny,
+		SubstractInt, SubstractFloat, SubstractAny,
+		MultiplyInt, MultiplyFloat, MultiplyAny,
+		DivideInt, DivideFloat, DivideAny,
+		ModulusInt, ModulusFloat, ModulusAny,
+		MinusInt, MinusFloat, MinusAny,
+		IncrementInt, IncrementFloat, IncrementAny,
+		DecrementInt, DecrementFloat, DecrementAny,
 
 		SetStack, Call, AnonymousCall, PrimitiveCall, Return,
 		Jump, JumpEqual, JumpNotEqual
+	}
+
+	struct AnyValue {
+		private union {
+			int ivalue;
+			float fvalue;
+			dstring svalue;
+		}
+
+		enum Type {
+			UndefinedType, BoolType, IntType, FloatType, StringType
+		}
+
+		Type type;
+
+		void setInteger(int value) {
+			type = Type.IntType;
+			ivalue = value;
+		}
+
+		void setFloat(float value) {
+			type = Type.FloatType;
+			fvalue = value;
+		}
+
+		void setString(dstring value) {
+			type = Type.StringType;
+			svalue = value;
+		}
+
+		int getInteger() const {
+			switch(type) with(Type) {
+			case IntType:
+				return ivalue;
+			case FloatType:
+				return to!int(fvalue);
+			case StringType:
+				return to!int(svalue);
+			default:
+				//error
+				return 0;
+			}
+		}
+
+		float getFloat() const {
+			switch(type) with(Type) {
+			case IntType:
+				return to!float(ivalue);
+			case FloatType:
+				return fvalue;
+			case StringType:
+				return to!float(svalue);
+			default:
+				//error
+				return 0;
+			}
+		}
+
+		dstring getString() const {
+			switch(type) with(Type) {
+			case IntType:
+				return to!dstring(ivalue);
+			case FloatType:
+				return to!dstring(fvalue);
+			case StringType:
+				return svalue;
+			default:
+				//error
+				return "err";
+			}
+		}
+		
+		AnyValue opOpAssign(string op)(AnyValue v) {
+			static if(op == "+" || op == "-" || op == "*" || op == "/" || op == "%") {
+				switch(type) with(Type) {
+				case IntType:
+					switch(v.type) with(Type) {
+					case IntType:
+						mixin("ivalue = ivalue " ~ op ~ " v.ivalue;");
+						break;
+					case FloatType:
+						type = Type.FloatType;
+						mixin("fvalue = to!float(ivalue) " ~ op ~ " v.fvalue;");
+						break;
+					default:
+						break;
+					}
+					break;
+				case FloatType:
+					switch(v.type) with(Type) {
+					case IntType:
+						mixin("fvalue = fvalue " ~ op ~ " to!float(v.ivalue);");
+						break;
+					case FloatType:
+						mixin("fvalue = fvalue " ~ op ~ " v.fvalue;");
+						break;
+					default:
+						break;
+					}
+					break;
+				case StringType:
+				default:
+					//error
+					break;
+				}
+			}
+			else static if(op == "~") {
+				switch(type) with(Type) {
+				case IntType:
+				case FloatType:
+					//error
+					break;
+				case StringType:
+					switch(v.type) with(Type) {
+					case StringType:
+						mixin("svalue = svalue " ~ op ~ " v.svalue;");
+						break;
+					default:
+						break;
+					}
+					break;
+				default:
+					//error
+					break;
+				}
+			}
+			return this;
+		}
+
+		AnyValue opUnaryRight(string op)() {	
+			switch(type) with(Type) {
+			case IntType:
+				mixin("ivalue" ~ op ~ ";");
+				break;
+			case FloatType:
+				mixin("fvalue" ~ op ~ ";");				
+				break;
+			case StringType:
+			default:
+				//error
+				break;
+			}
+			return this;
+		}
+
+		AnyValue opUnary(string op)() {	
+			switch(type) with(Type) {
+			case IntType:
+				mixin("ivalue = " ~ op ~ " ivalue;");
+				break;
+			case FloatType:
+				mixin("fvalue = " ~ op ~ " fvalue;");				
+				break;
+			case StringType:
+			default:
+				//error
+				break;
+			}
+			return this;
+		}	
 	}
 
 	class Coroutine {
 		int[256] ivalues;
 		float[256] fvalues;
 		dstring[256] svalues;
+		AnyValue[256] avalues;
 		uint[64] callStack;
 		int[] istack;
 		float[] fstack;
 		dstring[] sstack;
+		AnyValue[] astack;
 		uint pc,
 			valuesPos, //Local variables: Access with ivalues[valuesPos + variableIndex]
 			stackPos;
@@ -90,6 +257,7 @@ class Vm {
 	int[] iglobalStack;
 	float[] fglobalStack;
 	dstring[] sglobalStack;
+	AnyValue[] aglobalStack;
 
 	IndexedArray!(Coroutine, 256u) coroutines = new IndexedArray!(Coroutine, 256u)();
 
@@ -119,7 +287,7 @@ class Vm {
 		opcodes = bytecode.opcodes;
 
 		coroutines.push(new Coroutine());
-		//dump();
+		dump();
 
 		if(opcodes.length)
 			run();
@@ -162,6 +330,10 @@ class Vm {
 					coro.sstack.length -= getValue(opcode);
 					coro.pc ++;
 					break;
+				case DecreaseAnyStack:
+					coro.astack.length -= getValue(opcode);
+					coro.pc ++;
+					break;
 				case SetInt:
 					coro.ivalues[coro.valuesPos + getValue(opcode)] = coro.istack[$ - 1];
 					coro.pc ++;
@@ -174,6 +346,10 @@ class Vm {
 					coro.svalues[coro.valuesPos + getValue(opcode)] = coro.sstack[$ - 1];
 					coro.pc ++;
 					break;
+				case SetAny:
+					coro.avalues[coro.valuesPos + getValue(opcode)] = coro.astack[$ - 1];
+					coro.pc ++;
+					break;
 				case GetInt:
 					coro.istack ~= coro.ivalues[coro.valuesPos + getValue(opcode)];
 					coro.pc ++;
@@ -184,6 +360,10 @@ class Vm {
 					break;
 				case GetString:
 					coro.sstack ~= coro.svalues[coro.valuesPos + getValue(opcode)];
+					coro.pc ++;
+					break;
+				case GetAny:
+					coro.astack ~= coro.avalues[coro.valuesPos + getValue(opcode)];
 					coro.pc ++;
 					break;
 				case LoadInt:
@@ -223,6 +403,13 @@ class Vm {
 					coro.sstack.length -= nbParams;
 					coro.pc ++;
 					break;
+				case PushGlobalAny:
+					uint nbParams = getValue(opcode);
+					for(uint i = 0u; i < nbParams; i++)
+						aglobalStack ~= coro.astack[($ - nbParams) + i];
+					coro.astack.length -= nbParams;
+					coro.pc ++;
+					break;
 				case PopGlobalInt:
 					coro.istack ~= iglobalStack[$ - 1];
 					iglobalStack.length --;
@@ -238,6 +425,47 @@ class Vm {
 					sglobalStack.length --;
 					coro.pc ++;
 					break;
+				case PopGlobalAny:
+					coro.astack ~= aglobalStack[$ - 1];
+					aglobalStack.length --;
+					coro.pc ++;
+					break;
+				case ConvertIntToAny:
+					AnyValue value;
+					value.setInteger(coro.istack[$ - 1]);
+					coro.istack.length --;
+					coro.astack ~= value;
+					coro.pc ++;
+					break;
+				case ConvertFloatToAny:
+					AnyValue value;
+					value.setFloat(coro.fstack[$ - 1]);
+					coro.fstack.length --;
+					coro.astack ~= value;
+					coro.pc ++;
+					break;
+				case ConvertStringToAny:
+					AnyValue value;
+					value.setString(coro.sstack[$ - 1]);
+					coro.sstack.length --;
+					coro.astack ~= value;
+					coro.pc ++;
+					break;
+				case ConvertAnyToInt:
+					coro.istack ~= coro.astack[$ - 1].getInteger();
+					coro.astack.length --;
+					coro.pc ++;
+					break;
+				case ConvertAnyToFloat:
+					coro.fstack ~= coro.astack[$ - 1].getFloat();
+					coro.astack.length --;
+					coro.pc ++;
+					break;
+				case ConvertAnyToString:
+					coro.sstack ~= coro.astack[$ - 1].getString();
+					coro.astack.length --;
+					coro.pc ++;
+					break;
 				case AddInt:
 					coro.istack[$ - 2] += coro.istack[$ - 1];
 					coro.istack.length --;
@@ -248,9 +476,19 @@ class Vm {
 					coro.fstack.length --;
 					coro.pc ++;
 					break;
+				case AddAny:
+					coro.astack[$ - 2] += coro.astack[$ - 1];
+					coro.astack.length --;
+					coro.pc ++;
+					break;
 				case ConcatenateString:
 					coro.sstack[$ - 2] ~= coro.sstack[$ - 1];
 					coro.sstack.length --;
+					coro.pc ++;
+					break;
+				case ConcatenateAny:
+					coro.astack[$ - 2] ~= coro.astack[$ - 1];
+					coro.astack.length --;
 					coro.pc ++;
 					break;
 				case SubstractInt:
@@ -263,6 +501,11 @@ class Vm {
 					coro.fstack.length --;
 					coro.pc ++;
 					break;
+				case SubstractAny:
+					coro.astack[$ - 2] -= coro.astack[$ - 1];
+					coro.astack.length --;
+					coro.pc ++;
+					break;
 				case MultiplyInt:
 					coro.istack[$ - 2] *= coro.istack[$ - 1];
 					coro.istack.length --;
@@ -271,6 +514,11 @@ class Vm {
 				case MultiplyFloat:
 					coro.fstack[$ - 2] *= coro.fstack[$ - 1];
 					coro.fstack.length --;
+					coro.pc ++;
+					break;
+				case MultiplyAny:
+					coro.astack[$ - 2] *= coro.astack[$ - 1];
+					coro.astack.length --;
 					coro.pc ++;
 					break;
 				case DivideInt:
@@ -282,7 +530,12 @@ class Vm {
 					coro.fstack[$ - 2] /= coro.fstack[$ - 1];
 					coro.fstack.length --;
 					coro.pc ++;
-					break;	
+					break;
+				case DivideAny:
+					coro.astack[$ - 2] /= coro.astack[$ - 1];
+					coro.astack.length --;
+					coro.pc ++;
+					break;
 				case ModulusInt:
 					coro.istack[$ - 2] %= coro.istack[$ - 1];
 					coro.istack.length --;
@@ -293,12 +546,21 @@ class Vm {
 					coro.fstack.length --;
 					coro.pc ++;
 					break;
+				case ModulusAny:
+					coro.astack[$ - 2] %= coro.astack[$ - 1];
+					coro.astack.length --;
+					coro.pc ++;
+					break;
 				case MinusInt:
 					coro.istack[$ - 1] = -coro.istack[$ - 1];
 					coro.pc ++;
 					break;
 				case MinusFloat:
 					coro.fstack[$ - 1] = -coro.fstack[$ - 1];
+					coro.pc ++;
+					break;
+				case MinusAny:
+					coro.astack[$ - 1] = -coro.astack[$ - 1];
 					coro.pc ++;
 					break;
 				case IncrementInt:
@@ -309,12 +571,20 @@ class Vm {
 					coro.fstack[$ - 1] += 1f;
 					coro.pc ++;
 					break;
+				case IncrementAny:
+					coro.astack[$ - 1] ++;
+					coro.pc ++;
+					break;
 				case DecrementInt:
 					coro.istack[$ - 1] --;
 					coro.pc ++;
 					break;
 				case DecrementFloat:
 					coro.fstack[$ - 1] -= 1f;
+					coro.pc ++;
+					break;
+				case DecrementAny:
+					coro.astack[$ - 1] --;
 					coro.pc ++;
 					break;
 				case Return:
