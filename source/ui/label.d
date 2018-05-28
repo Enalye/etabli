@@ -101,6 +101,7 @@ class Label: Widget {
 	this() {
 		_texture = new Texture;
 		_sprite = _texture;
+		_font = fetch!Font("VeraMoBd");
 	}
 
 	override void onEvent(Event event) {}

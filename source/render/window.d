@@ -33,8 +33,10 @@ import derelict.sdl2.mixer;
 import derelict.sdl2.ttf;
 
 import core.all;
+import common.all;
 import render.view;
 import render.quadview;
+import render.sprite;
 
 static {
 	SDL_Window* window;
@@ -45,6 +47,10 @@ static {
 		SDL_Surface* _icon;
 		Vec2u _windowSize;
 		Vec2f _screenSize, _centerScreen;
+		bool _hasAudio = true;
+		bool _hasCustomCursor = false;
+		bool _showCursor = true;
+		Sprite _customCursorSprite;
 	}
 }
 
@@ -73,7 +79,8 @@ enum Fullscreen {
 void createWindow(const Vec2u windowSize, string title) {
 	DerelictSDL2.load(SharedLibVersion(2, 0, 2));
 	DerelictSDL2Image.load();
-	DerelictSDL2Mixer.load();
+	if(_hasAudio)
+		DerelictSDL2Mixer.load();
 	DerelictSDL2ttf.load();
 
 	SDL_Init(SDL_INIT_EVERYTHING);
@@ -81,11 +88,13 @@ void createWindow(const Vec2u windowSize, string title) {
 	if(-1 == TTF_Init())
 		throw new Exception("Could not initialize TTF module.");
 
-	if(-1 == Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024))
-		throw new Exception("No audio device connected.");
+	if(_hasAudio) {
+		if(-1 == Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024))
+			throw new Exception("No audio device connected.");
 
-	if(-1 == Mix_AllocateChannels(16))
-		throw new Exception("Could not allocate audio channels.");
+		if(-1 == Mix_AllocateChannels(16))
+			throw new Exception("Could not allocate audio channels.");
+	}
 
 	if(-1 == SDL_CreateWindowAndRenderer(windowSize.x, windowSize.y, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_WINDOW_RESIZABLE, &window, &renderer))
 		throw new Exception("Window initialization failed.");
@@ -119,6 +128,10 @@ void destroyWindow() {
 	SDL_Quit();
 }
 
+void enableAudio(bool enable) {
+	_hasAudio = enable;
+}
+
 void setWindowTitle(string title) {
 	SDL_SetWindowTitle(window, toStringz(title));
 }
@@ -143,6 +156,18 @@ void setWindowIcon(string path) {
 	SDL_SetWindowIcon(window, _icon);
 }
 
+void setWindowCursor(Sprite cursorSprite) {
+  _customCursorSprite = cursorSprite;
+  _hasCustomCursor = true;
+  SDL_ShowCursor(false);
+}
+
+void showWindowCursor(bool show) {
+	_showCursor = show;
+	if(!_hasCustomCursor)
+		SDL_ShowCursor(show);
+}
+
 void setWindowFullScreen(Fullscreen fullscreen) {
 	SDL_SetWindowFullscreen(window,
 		(Fullscreen.RealFullscreen == fullscreen ? SDL_WINDOW_FULLSCREEN :
@@ -162,6 +187,11 @@ void showWindow(bool show) {
 }
 
 void renderWindow() {
+	Vec2f mousePos = getMousePos();
+	if(_hasCustomCursor && _showCursor && mousePos.isBetween(Vec2f.one, screenSize - Vec2f.one)) {
+		_customCursorSprite.color = Color.white;
+		_customCursorSprite.draw(mousePos + _customCursorSprite.size / 2f);
+	}
 	SDL_RenderPresent(renderer);
 	setRenderColor(windowClearColor);
 	SDL_RenderClear(renderer);
