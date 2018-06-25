@@ -54,42 +54,113 @@ class Widget {
 	}
 
 	@property {
-		bool isLocked() const { return _isLocked; }
-		bool isLocked(bool newIsLocked) { return _isLocked = newIsLocked; }
+		final bool isLocked() const { return _isLocked; }
+		final bool isLocked(bool newIsLocked) {
+            if(newIsLocked != _isLocked) {
+                _isLocked = newIsLocked;
+                onLock();
+                return _isLocked;
+            }
+            return _isLocked = newIsLocked;
+        }
 
-		bool isMovable() const { return _isMovable; }
-		bool isMovable(bool newIsMovable) { return _isMovable = newIsMovable; }
+		final bool isMovable() const { return _isMovable; }
+		final bool isMovable(bool newIsMovable) {
+            if(newIsMovable != _isMovable) {
+                _isMovable = newIsMovable;
+                onMovable();
+                return _isMovable;
+            }
+            return _isMovable = newIsMovable;
+        }
 
-		bool isHovered() const { return _isHovered; }
-		bool isHovered(bool newIsHovered) { return _isHovered = newIsHovered; }
+		final bool isHovered() const { return _isHovered; }
+		final bool isHovered(bool newIsHovered) {
+            if(newIsHovered != _isHovered) {
+                _isHovered = newIsHovered;
+                onHover();
+                return _isHovered;
+            }
+            return _isHovered = newIsHovered;
+        }
 
-		bool isSelected() const { return _isSelected; }
-		bool isSelected(bool newIsSelected) { return _isSelected = newIsSelected; }
+		final bool isSelected() const { return _isSelected; }
+		final bool isSelected(bool newIsSelected) {
+            if(newIsSelected != _isSelected) {
+                _isSelected = newIsSelected;
+                onSelect();
+                return _isSelected;
+            }
+            return _isSelected = newIsSelected;
+        }
 
-		bool hasFocus() const { return _hasFocus; }
-		bool hasFocus(bool newHasFocus) { return _hasFocus = newHasFocus; }
+		final bool hasFocus() const { return _hasFocus; }
+		final bool hasFocus(bool newHasFocus) {
+            if(newHasFocus != _hasFocus) {
+                _hasFocus = newHasFocus;
+                onFocus();
+                return _hasFocus;
+            }
+            return _hasFocus = newHasFocus;
+        }
 
-		bool isInteractable() const { return _isInteractable; }
-		bool isInteractable(bool newIsSelectable) { return _isInteractable = newIsSelectable; }
+		final bool isInteractable() const { return _isInteractable; }
+		final bool isInteractable(bool newIsInteractable) {
+            if(newIsInteractable != _isInteractable) {
+                _isInteractable = newIsInteractable;
+                onInteractable();
+                return _isInteractable;
+            }
+            return _isInteractable = newIsInteractable;
+        }
 
-		bool isValidated() const { return _isValidated; }
-		bool isValidated(bool newIsValidated) { return _isValidated = newIsValidated; }
+		final bool isValidated() const { return _isValidated; }
+		final bool isValidated(bool newIsValidated) {
+            if(newIsValidated != _isValidated) {
+                _isValidated = newIsValidated;
+                onValidate();
+                return _isValidated;
+            }
+            return _isValidated = newIsValidated;         
+        }
 
-		Vec2f position() { return _position; }
-		Vec2f position(Vec2f newPosition) { return _position = newPosition; }
+		final Vec2f position() { return _position; }
+		final Vec2f position(Vec2f newPosition) {
+            auto oldPosition = _position;
+            _position = newPosition;
+            onDeltaPosition(newPosition - oldPosition);
+            onPosition();
+            return _position;
+        }
 
-		Vec2f size() const { return _size; }
-		Vec2f size(Vec2f newSize) { return _size = newSize; }
+		final Vec2f size() const { return _size; }
+		final Vec2f size(Vec2f newSize) {
+            auto oldSize = _size;
+            _size = newSize;
+            onDeltaSize(newSize - oldSize);         
+            onSize();
+            return _size;
+        }
 
-		Vec2f anchor() const { return _anchor; }
-		Vec2f anchor(Vec2f newAnchor) { return _anchor = newAnchor; }
+		final Vec2f anchor() const { return _anchor; }
+		final Vec2f anchor(Vec2f newAnchor) {
+            auto oldAnchor = _anchor;
+            _anchor = newAnchor;
+            onDeltaAnchor(newAnchor - oldAnchor);
+            onAnchor();
+            return _anchor;
+        }
 
-		Vec2f anchoredPosition() const {
+		final Vec2f anchoredPosition() const {
 			return _position + _size * (Vec2f.half - _anchor);
 		}
 
-		float angle() const { return _angle; }
-		float angle(float newAngle) { return _angle = newAngle; }
+		final float angle() const { return _angle; }
+		final float angle(float newAngle) {
+            _angle = newAngle;
+            onAngle();
+            return _angle;
+        }
 	}
 
 	this() {}
@@ -133,50 +204,64 @@ class Widget {
 	abstract void update(float deltaTime);
 	abstract void onEvent(Event event);
 	abstract void draw();
+
+    protected {
+        void onLock() {}
+        void onMovable() {}
+        void onHover() {}
+        void onSelect() {}
+        void onFocus() {}
+        void onInteractable() {}
+        void onValidate() {}
+        void onDeltaPosition(Vec2f delta) {}
+        void onPosition() {}
+        void onDeltaSize(Vec2f delta) {}
+        void onSize() {}
+        void onDeltaAnchor(Vec2f delta) {}
+        void onAnchor() {}
+        void onAngle() {}
+    }
 }
 
 class WidgetGroup: Widget {
 	protected {
 		Widget[] _children;
+		bool _isFrame = false;
+
+        //Mouse control        
 		Vec2f _lastMousePos;
 		bool _isGrabbed = false, _isChildGrabbed = false, _isChildHovered = false;
 		uint _idChildGrabbed;
-		bool _isFrame = false;
+
+        //Iteration
+        bool _isIterating, _isWarping = true;
+        uint _idChildIterator;
+        Timer _iteratorTimer, _iteratorTimeOutTimer;
 	}
 
 	@property {
-		alias isHovered = super.isHovered;
-		override bool isHovered(bool hovered) {
-			if(!hovered)
-				foreach(Widget widget; _children)
-					widget.isHovered = false;
-			return _isHovered = hovered;
-		}
-
-		alias position = super.position;
-		override Vec2f position(Vec2f newPosition) {
-			if(!_isFrame) {
-				Vec2f deltaPosition = newPosition - _position;
-				foreach(widget; _children)
-					widget.position = widget.position + deltaPosition;
-			}
-			_position = newPosition;
-			return _position;
-		}
-
 		const(Widget[]) children() const { return _children; }
 		Widget[] children() { return _children; }
 	}
 
 	override void update(float deltaTime) {
+        _iteratorTimer.update(deltaTime);
+        _iteratorTimeOutTimer.update(deltaTime);
 		foreach(Widget widget; _children)
 			widget.update(deltaTime);
 	}
+
+    override void onHover() {
+        if(!_isHovered) {
+            foreach(Widget widget; _children)
+                widget.isHovered = false;
+        }
+    }
 	
 	override void onEvent(Event event) {
 		switch (event.type) with(EventType) {
 		case MouseDown:
-			bool hasClickedWidget = false;
+			bool hasClickedWidget;
 			foreach(uint id, Widget widget; _children) {
 				widget.hasFocus = false;
 				if(!widget.isInteractable)
@@ -215,6 +300,7 @@ class WidgetGroup: Widget {
 			}
 			break;
 		case MouseUpdate:
+            _isIterating = false; //Use mouse control
 			Vec2f mousePosition = event.position;
 			if(_isFrame)
 				event.position = getViewVirtualPos(event.position, _position);
@@ -271,6 +357,13 @@ class WidgetGroup: Widget {
 			break;
 		}
 	}
+    
+    override void onDeltaPosition(Vec2f delta) {
+        if(!_isFrame) {
+            foreach(widget; _children)
+                widget.position = widget.position + delta;
+        }
+    }
 
 	override void draw() {
 		foreach_reverse(Widget widget; _children)
@@ -296,6 +389,7 @@ class WidgetGroup: Widget {
 	}
 
 	void removeChildren() {
+        _isChildGrabbed = false;
 		_children.length = 0uL;
 	}
 
@@ -304,6 +398,8 @@ class WidgetGroup: Widget {
 	}
 
 	void removeChild(uint id) {
+        _isChildGrabbed = false;
+        _isChildHovered = false;
 		if(!_children.length)
 			return;
 		if(id + 1u == _children.length)
@@ -327,4 +423,77 @@ class WidgetGroup: Widget {
 		foreach(widget; _children)
 			widget.drawOverlay();
 	}
+
+    //Iteration
+    private void setupIterationTimer(float time) {
+        _iteratorTimer.start(time);
+        _iteratorTimeOutTimer.start(5f);
+    }
+
+    private bool startIteration() {
+        if(_isIterating)
+            return _iteratorTimeOutTimer.isRunning;
+        _isIterating = true;
+        
+        //If a child was hovered, we start from here
+        if(_isChildHovered) {
+            foreach(i; 0.. _children.length) {
+                if(_children[i].isHovered) {
+                    _idChildIterator = cast(int)i;
+                    break;
+                }
+            }
+        }
+        else
+            _idChildIterator = 0u;
+        return false;
+    }
+
+    void stopChild() {
+        _iteratorTimeOutTimer.stop();
+    }
+
+    void previousChild() {
+        bool wasIterating = startIteration();
+        if(_iteratorTimer.isRunning)
+            return;
+        setupIterationTimer(wasIterating ? .15f : .35f);
+        if(_idChildIterator == 0u) {
+            if(_children.length < 1)
+                return;
+            if(_isWarping)
+                _idChildIterator = (cast(int)_children.length) - 1;
+            else return;
+        }
+        else _idChildIterator --;
+
+        foreach(uint id, Widget widget; _children)
+            widget.isHovered = (id == _idChildIterator);
+    }
+
+    void nextChild() {
+        bool wasIterating = startIteration();
+        if(_iteratorTimer.isRunning)
+            return;
+        setupIterationTimer(wasIterating ? .15f : .35f);
+        if(_idChildIterator + 1u == _children.length) {
+            if(_children.length < 1)
+                return;
+            if(_isWarping)
+                _idChildIterator = 0u;
+            else return;
+        }
+        else _idChildIterator ++;
+
+        foreach(uint id, Widget widget; _children)
+            widget.isHovered = (id == _idChildIterator);
+    }
+
+    Widget selectChild() {
+        startIteration();
+
+        if(_idChildIterator < _children.length)
+            return _children[_idChildIterator];
+        return null;
+    }
 }

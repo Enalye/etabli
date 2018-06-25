@@ -37,7 +37,6 @@ import render.drawable;
 struct Sprite {
 	@property {
 		bool isValid() const { return texture !is null; }
-		Color color(const Color newColor) { texture.setColorMod(newColor); return newColor; };
 		Vec2f center() const { return anchor * size * scale; }
 	}
 
@@ -46,6 +45,8 @@ struct Sprite {
 	Vec2f scale = Vec2f.one, size = Vec2f.zero, anchor = Vec2f.half;
 	Vec4i clip;
 	float angle = 0f;
+    Color color = Color.white;
+    Blend blend = Blend.AlphaBlending;
 
 	this(Texture newTexture, Flip newFlip = Flip.NoFlip) {
 		texture = newTexture;
@@ -72,33 +73,43 @@ struct Sprite {
 		size = to!Vec2f(clip.zw).fit(newSize);
 	}
 
-	void draw(const Vec2f position) const {
+	void draw(const Vec2f position) {
 		Vec2f finalSize = size * scale * getViewScale();
 		if (isVisible(position, finalSize)) {
+            texture.setColorMod(color, blend);
 			texture.draw(getViewRenderPos(position), finalSize, clip, angle, flip, anchor);
+            texture.setColorMod(Color.white);
 		}
 	}
 
-	void drawUnchecked(const Vec2f position) const {
+	void drawUnchecked(const Vec2f position) {
 		Vec2f finalSize = size * scale * getViewScale();
+        texture.setColorMod(color, blend);
 		texture.draw(getViewRenderPos(position), finalSize, clip, angle, flip, anchor);
+        texture.setColorMod(Color.white);
 	}
 	
-	void drawRotated(const Vec2f position) const {
+	void drawRotated(const Vec2f position) {
 		Vec2f finalSize = size * scale * getViewScale();
 		Vec2f dist = (anchor - Vec2f.half) * size * scale;
 		dist.rotate(angle);
+        texture.setColorMod(color, blend);
 		texture.draw(getViewRenderPos(position - dist), finalSize, clip, angle, flip);
+        texture.setColorMod(Color.white);
 	}
 
-	void draw(const Vec2f pivot, float pivotDistance, float pivotAngle) const {
+	void draw(const Vec2f pivot, float pivotDistance, float pivotAngle) {
 		Vec2f finalSize = size * scale * getViewScale();
+        texture.setColorMod(color, blend);
 		texture.draw(getViewRenderPos(pivot + Vec2f.angled(pivotAngle) * pivotDistance), finalSize, clip, angle, flip, anchor);
+        texture.setColorMod(Color.white);
 	}
 
-	void draw(const Vec2f pivot, const Vec2f pivotOffset, float pivotAngle) const {
+	void draw(const Vec2f pivot, const Vec2f pivotOffset, float pivotAngle) {
 		Vec2f finalSize = size * scale * getViewScale();
+        texture.setColorMod(color, blend);
 		texture.draw(getViewRenderPos(pivot + pivotOffset.rotated(pivotAngle)), finalSize, clip, angle, flip, anchor);
+        texture.setColorMod(Color.white);
 	}
 
 	bool isInside(const Vec2f position) const {

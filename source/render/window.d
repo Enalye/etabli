@@ -123,9 +123,10 @@ void destroyWindow() {
 	if (renderer)
 		SDL_DestroyRenderer(renderer);
 
-	Mix_CloseAudio();
+    if(_hasAudio)
+	    Mix_CloseAudio();
 	//TTF_Quit();
-	SDL_Quit();
+	//SDL_Quit();
 }
 
 void enableAudio(bool enable) {

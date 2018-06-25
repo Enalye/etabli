@@ -142,15 +142,6 @@ class VScrollbar: Slider {
 		Sprite _circleSprite, _barSprite;
 	}
 
-	@property {
-		alias size = super.size;
-		override Vec2f size(Vec2f newSize) {
-			super.size = newSize;
-			_length = newSize.y - newSize.x;
-			return _size;
-		}
-	}
-
 	this() {
 		_angle = 90f;
 		_circleSprite = fetch!Sprite("gui_circle");
@@ -207,20 +198,15 @@ class VScrollbar: Slider {
 		_circleSprite.size = Vec2f.one;
 		_barSprite.size = Vec2f.one;
 	}
+
+    override void onSize() {
+        _length = _size.y - _size.x;
+    }
 }
 
 class HScrollbar: Slider {
 	private {
 		Sprite _circleSprite, _barSprite;
-	}
-
-	@property {
-		alias size = super.size;
-		override Vec2f size(Vec2f newSize) {
-			super.size = newSize;
-			_length = newSize.x - newSize.y;
-			return _size;
-		}
 	}
 
 	this() {
@@ -279,21 +265,16 @@ class HScrollbar: Slider {
 		_circleSprite.size = Vec2f.one;
 		_barSprite.size = Vec2f.one;
 	}
+
+    override void onSize() {
+        _length = _size.x - _size.y;
+    }
 }
 
 class VGauge: Slider {
 	private {
 		Sprite _barSprite, _endSprite;
 		int _clipSizeY, _clipSizeH;
-	}
-
-	@property {
-		alias size = super.size;
-		override Vec2f size(Vec2f newSize) {
-			super.size = newSize;
-			_length = newSize.y;
-			return _size;
-		}
 	}
 
 	this() {
@@ -357,21 +338,16 @@ class VGauge: Slider {
 		_endSprite.size = Vec2f.one;
 		_barSprite.size = Vec2f.one;
 	}
+
+    override void onSize() {
+        _length = _size.y;
+    }
 }
 
 class HGauge: Slider {
 	private {
 		Sprite _barSprite, _endSprite;
 		int _clipSizeY, _clipSizeH;
-	}
-
-	@property {
-		alias size = super.size;
-		override Vec2f size(Vec2f newSize) {
-			super.size = newSize;
-			_length = newSize.x;
-			return _size;
-		}
 	}
 
 	this() {
@@ -445,20 +421,15 @@ class HGauge: Slider {
 		_endSprite.size = Vec2f.one;
 		_barSprite.size = Vec2f.one;
 	}
+
+    override void onSize() {
+        _length = _size.x;
+    }
 }
 
 
 class VSlider: Slider {
 	private Sprite _circleSprite, _barSprite;
-
-	@property {
-		alias size = super.size;
-		override Vec2f size(Vec2f newSize) {
-			super.size = newSize;
-			_length = newSize.y - newSize.x;
-			return _size;
-		}
-	}
 
 	this() {
 		_angle = 90f;
@@ -499,19 +470,14 @@ class VSlider: Slider {
 		_circleSprite.size = Vec2f.one;
 		_barSprite.size = Vec2f.one;
 	}
+
+    override void onSize() {
+        _length = _size.y - _size.x;
+    }
 }
 
 class HSlider: Slider {
 	private Sprite _circleSprite, _barSprite;
-
-	@property {
-		alias size = super.size;
-		override Vec2f size(Vec2f newSize) {
-			super.size = newSize;
-			_length = newSize.x - newSize.y;
-			return _size;
-		}
-	}
 
 	this() {
 		_angle = 0f;
@@ -552,4 +518,8 @@ class HSlider: Slider {
 		_circleSprite.size = Vec2f.one;
 		_barSprite.size = Vec2f.one;
 	}
+
+    override void onSize() {
+        _length = _size.x - _size.y;
+    }
 }

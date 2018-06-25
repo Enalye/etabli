@@ -34,18 +34,6 @@ class Image: Widget {
 	private Sprite _sprite;
 
 	@property {
-		alias angle = super.angle;
-		override float angle(float newAngle) {
-			_sprite.angle = newAngle;
-			return _angle = newAngle;
-		}
-
-		alias size = super.size;
-		override Vec2f size(Vec2f newSize) {
-			_sprite.size = newSize;
-			return _size = newSize;
-		}
-
 		Sprite sprite() { return _sprite; }
 		Sprite sprite(Sprite newSprite) {
 			_sprite = newSprite;
@@ -63,6 +51,14 @@ class Image: Widget {
 
 	override void onEvent(Event event) {}
 	override void update(float deltaTime) {}
+    
+    override void onAngle() {
+        _sprite.angle = _angle;
+    }
+
+    override void onSize() {
+        _sprite.size = _size;
+    }
 
 	override void draw() {
 		_sprite.drawUnchecked(anchoredPosition());

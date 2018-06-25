@@ -94,8 +94,8 @@ private class Application: IMainWidget {
 	}
 
 	this(Vec2u size, string title) {
-		initializeEvents();
 		createWindow(size, title);
+		initializeEvents();
 		loadResources();
 		initializeOverlay();
 		loadPrimitives();
@@ -103,6 +103,7 @@ private class Application: IMainWidget {
 	}
 
 	~this() {
+        destroyEvents();
 		destroyWindow();
 	}
 
@@ -167,6 +168,7 @@ private class Application: IMainWidget {
 
 	void run() {
 		while(processEvents(this)) {
+            updateEvents(_deltaTime);
 			processOverlayBack(_deltaTime);
 			foreach(Widget widget; _children) {
 				widget.update(_deltaTime);
@@ -193,6 +195,7 @@ private class Application: IMainWidget {
 	}
 
 	void removeChildren() {
+        _isChildGrabbed = false;
 		_children.length = 0uL;
 	}
 

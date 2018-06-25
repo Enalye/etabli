@@ -45,7 +45,6 @@ struct Tileset {
 	@property {
 		Texture texture() const { return cast(Texture)_texture; }
 		bool isLoaded() const { return _texture.isLoaded; }
-		Color color(const Color newColor) { _texture.setColorMod(newColor); return newColor; };
 		Vec2f tileSize() const { return cast(Vec2f)_tileSize; }
 	}
 
@@ -53,6 +52,8 @@ struct Tileset {
 	float angle = 0f;
 	Flip flip = Flip.NoFlip;
 	Vec2f anchor = Vec2f.half;
+    Color color = Color.white;
+    Blend blend = Blend.AlphaBlending;
 
 	this(Texture newTexture, Vec2i grid, Vec2i tileSize) {
 		_texture = newTexture;
@@ -71,12 +72,12 @@ struct Tileset {
 		return sprites;
 	}
 
-	void drawRotated(Timer timer, const Vec2f position) const {
+	void drawRotated(Timer timer, const Vec2f position) {
 		float id = floor(lerp(0f, to!float(_nbTiles), timer.time));
 		drawRotated(to!uint(id), position);
 	}
 
-	void drawRotated(uint id, const Vec2f position) const {
+	void drawRotated(uint id, const Vec2f position) {
 		if(id >= _nbTiles)
 			return;
 
@@ -89,16 +90,18 @@ struct Tileset {
 
 		Vec4i clip = Vec4i(coord.x * _tileSize.x, coord.y * _tileSize.y, _tileSize.x, _tileSize.y);
 		if (isVisible(position, finalSize)) {
+            _texture.setColorMod(color, blend);
 			_texture.draw(getViewRenderPos(position - dist), finalSize, clip, angle, flip);
+            _texture.setColorMod(Color.white);
 		}
 	}
 
-	void draw(Timer timer, const Vec2f position) const {
+	void draw(Timer timer, const Vec2f position) {
 		float id = floor(lerp(0f, to!float(_nbTiles), timer.time));
 		draw(to!uint(id), position);
 	}
 
-	void draw(uint id, const Vec2f position) const {
+	void draw(uint id, const Vec2f position) {
 		if(id >= _nbTiles)
 			return;
 
@@ -108,7 +111,9 @@ struct Tileset {
 			throw new Exception("Tileset id out of bounds");
 		Vec4i clip = Vec4i(coord.x * _tileSize.x, coord.y * _tileSize.y, _tileSize.x, _tileSize.y);
 		if (isVisible(position, finalSize)) {
+            _texture.setColorMod(color, blend);
 			_texture.draw(getViewRenderPos(position), finalSize, clip, angle, flip, anchor);
+            _texture.setColorMod(Color.white);
 		}
 	}
 }

@@ -80,7 +80,7 @@ struct Animation {
 		_timer.update(deltaTime);
 	}
 	
-	void draw(const Vec2f position) const {
+	void draw(const Vec2f position) {
 		_tileset.drawRotated(_timer, position);
 	}
 }

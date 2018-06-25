@@ -43,13 +43,6 @@ class DropDownList: WidgetGroup {
 	}
 
 	@property {
-		alias position = super.position;
-		override Vec2f position(Vec2f newPosition) {
-			_position = newPosition;
-			_originalPosition = _position;
-			return _position;
-		}
-
 		uint selected() const { return _list.selected; }
 		uint selected(uint id) { return _list.selected = id; }
 	}
@@ -80,6 +73,10 @@ class DropDownList: WidgetGroup {
 		if(_isClicked)
 			_list.onEvent(event);
 	}
+
+    override void onPosition() {
+        _originalPosition = _position;
+    }
 
 	override void update(float deltaTime) {
 		if(_isClicked) {

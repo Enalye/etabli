@@ -302,30 +302,43 @@ private class TilesetCache(T): ResourceCache!T {
 			string folder = dirName(relativeFileName);
 
 			auto texture = cache.get(relativeFileName);
-			loadJson(relativeFileName, file, texture);
+			loadJson(file, texture);
 		}
 	}
 
-	private void loadJson(string tag, string file, Texture texture) {
-		auto json = parseJSON(readText(file));
+	private void loadJson(string file, Texture texture) {
+		auto sheetJson = parseJSON(readText(file));
+        import std.stdio;
+        writeln(file);
+		foreach(string tag, JSONValue value; sheetJson.object) {
+			if((tag in _ids) !is null)
+				throw new Exception("Duplicate tileset defined \'" ~ tag ~ "\' in \'" ~ file ~ "\'");
+            Vec2i grid, startPos, tileSize;
+            int nbTiles;
 
-		Vec2i grid, tileSize;
+            //Max number of tiles the tileset cannot exceeds
+            nbTiles = getJsonInt(value, "nbtiles", -1);
 
-		auto tileObject = json.object["tile"];
-		tileSize.x = getJsonInt(tileObject, "w");
-		tileSize.y = getJsonInt(tileObject, "h");
+            //Upper left border of the tileset
+            startPos.x = getJsonInt(value, "x", 0);
+            startPos.y = getJsonInt(value, "y", 0);
 
-		grid.x = getJsonInt(json, "columns", 1);
-		grid.y = getJsonInt(json, "lines", 1);
+            //Tile size
+            tileSize.x = getJsonInt(value, "w");
+            tileSize.y = getJsonInt(value, "h");
 
-		string type = getJsonStr(json, "type", ".");
+            grid.x = getJsonInt(value, "columns", 1);
+            grid.y = getJsonInt(value, "lines", 1);
 
-		T tileset = T(texture, grid, tileSize);
-		tileset.scale = Vec2f(getJsonFloat(json, "scalex", 1f), getJsonFloat(json, "scaley", 1f));
+            string type = getJsonStr(value, "type", ".");
 
-		uint id = cast(uint)_data.length;
-		_packs[type] ~= id;
-		_ids[tag] = id;
-		_data ~= tuple(tileset, tag);
+            T tileset = T(texture, grid, tileSize);
+            tileset.scale = Vec2f(getJsonFloat(value, "scalex", 1f), getJsonFloat(value, "scaley", 1f));
+
+            uint id = cast(uint)_data.length;
+            _packs[type] ~= id;
+            _ids[tag] = id;
+            _data ~= tuple(tileset, tag);
+        }
 	}
 }

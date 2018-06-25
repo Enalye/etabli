@@ -34,34 +34,22 @@ import ui.widget;
 import ui.label;
 
 class Button: Widget {
-	protected bool _isPressed = false;
 	void function() onClick;
 
-	@property {
-		bool isPressed() const { return _isPressed; }
-	}
+	override void update(float deltaTime) {}
+	override void onEvent(Event event) {}
 
-	override void update(float deltaTime) {
-		if (!_isLocked) {
-			if (!isButtonDown(1U))
-				_isPressed = false;
-		}
-	}
+    override void onSelect() {
+        if(!_isLocked && !_isSelected && _isHovered) {
+            isValidated = true;
+        }
+    }
 
-	override void onEvent(Event event) {
-		if (!_isLocked) {
-			if (event.type == EventType.MouseDown)
-				_isPressed = true;
-			else if(event.type == EventType.MouseUp) {
-				if(_isPressed) {
-					if(onClick !is null)
-						onClick();
-					triggerCallback();
-				}
-				_isPressed = false;
-			}
-		}
-	}
+    override void onValidate() {
+        if(onClick !is null)
+            onClick();
+        triggerCallback();
+    }
 }
 
 class ListButton: Button {
@@ -71,20 +59,6 @@ class ListButton: Button {
 	@property {
 		alias color = label.color;
 		alias text = label.text;
-
-		alias position = super.position;
-		override Vec2f position(Vec2f newPosition) {
-			_position = newPosition;
-			reload();
-			return _position;
-		}
-
-		alias size = super.size;
-		override Vec2f size(Vec2f newSize) {
-			_size = newSize;
-			reload();
-			return _position;
-		}
 
 		Sprite sprite() { return _sprite; }
 		Sprite sprite(Sprite newSprite) {
@@ -134,6 +108,14 @@ class ListButton: Button {
 			label.draw();
 	}
 
+    override void onPosition() {
+        reload();
+    }
+
+    override void onSize() {
+        reload();
+    }
+
 	private void reload() {
 		label.position = _position;
 		if(_sprite.texture) {
@@ -148,13 +130,6 @@ class TextButton: Button {
 	@property {
 		alias color = label.color;
 		alias text = label.text;
-
-		alias position = super.position;
-		override Vec2f position(Vec2f newPosition) {
-			_position = newPosition;
-			label.position = _position;
-			return _position;
-		}
 	}
 
 	this(string text) {
@@ -171,15 +146,19 @@ class TextButton: Button {
 	override void draw() {
 		if(_isLocked)
 			drawFilledRect(_position - _size / 2f, _size, Color.white * 0.055f);
-		else if(_isPressed)
-			drawFilledRect(_position - _size / 2f + (_isPressed ? 1f : 0f), _size, Color.white * 0.4f);
+		else if(_isSelected)
+			drawFilledRect(_position - _size / 2f + (_isSelected ? 1f : 0f), _size, Color.white * 0.4f);
 		else if(_isHovered)
-			drawFilledRect(_position - _size / 2f + (_isPressed ? 1f : 0f), _size, Color.white * 0.25f);
+			drawFilledRect(_position - _size / 2f + (_isSelected ? 1f : 0f), _size, Color.white * 0.25f);
 		else
-			drawFilledRect(_position - _size / 2f + (_isPressed ? 1f : 0f), _size, Color.white * 0.15f);
+			drawFilledRect(_position - _size / 2f + (_isSelected ? 1f : 0f), _size, Color.white * 0.15f);
 		if(label.isLoaded)
 			label.draw();
 	}
+
+    override void onPosition() {
+        label.position = _position;
+    }
 }
 
 class ImgButton: Button {
@@ -193,21 +172,6 @@ class ImgButton: Button {
 	@property {
 		alias color = label.color;
 		alias text = label.text;
-
-		alias size = super.size;
-		override Vec2f size(Vec2f newSize) {
-			_isFixedSize = true;
-			_size = newSize;
-			if(_idleSprite.texture)
-				setToSize(_idleSprite);
-			if(_hoveredSprite.texture)
-				setToSize(_hoveredSprite);
-			if(_clickedSprite.texture)
-				setToSize(_clickedSprite);
-			if(_lockedSprite.texture)
-				setToSize(_lockedSprite);
-			return _size;
-		}
 
 		bool isScaleLocked() { return _isScaleLocked; }
 		bool isScaleLocked(bool newIsScaleLocked) {
@@ -307,7 +271,7 @@ class ImgButton: Button {
 			else
 				drawFilledRect(_position - _size / 2f, _size, Color.gray);
 		}
-		else if(_isPressed) {
+		else if(_isSelected) {
 			if(_clickedSprite.texture)
 				_clickedSprite.drawUnchecked(_position);
 			else if(_idleSprite.texture)
@@ -332,4 +296,16 @@ class ImgButton: Button {
 		if(label.isLoaded)
 			label.draw();
 	}
+    
+    override void onSize() {
+        _isFixedSize = true;
+        if(_idleSprite.texture)
+            setToSize(_idleSprite);
+        if(_hoveredSprite.texture)
+            setToSize(_hoveredSprite);
+        if(_clickedSprite.texture)
+            setToSize(_clickedSprite);
+        if(_lockedSprite.texture)
+            setToSize(_lockedSprite);
+    }
 }

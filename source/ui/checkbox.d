@@ -60,16 +60,6 @@ class Checkbox: Widget {
 		checkedSprite(fetch!Sprite("gui_checked"));
 	}
 
-	@property {
-		alias size = super.size;
-		override Vec2f size(Vec2f newSize) {
-			_size = newSize;
-			_uncheckedSprite.fit(_size);
-			_checkedSprite.fit(_size);
-			return _size;
-		}
-	}
-
 	override void update(float deltaTime) {}
 	
 	override void onEvent(Event event) {
@@ -85,4 +75,9 @@ class Checkbox: Widget {
 		else
 			_uncheckedSprite.draw(_position);
 	}
+
+    override void onSize() {
+        _uncheckedSprite.fit(_size);
+        _checkedSprite.fit(_size);
+    }
 }

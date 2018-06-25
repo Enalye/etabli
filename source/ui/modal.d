@@ -89,16 +89,6 @@ class ModalWindow: WidgetGroup {
 		ImgButton _exitBtn;
 	}
 
-	@property {
-		alias size = super.size;
-		override Vec2f size(Vec2f newSize) {
-			newSize += Vec2f(22f, 116f);
-			_size = newSize;
-			resize();
-			return _size;
-		}
-	}
-
 	this(string newTitle, Vec2f newSize) {
 		_size = newSize + Vec2f(22f, 116f);
 		_isMovable = true;
@@ -182,6 +172,11 @@ class ModalWindow: WidgetGroup {
 			child.draw();
 		super.draw();
 	}
+
+    override void onSize() {
+        _size += Vec2f(22f, 116f);
+        resize();
+    }
 
 	protected void resize() {
 		_exitBtn.position = _position + Vec2f((_size.x - _exitBtn.size.x), (-_size.y + _exitBtn.size.y)) / 2f;

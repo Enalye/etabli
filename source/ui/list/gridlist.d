@@ -86,26 +86,6 @@ class GridList: WidgetGroup {
 	}
 
 	@property {
-		alias position = super.position;
-		override Vec2f position(Vec2f newPosition) {
-			_position = newPosition;
-			_slider.position = _position - Vec2f((_size.x - _slider.size.x) / 2f, 0f);
-			_container.position = _position + Vec2f(_slider.size.x / 2f, 0f);
-			return _position;
-		}
-
-		alias size = super.size;
-		override Vec2f size(Vec2f newSize) {
-			_size = newSize;
-			_slider.size = Vec2f(10f, _size.y);
-			_container.layout.capacity = Vec2u(_nbElementsPerLine, 0u);
-			_container.layout.size = Vec2f(_size.x, _layoutLength * (_nbElements / _nbElementsPerLine));
-			_container.size = Vec2f(_size.x - _slider.size.x, _size.y);
-			_container.view.renderSize = _container.size.to!Vec2u;
-			position(_position);
-			return _size;
-		}
-
 		uint selected() const { return _idElementSelected; }
 		uint selected(uint id) {
 			if(id > _nbElements)
@@ -140,6 +120,20 @@ class GridList: WidgetGroup {
 		if(!isOnInteractableWidget(_lastMousePos) && event.type == EventType.MouseWheel)
 			_slider.onEvent(event);
 	}
+
+		override void onPosition() {
+			_slider.position = _position - Vec2f((_size.x - _slider.size.x) / 2f, 0f);
+			_container.position = _position + Vec2f(_slider.size.x / 2f, 0f);
+		}
+
+		override void onSize() {
+			_slider.size = Vec2f(10f, _size.y);
+			_container.layout.capacity = Vec2u(_nbElementsPerLine, 0u);
+			_container.layout.size = Vec2f(_size.x, _layoutLength * (_nbElements / _nbElementsPerLine));
+			_container.size = Vec2f(_size.x - _slider.size.x, _size.y);
+			_container.view.renderSize = _container.size.to!Vec2u;
+			onPosition();
+		}
 
 	override void update(float deltaTime) {
 		super.update(deltaTime);

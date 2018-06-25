@@ -78,6 +78,10 @@ struct Timer {
 		mode = newTimeMode;
 	}
 
+    void stop() {
+        mode = TimeMode.Stopped;
+    }
+
 	void update(float deltaTime) {
 		switch(mode) with(TimeMode) {
 		case Stopped:

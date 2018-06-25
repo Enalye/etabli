@@ -41,6 +41,7 @@ import ui.widget;
 import core.vec2;
 
 import common.settings;
+import common.controller;
 
 static private {
 	bool[512] _keys;
@@ -178,6 +179,15 @@ void initializeEvents() {
 		signal(SIGINT, &signalHandler);
 	_isRunning = true;
 	_mousePosition = Vec2f.zero;
+    initializeControllers();
+}
+
+void destroyEvents() {
+    destroyControllers();
+}
+
+void updateEvents(float deltaTime) {
+    updateControllers(deltaTime);
 }
 
 bool processEvents(IMainWidget mainWidget) {
@@ -187,6 +197,7 @@ bool processEvents(IMainWidget mainWidget) {
 	if(!_isRunning) {
 		event.type = EventType.Quit;
 		mainWidget.onEvent(event);
+        destroyWindow();
 		return false;
 	}
 
@@ -322,6 +333,24 @@ bool processEvents(IMainWidget mainWidget) {
 
 			SDL_free(sdlEvent.drop.file);
 			break;
+        case SDL_CONTROLLERDEVICEADDED:
+            addController(sdlEvent.cdevice.which);
+            break;
+        case SDL_CONTROLLERDEVICEREMOVED:
+            removeController(sdlEvent.cdevice.which);
+            break;
+        case SDL_CONTROLLERDEVICEREMAPPED:
+            remapController(sdlEvent.cdevice.which);
+            break;
+        case SDL_CONTROLLERAXISMOTION:
+            setControllerAxis(sdlEvent.caxis.axis, sdlEvent.caxis.value);
+            break;
+        case SDL_CONTROLLERBUTTONDOWN:
+            setControllerButton(sdlEvent.cbutton.button, true);
+            break;
+        case SDL_CONTROLLERBUTTONUP:
+            setControllerButton(sdlEvent.cbutton.button, false);
+            break;
 		default:
 			break;
 		}
@@ -332,6 +361,7 @@ bool processEvents(IMainWidget mainWidget) {
 			case Quit:
 				_isRunning = false;
 				mainWidget.onEvent(globalEvent);
+                destroyWindow();
 				return false;
 			default:
 				mainWidget.onEvent(globalEvent);

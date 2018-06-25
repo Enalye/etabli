@@ -39,20 +39,6 @@ class Frame: WidgetGroup {
 	bool clearRenderer = true;
 	
 	@property {
-		alias position = super.position;
-		override Vec2f position(Vec2f newPosition) {
-			_position = newPosition;
-			_view.position = _position;
-			return _position;
-		}
-
-		alias size = super.size;
-		override Vec2f size(Vec2f newSize) {
-			_size = newSize;
-			_view.position = _position;
-			return _position;
-		}
-
 		View view() { return _view; }
 		View view(View newView) { return _view = newView; }
 	}
@@ -80,4 +66,12 @@ class Frame: WidgetGroup {
 		popView();
 		_view.draw(_position);
 	}
+
+    override void onPosition() {
+        _view.position = _position;
+    }
+
+    override void onSize() {
+        _view.position = _position;
+    }
 }

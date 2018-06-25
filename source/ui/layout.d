@@ -40,13 +40,6 @@ class VLayout: WidgetGroup {
 	}
 
 	@property {
-		alias size = super.size;
-		override Vec2f size(Vec2f newSize) {
-			_size = newSize;
-			resize();
-			return _size;
-		}
-
 		Vec2f padding() const { return _padding; }
 		Vec2f padding(Vec2f newPadding) { _padding = newPadding; resize(); return _padding; }
 
@@ -64,6 +57,10 @@ class VLayout: WidgetGroup {
 		super.addChild(widget);
 		resize();
 	}
+
+    override void onSize() {
+        resize();
+    }
 
 	protected void resize() {
 		if(!_children.length)
@@ -84,13 +81,6 @@ class HLayout: WidgetGroup {
 	}
 
 	@property {
-		alias size = super.size;
-		override Vec2f size(Vec2f newSize) {
-			_size = newSize;
-			resize();
-			return _size;
-		}
-
 		Vec2f padding() const { return _padding; }
 		Vec2f padding(Vec2f newPadding) { _padding = newPadding; resize(); return _padding; }
 
@@ -108,6 +98,10 @@ class HLayout: WidgetGroup {
 		super.addChild(widget);
 		resize();
 	}
+
+    override void onSize() {
+        resize();
+    }
 
 	protected void resize() {
 		if(!_children.length)
@@ -128,13 +122,6 @@ class GridLayout: WidgetGroup {
 	}
 
 	@property {
-		alias size = super.size;
-		override Vec2f size(Vec2f newSize) {
-			_size = newSize;
-			resize();
-			return _size;
-		}
-
 		Vec2f padding() const { return _padding; }
 		Vec2f padding(Vec2f newPadding) { _padding = newPadding; resize(); return _padding; }
 
@@ -152,6 +139,10 @@ class GridLayout: WidgetGroup {
 		super.addChild(widget);
 		resize();
 	}
+
+    override void onSize() {
+        resize();
+    }
 
 	protected void resize() {
 		if(!_children.length || _capacity.x == 0u)
@@ -177,20 +168,6 @@ class VContainer: WidgetGroup {
 	}
 
 	@property {
-		alias size = super.size;
-		override Vec2f size(Vec2f newSize) {
-			resize();
-			return _size;
-		}
-
-		alias position = super.position;
-		override Vec2f position(Vec2f newPosition) {
-			_position = newPosition;
-			resize();
-			return _position;
-		}
-
-
 		Vec2f padding() const { return _padding; }
 		Vec2f padding(Vec2f newPadding) { _padding = newPadding; resize(); return _padding; }
 	}
@@ -201,6 +178,18 @@ class VContainer: WidgetGroup {
 		super.addChild(widget);
 		resize();
 	}
+
+    override void onPosition() {
+        resize();
+    }
+
+    override void onSize() {
+        resize();
+    }
+
+    override void onAnchor() {
+        resize();
+    }
 
 	protected void resize() {
 		if(!_children.length) {
@@ -214,7 +203,7 @@ class VContainer: WidgetGroup {
 			totalSize.x = max(totalSize.x, widget.size.x);
 		}
 		_size = totalSize + Vec2f(_padding.x * 2f, _padding.y);
-		Vec2f currentPosition = _position - _size / 2f + _padding;
+		Vec2f currentPosition = _position - (_size * _anchor) + _padding;
 		foreach(Widget widget; _children) {
 			widget.position = currentPosition + widget.size / 2f;
 			currentPosition = currentPosition + Vec2f(0f, widget.size.y + _padding.y);
@@ -228,20 +217,6 @@ class HContainer: WidgetGroup {
 	}
 
 	@property {
-		alias size = super.size;
-		override Vec2f size(Vec2f newSize) {
-			resize();
-			return _size;
-		}
-
-		alias position = super.position;
-		override Vec2f position(Vec2f newPosition) {
-			_position = newPosition;
-			resize();
-			return _position;
-		}
-
-
 		Vec2f padding() const { return _padding; }
 		Vec2f padding(Vec2f newPadding) { _padding = newPadding; resize(); return _padding; }
 	}
@@ -252,6 +227,18 @@ class HContainer: WidgetGroup {
 		super.addChild(widget);
 		resize();
 	}
+
+    override void onPosition() {
+        resize();
+    }
+
+    override void onSize() {
+        resize();
+    }
+
+    override void onAnchor() {
+        resize();
+    }
 
 	protected void resize() {
 		if(!_children.length) {
@@ -265,7 +252,7 @@ class HContainer: WidgetGroup {
 			totalSize.x += widget.size.x + _padding.x;
 		}
 		_size = totalSize + Vec2f(_padding.x, _padding.y * 2f);
-		Vec2f currentPosition = _position - _size / 2f + _padding;
+		Vec2f currentPosition = _position - (_size * _anchor) + _padding;
 		foreach(Widget widget; _children) {
 			widget.position = currentPosition + widget.size / 2f;
 			currentPosition = currentPosition + Vec2f(widget.size.x + _padding.x, 0f);
@@ -276,22 +263,6 @@ class HContainer: WidgetGroup {
 class AnchoredLayout: WidgetGroup {
 	private {
 		Vec2f[] _childrenPositions, _childrenSizes;
-	}
-
-	@property {
-		alias position = super.position;
-		override Vec2f position(Vec2f newPosition) {
-			_position = newPosition;
-			resize();
-			return _position;
-		}
-
-		alias size = super.size;
-		override Vec2f size(Vec2f newSize) {
-			_size = newSize;
-			resize();
-			return _size;
-		}
 	}
 
 	this() {}
@@ -306,6 +277,14 @@ class AnchoredLayout: WidgetGroup {
 		_childrenSizes ~= Vec2f.one;
 		resize();
 	}
+
+    override void onPosition() {
+        resize();
+    }
+
+    override void onSize() {
+        resize();
+    }
 
 	void addChild(Widget widget, Vec2f position, Vec2f size) {
 		super.addChild(widget);
@@ -332,20 +311,16 @@ class AnchoredLayout: WidgetGroup {
 }
 
 class LogLayout: WidgetGroup {
-	@property {
-		alias size = super.size;
-		override Vec2f size(Vec2f newSize) {
-			resize();
-			return _size;
-		}
-	}
-
 	this() {}
 
 	override void addChild(Widget widget) {
 		super.addChild(widget);
 		resize();
 	}
+
+    override void onSize() {
+        resize();
+    }
 
 	protected void resize() {
 		if(!_children.length)
