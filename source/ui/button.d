@@ -46,9 +46,12 @@ class Button: Widget {
     }
 
     override void onValidate() {
+        if(!_isValidated)
+            return;
         if(onClick !is null)
             onClick();
         triggerCallback();
+        _isValidated = false;
     }
 }
 

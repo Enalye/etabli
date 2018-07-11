@@ -26,10 +26,12 @@ module common.controller;
 
 import derelict.sdl2.sdl;
 import core.all;
+import common.resource;
 
 import std.string;
 import std.file: exists;
 import std.stdio: writeln, printf;
+import std.path;
 
 private struct Controller {
     SDL_GameController* sdlController;
@@ -57,7 +59,7 @@ private {
 
 ///Open all the connected controllers
 void initializeControllers() {
-    const(char)[] dbPath = "../data/gamecontrollerdb.txt";
+    const(char)[] dbPath = buildPath(getResourceFolder(), "gamecontrollerdb.txt");
     if(!exists(dbPath)) {
         writeln("Could not find \'gamecontrollerdb.txt\'.");
         return;

@@ -99,8 +99,16 @@ class HList: WidgetGroup {
 		}
 	}
 
-	this(Vec2f size) {
-		createGui(size);
+	this(Vec2f newSize) {
+		isLocked = true;
+		_slider = new HScrollbar;
+		_container = new ListContainer(newSize);
+
+		super.addChild(_slider);
+		super.addChild(_container);
+
+		size(newSize);
+		position(Vec2f.zero);
 	}
 
 	override void onEvent(Event event) {
@@ -126,8 +134,9 @@ class HList: WidgetGroup {
 	}
 
     override void onPosition() {
-        _slider.position = _position - Vec2f(0f, (_size.y - _slider.size.y) / 2f);
-        _container.position = _position + Vec2f(0f, _slider.size.y / 2f);
+        auto offset = _size * (.5f - _anchor);
+        _slider.position = _position - Vec2f(0f, (_size.y - _slider.size.y) / 2f) + offset;
+        _container.position = _position + Vec2f(0f, _slider.size.y / 2f) + offset;
     }
 
     override void onSize() {
@@ -186,18 +195,6 @@ class HList: WidgetGroup {
 
 	Widget[] getList() {
 		return _container.layout.children;
-	}
-
-	protected void createGui(Vec2f newSize) {
-		isLocked = true;
-		_slider = new HScrollbar;
-		_container = new ListContainer(newSize);
-
-		super.addChild(_slider);
-		super.addChild(_container);
-
-		size(newSize);
-		position(Vec2f.zero);
 	}
 }
 
