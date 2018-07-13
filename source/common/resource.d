@@ -308,8 +308,6 @@ private class TilesetCache(T): ResourceCache!T {
 
 	private void loadJson(string file, Texture texture) {
 		auto sheetJson = parseJSON(readText(file));
-        import std.stdio;
-        writeln(file);
 		foreach(string tag, JSONValue value; sheetJson.object) {
 			if((tag in _ids) !is null)
 				throw new Exception("Duplicate tileset defined \'" ~ tag ~ "\' in \'" ~ file ~ "\'");

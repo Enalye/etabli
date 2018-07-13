@@ -75,11 +75,11 @@ struct Sprite {
 
 	void draw(const Vec2f position) {
 		Vec2f finalSize = size * scale * getViewScale();
-		if (isVisible(position, finalSize)) {
+		//if (isVisible(position, finalSize)) {
             texture.setColorMod(color, blend);
 			texture.draw(getViewRenderPos(position), finalSize, clip, angle, flip, anchor);
             texture.setColorMod(Color.white);
-		}
+		//}
 	}
 
 	void drawUnchecked(const Vec2f position) {
