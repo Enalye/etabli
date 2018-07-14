@@ -38,7 +38,7 @@ import render.drawable;
 struct Tileset {
 	private {
 		Texture _texture;
-		Vec2i _grid, _tileSize;
+		Vec2i _grid, _tileSize, _offset;
 		int _nbTiles;
 	}
 
@@ -46,6 +46,8 @@ struct Tileset {
 		Texture texture() const { return cast(Texture)_texture; }
 		bool isLoaded() const { return _texture.isLoaded; }
 		Vec2f tileSize() const { return cast(Vec2f)_tileSize; }
+		Vec2i grid() const { return _grid; }
+		Vec2i offset() const { return _offset; }
 	}
 
 	Vec2f scale = Vec2f.one;
@@ -55,18 +57,21 @@ struct Tileset {
     Color color = Color.white;
     Blend blend = Blend.AlphaBlending;
 
-	this(Texture newTexture, Vec2i grid, Vec2i tileSize) {
+	this(Texture newTexture, Vec2i newOffset, Vec2i newGrid, Vec2i newTileSize, int newNbTiles = -1) {
 		_texture = newTexture;
-		_grid = grid;
-		_tileSize = tileSize;
-		_nbTiles = _grid.x * _grid.y;
+		_grid = newGrid;
+		_tileSize = newTileSize;
+        if(newNbTiles != -1)
+            _nbTiles = newNbTiles;
+        else
+		    _nbTiles = _grid.x * _grid.y;
 	}
 
 	Sprite[] asSprites() {
 		Sprite[] sprites;
 		foreach(id; 0.. _nbTiles) {
 			Vec2i coord = Vec2i(id % _grid.x, id / _grid.x);
-			Vec4i clip = Vec4i(coord.x * _tileSize.x, coord.y * _tileSize.y, _tileSize.x, _tileSize.y);
+			Vec4i clip = Vec4i(_offset.x + coord.x * _tileSize.x, _offset.y + coord.y * _tileSize.y, _tileSize.x, _tileSize.y);
 			sprites ~= Sprite(_texture, clip);
 		}
 		return sprites;
@@ -88,7 +93,7 @@ struct Tileset {
 		Vec2f finalSize = scale * cast(Vec2f)(_tileSize) * getViewScale();
 		Vec2f dist = (anchor - Vec2f.half).rotated(angle) * cast(Vec2f)(_tileSize) * scale;
 
-		Vec4i clip = Vec4i(coord.x * _tileSize.x, coord.y * _tileSize.y, _tileSize.x, _tileSize.y);
+		Vec4i clip = Vec4i(_offset.x + coord.x * _tileSize.x, _offset.y + coord.y * _tileSize.y, _tileSize.x, _tileSize.y);
 		//if (isVisible(position, finalSize)) {
             _texture.setColorMod(color, blend);
 			_texture.draw(getViewRenderPos(position - dist), finalSize, clip, angle, flip);
@@ -109,7 +114,7 @@ struct Tileset {
 		Vec2i coord = Vec2i(id % _grid.x, id / _grid.x);
 		if(coord.y > _grid.y)
 			throw new Exception("Tileset id out of bounds");
-		Vec4i clip = Vec4i(coord.x * _tileSize.x, coord.y * _tileSize.y, _tileSize.x, _tileSize.y);
+		Vec4i clip = Vec4i(_offset.x + coord.x * _tileSize.x, _offset.y + coord.y * _tileSize.y, _tileSize.x, _tileSize.y);
 		//if (isVisible(position, finalSize)) {
             _texture.setColorMod(color, blend);
 			_texture.draw(getViewRenderPos(position), finalSize, clip, angle, flip, anchor);

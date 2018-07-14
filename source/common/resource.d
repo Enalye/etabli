@@ -311,15 +311,15 @@ private class TilesetCache(T): ResourceCache!T {
 		foreach(string tag, JSONValue value; sheetJson.object) {
 			if((tag in _ids) !is null)
 				throw new Exception("Duplicate tileset defined \'" ~ tag ~ "\' in \'" ~ file ~ "\'");
-            Vec2i grid, startPos, tileSize;
+            Vec2i grid, offset, tileSize;
             int nbTiles;
 
             //Max number of tiles the tileset cannot exceeds
-            nbTiles = getJsonInt(value, "nbtiles", -1);
+            nbTiles = getJsonInt(value, "tiles", -1);
 
             //Upper left border of the tileset
-            startPos.x = getJsonInt(value, "x", 0);
-            startPos.y = getJsonInt(value, "y", 0);
+            offset.x = getJsonInt(value, "x", 0);
+            offset.y = getJsonInt(value, "y", 0);
 
             //Tile size
             tileSize.x = getJsonInt(value, "w");
@@ -330,8 +330,21 @@ private class TilesetCache(T): ResourceCache!T {
 
             string type = getJsonStr(value, "type", ".");
 
-            T tileset = T(texture, grid, tileSize);
+            T tileset = T(texture, offset, grid, tileSize, nbTiles);
             tileset.scale = Vec2f(getJsonFloat(value, "scalex", 1f), getJsonFloat(value, "scaley", 1f));
+
+            //Flip
+			bool flipH = getJsonBool(value, "fliph", false);
+			bool flipV = getJsonBool(value, "flipv", false);
+
+			if(flipH && flipV)
+				tileset.flip = Flip.BothFlip;
+			else if(flipH)
+				tileset.flip = Flip.HorizontalFlip;
+			else if(flipV)
+				tileset.flip = Flip.VerticalFlip;
+			else
+				tileset.flip = Flip.NoFlip;
 
             uint id = cast(uint)_data.length;
             _packs[type] ~= id;
