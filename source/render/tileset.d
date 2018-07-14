@@ -59,6 +59,7 @@ struct Tileset {
 
 	this(Texture newTexture, Vec2i newOffset, Vec2i newGrid, Vec2i newTileSize, int newNbTiles = -1) {
 		_texture = newTexture;
+		_offset = newOffset;
 		_grid = newGrid;
 		_tileSize = newTileSize;
         if(newNbTiles != -1)
