@@ -26,8 +26,14 @@ module script.all;
 
 public {
 	import script.vm;
+	import script.coroutine;
+	import script.any;
+	import script.array;
 	import script.compiler;
 	import script.lexer;
 	import script.parser;
 	import script.primitive;
+	import script.bytecode;
+	import script.dump;
+	import script.std.all;
 }

@@ -80,7 +80,7 @@ class ColorPicker: ModalWindow {
 			slider.size = Vec2f(255f, 10f);
 
 			auto hc = new HContainer;
-			hc.padding = Vec2f(10f, 0f);
+			hc.spacing = Vec2f(10f, 0f);
 			hc.addChild(new Label(title));
 			hc.addChild(slider);
 			container.addChild(hc);
@@ -88,7 +88,7 @@ class ColorPicker: ModalWindow {
 		}
 
 		auto container = new VContainer;
-		container.padding = Vec2f(0f, 10f);
+		container.spacing = Vec2f(0f, 10f);
 		_redSlider = makeSlider(container, "R");
 		_blueSlider = makeSlider(container, "G");
 		_greenSlider = makeSlider(container, "B");
@@ -110,7 +110,7 @@ class ColorPicker: ModalWindow {
 		_viewer.size = Vec2f(100f, 100f);
 
 		auto hc2 = new HContainer;
-		hc2.padding = Vec2f(20f, 5f);
+		hc2.spacing = Vec2f(20f, 5f);
 		hc2.addChild(container);
 		hc2.addChild(_viewer);
 

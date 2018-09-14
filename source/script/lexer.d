@@ -34,18 +34,18 @@ import std.algorithm: canFind;
 
 enum LexemeType {
 	LeftBracket, RightBracket, LeftParenthesis, RightParenthesis, LeftCurlyBrace, RightCurlyBrace,
-	Period, Semicolon, Colon, Comma,
+	Period, Semicolon, Colon, Comma, Pointer, As, Is,
 	Assign,
-	AddAssign, SubstractAssign, MultiplyAssign, DivideAssign, ConcatenateAssign, ModuloAssign, PowerAssign,
+	AddAssign, SubstractAssign, MultiplyAssign, DivideAssign, ConcatenateAssign, RemainderAssign, PowerAssign,
 	Plus, Minus,
-	Add, Substract, Multiply, Divide, Concatenate, Modulo, Power,
+	Add, Substract, Multiply, Divide, Concatenate, Remainder, Power,
 	Equal, NotEqual, GreaterOrEqual, Greater, LesserOrEqual, Lesser,
 	And, Or, Xor, Not,
 	Increment, Decrement,
 	Identifier, Integer, Float, Boolean, String,
-	Main,
-	VoidType, IntType, FloatType, BoolType, StringType, ArrayType, ObjectType, AnyType, FunctionType, TaskType,
-	If, Else, While, Do, For, Return, Yield, Break, Continue
+	Main, Struct,
+	VoidType, IntType, FloatType, BoolType, StringType, ArrayType, ObjectType, AnyType, FunctionType, TaskType, AutoType,
+	If, Else, While, Do, For, Loop, Return, Yield, Break, Continue
 }
 
 struct Lexeme {
@@ -98,7 +98,7 @@ class Lexer {
 
 		dchar symbol = text[current];
 
-		whileLoop: while(symbol <= 0x20 || symbol == '/') {
+		whileLoop: while(symbol <= 0x20 || symbol == '/' || symbol == '#') {
 			if(current >= text.length)
 				return false;
 
@@ -108,6 +108,16 @@ class Lexer {
 				positionOfLine = current;
 				line ++;
 			}
+            else if(symbol == '#') {
+                do {
+                    if((current + 1) >= text.length)
+                        return false;
+                    current ++;
+                }
+                while(text[current] != '\n');
+                positionOfLine = current;
+                line ++;
+            }
 			else if(symbol == '/') {
 				if((current + 1) >= text.length)
 					return false;
@@ -205,9 +215,15 @@ class Lexer {
 
 		do {
 			switch(get()) {
-				case '0': .. case '9': case '.':
+				case '0': .. case '9':
 					scanNumber();
 					break;
+                case '.':
+                    if(get(1) >= '0' && get(1) <= '9')
+                        scanNumber();
+                    else
+                        goto case '!';
+                    break;
 				case '!':
 				case '#': .. case '&':
 				case '(': .. case '-':
@@ -347,6 +363,9 @@ class Lexer {
 			case ',':
 				lex.type = LexemeType.Comma;
 				break;
+            case '&':
+                lex.type = LexemeType.Pointer;
+                break;
 			case '~':
 				lex.type = LexemeType.Concatenate;
 				if(current + 1 >= text.length)
@@ -432,11 +451,11 @@ class Lexer {
 				}
 				break;
 			case '%':
-				lex.type = LexemeType.Modulo;
+				lex.type = LexemeType.Remainder;
 				if(current + 1 >= text.length)
 					break;
 				if(get(1) == '=') {
-					lex.type = LexemeType.ModuloAssign;
+					lex.type = LexemeType.RemainderAssign;
 					lex.textLength = 2;
 					current ++;
 				}
@@ -498,7 +517,7 @@ class Lexer {
 				break;
 
 			dchar symbol = get();
-			if(symbol <= '&' || (symbol >= '(' && symbol <= '@') || (symbol >= '[' && symbol <= '^') || (symbol >= '{' && symbol <= 0x7F))
+			if(symbol <= '&' || (symbol >= '(' && symbol <= '/') || (symbol >= ':' && symbol <= '@') || (symbol >= '[' && symbol <= '^') || (symbol >= '{' && symbol <= 0x7F))
 				break;
 
 			buffer ~= symbol;
@@ -515,6 +534,9 @@ class Lexer {
 			case "main":
 				lex.type = LexemeType.Main;
 				break;
+            case "def":
+				lex.type = LexemeType.Struct;
+				break;
 			case "if":
 				lex.type = LexemeType.If;
 				break;
@@ -530,6 +552,9 @@ class Lexer {
 			case "for":
 				lex.type = LexemeType.For;
 				break;
+			case "loop":
+				lex.type = LexemeType.Loop;
+				break;
 			case "return":
 				lex.type = LexemeType.Return;
 				break;
@@ -542,6 +567,12 @@ class Lexer {
 			case "continue":
 				lex.type = LexemeType.Continue;
 				break;
+            case "as":
+                lex.type = LexemeType.As;
+                break;
+            case "is":
+                lex.type = LexemeType.Is;
+                break;
 			case "void":
 				lex.type = LexemeType.VoidType;
 				lex.isType = true;
@@ -582,6 +613,10 @@ class Lexer {
 				lex.type = LexemeType.AnyType;
 				lex.isType = true;
 				break;
+            case "let":
+                lex.type = LexemeType.AutoType;
+                lex.isType = false;
+                break;
 			case "true":
 				lex.type = LexemeType.Boolean;
 				lex.isKeyword = false;
@@ -652,4 +687,23 @@ class Lexer {
 
 		filesToImport ~= buffer;
 	}
+}
+
+dstring getLexemeTypeStr(LexemeType operator) {
+    dstring[] lexemeTypeStrTable = [
+        "[", "]", "(", ")", "{", "}",
+        ".", ";", ":", ",", "&",
+        "=",
+        "+=", "-=", "*=", "/=", "~=", "%=", "**=",
+        "+", "-",
+        "+", "-", "*", "/", "~", "%", "**",
+        "==", "!=", ">=", ">", "<=", "<",
+        "and", "or", "xor", "not",
+        "++", "--",
+        "identifier", "const_int", "const_float", "const_bool", "const_str",
+        "main", "def",
+        "void", "int", "float", "bool", "string", "array", "object", "var", "func", "task", "let",
+        "if", "else", "while", "do", "for", "loop", "return", "yield", "break", "continue"
+    ];
+    return lexemeTypeStrTable[operator];
 }

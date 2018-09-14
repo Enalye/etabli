@@ -40,18 +40,18 @@ class Button: Widget {
 	override void onEvent(Event event) {}
 
     override void onSelect() {
-        if(!_isLocked && !_isSelected && _isHovered) {
+        if(!_isLocked && !_isSelected && _isHovered)
             isValidated = true;
-        }
+		else
+			isValidated = false;
     }
 
     override void onValidate() {
-        if(!_isValidated)
-            return;
-        if(onClick !is null)
-            onClick();
-        triggerCallback();
-        _isValidated = false;
+        if(_isValidated) {
+			if(onClick !is null)
+				onClick();
+			triggerCallback();
+		}
     }
 }
 

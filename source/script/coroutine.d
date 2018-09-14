@@ -22,31 +22,35 @@ it freely, subject to the following restrictions:
 	3. This notice may not be removed or altered from any source distribution.
 */
 
-module ui.info;
+module script.coroutine;
 
-import core.all;
+import script.vm;
+import script.any;
+import script.array;
 
-import ui.modal;
-import ui.label;
+class Coroutine {
+    this(GrimoireVM parentVm) { vm = parentVm; }
 
-void setInfoWindow(string title, string information) {
-	setModalWindow(new InfoWindow(title, information));
-}
+    GrimoireVM vm;
 
-void setInfoWindow(string information) {
-	setModalWindow(new InfoWindow(information));
-}
+    //Local variables
+    int[] ivalues;
+    float[] fvalues;
+    dstring[] svalues;
+    AnyValue[][] nvalues;
+    AnyValue[] avalues;
+    void*[] ovalues;
 
+    //Stack
+    uint[64] callStack;
+    int[] istack;
+    float[] fstack;
+    dstring[] sstack;
+    AnyValue[][] nstack;
+    AnyValue[] astack;
+    void*[] ostack;
 
-class InfoWindow: ModalWindow {
-	this(string title, string information) {
-		super(title, Vec2f.zero);
-		auto label = new Label(information);
-		size = label.size;
-		layout.addChild(label);
-	}
-
-	this(string information) {
-		this("Information", information);
-	}
+    uint pc,
+        valuesPos, //Local variables: Access with ivalues[valuesPos + variableIndex]
+        stackPos;	
 }

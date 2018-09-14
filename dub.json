@@ -1,6 +1,6 @@
 {
-	"name": "grimoire",
-	"description": "Grimoire Framework",
+	"name": "atelier",
+	"description": "Atelier Framework",
 	"copyright": "Copyright © 2018, Enalye",
 	"license": "Zlib",
 	"authors": [
@@ -9,7 +9,7 @@
 	"dependencies": {
 		"derelict-sdl2": "~>2.1.4"
 	},
-	"targetName": "grimoire",
+	"targetName": "atelier",
 	"targetType": "library",
 	"targetPath": "lib",
 	"workingDirectory": "lib",

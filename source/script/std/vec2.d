@@ -22,31 +22,20 @@ it freely, subject to the following restrictions:
 	3. This notice may not be removed or altered from any source distribution.
 */
 
-module ui.info;
+module script.std.vec2;
 
-import core.all;
+import script.parser;
+import script.vm;
+import script.coroutine;
+import script.any;
+import script.array;
+import script.type;
+import script.mangle;
+import script.primitive;
 
-import ui.modal;
-import ui.label;
-
-void setInfoWindow(string title, string information) {
-	setModalWindow(new InfoWindow(title, information));
+void loadVec2Library() {
+    auto defVec2 = defineStructure("vec2", ["x", "y"], [sFloatType, sFloatType]);
+    bindPrimitive(&makeVec2, "vec2", defVec2, [sFloatType, sFloatType]);
 }
 
-void setInfoWindow(string information) {
-	setModalWindow(new InfoWindow(information));
-}
-
-
-class InfoWindow: ModalWindow {
-	this(string title, string information) {
-		super(title, Vec2f.zero);
-		auto label = new Label(information);
-		size = label.size;
-		layout.addChild(label);
-	}
-
-	this(string information) {
-		this("Information", information);
-	}
-}
+private void makeVec2(Coroutine coro) {}

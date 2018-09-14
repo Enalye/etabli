@@ -35,13 +35,13 @@ import common.all;
 
 class VLayout: WidgetGroup {
 	private {
-		Vec2f _padding = Vec2f.zero;
+		Vec2f _spacing = Vec2f.zero;
 		uint _capacity;
 	}
 
 	@property {
-		Vec2f padding() const { return _padding; }
-		Vec2f padding(Vec2f newPadding) { _padding = newPadding; resize(); return _padding; }
+		Vec2f spacing() const { return _spacing; }
+		Vec2f spacing(Vec2f newPadding) { _spacing = newPadding; resize(); return _spacing; }
 
 		uint capacity() const { return _capacity; }
 		uint capacity(uint newCapacity) { _capacity = newCapacity; resize(); return _capacity; }
@@ -69,20 +69,20 @@ class VLayout: WidgetGroup {
 		Vec2f origin = (_isFrame ? Vec2f.zero : _position) - _size / 2 + childSize / 2f;
 		foreach(uint id, Widget widget; _children) {
 			widget.position = origin + Vec2f(0f, childSize.y * to!float(id));
-			widget.size = childSize - _padding;
+			widget.size = childSize - _spacing;
 		}
 	}
 }
 
 class HLayout: WidgetGroup {
 	private {
-		Vec2f _padding = Vec2f.zero;
+		Vec2f _spacing = Vec2f.zero;
 		uint _capacity;
 	}
 
 	@property {
-		Vec2f padding() const { return _padding; }
-		Vec2f padding(Vec2f newPadding) { _padding = newPadding; resize(); return _padding; }
+		Vec2f spacing() const { return _spacing; }
+		Vec2f spacing(Vec2f newPadding) { _spacing = newPadding; resize(); return _spacing; }
 
 		uint capacity() const { return _capacity; }
 		uint capacity(uint newCapacity) { _capacity = newCapacity; resize(); return _capacity; }
@@ -110,20 +110,20 @@ class HLayout: WidgetGroup {
 		Vec2f origin = (_isFrame ? Vec2f.zero : _position) - _size / 2 + childSize / 2f;
 		foreach(uint id, Widget widget; _children) {
 			widget.position = origin + Vec2f(childSize.x * to!float(id), 0f);
-			widget.size = childSize - _padding;
+			widget.size = childSize - _spacing;
 		}
 	}
 }
 
 class GridLayout: WidgetGroup {
 	private {
-		Vec2f _padding = Vec2f.zero;
+		Vec2f _spacing = Vec2f.zero;
 		Vec2u _capacity;
 	}
 
 	@property {
-		Vec2f padding() const { return _padding; }
-		Vec2f padding(Vec2f newPadding) { _padding = newPadding; resize(); return _padding; }
+		Vec2f spacing() const { return _spacing; }
+		Vec2f spacing(Vec2f newPadding) { _spacing = newPadding; resize(); return _spacing; }
 
 		Vec2u capacity() const { return _capacity; }
 		Vec2u capacity(Vec2u newCapacity) { _capacity = newCapacity; resize(); return _capacity; }
@@ -157,19 +157,19 @@ class GridLayout: WidgetGroup {
 		foreach(uint id, Widget widget; _children) {
 			Vec2u coords = Vec2u(id % _capacity.x, id / _capacity.x);
 			widget.position = origin + Vec2f(childSize.x * coords.x, childSize.y * coords.y);
-			widget.size = childSize - _padding;
+			widget.size = childSize - _spacing;
 		}
 	}
 }
 
 class VContainer: WidgetGroup {
 	protected {
-		Vec2f _padding = Vec2f.zero;
+		Vec2f _spacing = Vec2f.zero;
 	}
 
 	@property {
-		Vec2f padding() const { return _padding; }
-		Vec2f padding(Vec2f newPadding) { _padding = newPadding; resize(); return _padding; }
+		Vec2f spacing() const { return _spacing; }
+		Vec2f spacing(Vec2f newPadding) { _spacing = newPadding; resize(); return _spacing; }
 	}
 
 	this() {}
@@ -199,26 +199,26 @@ class VContainer: WidgetGroup {
 
 		Vec2f totalSize = Vec2f.zero;
 		foreach(Widget widget; _children) {
-			totalSize.y += widget.size.y + _padding.y;
+			totalSize.y += widget.size.y + _spacing.y;
 			totalSize.x = max(totalSize.x, widget.size.x);
 		}
-		_size = totalSize + Vec2f(_padding.x * 2f, _padding.y);
-		Vec2f currentPosition = _position - (_size * _anchor) + _padding;
+		_size = totalSize + Vec2f(_spacing.x * 2f, _spacing.y);
+		Vec2f currentPosition = _position - (_size * _anchor) + _spacing;
 		foreach(Widget widget; _children) {
 			widget.position = currentPosition + widget.size / 2f;
-			currentPosition = currentPosition + Vec2f(0f, widget.size.y + _padding.y);
+			currentPosition = currentPosition + Vec2f(0f, widget.size.y + _spacing.y);
 		}
 	}
 }
 
 class HContainer: WidgetGroup {
 	protected {
-		Vec2f _padding = Vec2f.zero;
+		Vec2f _spacing = Vec2f.zero;
 	}
 
 	@property {
-		Vec2f padding() const { return _padding; }
-		Vec2f padding(Vec2f newPadding) { _padding = newPadding; resize(); return _padding; }
+		Vec2f spacing() const { return _spacing; }
+		Vec2f spacing(Vec2f newPadding) { _spacing = newPadding; resize(); return _spacing; }
 	}
 
 	this() {}
@@ -249,13 +249,13 @@ class HContainer: WidgetGroup {
 		Vec2f totalSize = Vec2f.zero;
 		foreach(Widget widget; _children) {
 			totalSize.y = max(totalSize.y, widget.size.y);
-			totalSize.x += widget.size.x + _padding.x;
+			totalSize.x += widget.size.x + _spacing.x;
 		}
-		_size = totalSize + Vec2f(_padding.x, _padding.y * 2f);
-		Vec2f currentPosition = _position - (_size * _anchor) + _padding;
+		_size = totalSize + Vec2f(_spacing.x, _spacing.y * 2f);
+		Vec2f currentPosition = _position - (_size * _anchor) + _spacing;
 		foreach(Widget widget; _children) {
 			widget.position = currentPosition + widget.size / 2f;
-			currentPosition = currentPosition + Vec2f(widget.size.x + _padding.x, 0f);
+			currentPosition = currentPosition + Vec2f(widget.size.x + _spacing.x, 0f);
 		}
 	}
 }

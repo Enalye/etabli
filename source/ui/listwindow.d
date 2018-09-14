@@ -32,9 +32,9 @@ import ui.button;
 import ui.list.vlist;
 import ui.inputfield;
 
-void setListWindow(string id, string title, string[] list) {
+void setListWindow(string title, string[] list) {
 	auto modal = new ListWindow(title, list);
-	setModalWindow(id, modal);
+	setModalWindow(modal);
 }
 
 class ListWindow: ModalWindow {

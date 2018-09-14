@@ -31,12 +31,12 @@ import common.all;
 import render.sprite;
 
 import ui.widget;
+import ui.label;
 
 class Checkbox: Widget {
-	bool isChecked = false;
-
 	private {
 		Sprite _uncheckedSprite, _checkedSprite;
+		bool _isChecked;
 	}
 
 	@property {
@@ -53,6 +53,13 @@ class Checkbox: Widget {
 			_checkedSprite.fit(_size);
 			return _checkedSprite;
 		}
+
+		bool isChecked() const { return _isChecked; }
+		bool isChecked(bool newIsChecked) {
+			_isChecked = newIsChecked;
+			onCheck();
+			return _isChecked;
+		}
 	}
 
 	this() {
@@ -62,22 +69,63 @@ class Checkbox: Widget {
 
 	override void update(float deltaTime) {}
 	
-	override void onEvent(Event event) {
-		if(!isLocked) {
-			if(event.type == EventType.MouseUp)
-				isChecked = !isChecked;
-		}
-	}
+	override void onEvent(Event event) {}
 
 	override void draw() {
-		if(isChecked)
+		if(_isChecked)
 			_checkedSprite.draw(_position);
 		else
 			_uncheckedSprite.draw(_position);
+	}
+
+	override void onSelect() {
+		if(_isSelected || isLocked)
+			return;
+		isChecked = !_isChecked;
 	}
 
     override void onSize() {
         _uncheckedSprite.fit(_size);
         _checkedSprite.fit(_size);
     }
+
+	protected void onCheck() {}
+}
+
+class TextCheckbox: Checkbox {
+	Label label;
+
+	@property {
+		alias color = label.color;
+		alias text = label.text;
+	}
+
+	this(string text) {
+		label = new Label;
+		label.text = text;
+		onSize();
+	}	
+
+	override void onPosition() {
+        label.position = _position + Vec2f((_size.x - label.size.x) / 2f, 0f);
+    }
+
+	override void onSize() {
+		super.onSize();
+		const Vec2f checkboxSize = Vec2f.one * label.size.y;
+		_size = label.size + checkboxSize + Vec2f(25f, 0f);
+		onPosition();
+	}
+
+	override void update(float deltaTime) {}
+
+	override void draw() {
+		const Vec2f checkboxPosition = _position - Vec2f((_size.x - label.size.y) / 2f, 0f);
+
+		label.draw();
+		if(_isChecked)
+			_checkedSprite.draw(checkboxPosition);
+		else
+			_uncheckedSprite.draw(checkboxPosition);
+	}
 }

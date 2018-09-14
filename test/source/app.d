@@ -1,6 +1,6 @@
 import std.stdio: writeln;
 
-import grimoire;
+import atelier;
 
 void main() {
 	try {

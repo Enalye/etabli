@@ -30,80 +30,11 @@ import std.array;
 import std.conv;
 import std.math;
 import std.file;
-import std.outbuffer;
 
 import script.vm;
 import script.lexer;
 import script.parser;
-
-struct Bytecode {
-	uint[] opcodes;
-	int[] iconsts;
-	float[] fconsts;
-	dstring[] sconsts;
-
-	void toOutBuffer(ref OutBuffer buffer) {
-		buffer.write(cast(uint)iconsts.length);
-		buffer.write(cast(uint)fconsts.length);
-		buffer.write(cast(uint)sconsts.length);
-		buffer.write(cast(uint)opcodes.length);
-
-		foreach(uint i; iconsts)
-			buffer.write(i);
-		foreach(float i; fconsts)
-			buffer.write(i);
-		foreach(dstring i; sconsts)
-			buffer.write(cast(ubyte[])i);
-		foreach(uint i; opcodes)
-			buffer.write(i);
-	}
-}
-
-Bytecode getBytecodeFromFile(string fileName) {
-	Bytecode bytecode;
-	File file = File(fileName, "rb");
-	uint[4] header;
-	file.rawRead(header);
-	bytecode.iconsts.length = cast(size_t)header[0];
-	bytecode.fconsts.length = cast(size_t)header[1];
-	bytecode.sconsts.length = cast(size_t)header[2];
-	bytecode.opcodes.length = cast(size_t)header[3];
-
-	if(bytecode.iconsts.length)
-		file.rawRead(bytecode.iconsts);
-
-	if(bytecode.fconsts.length)
-		file.rawRead(bytecode.fconsts);
-
-	if(bytecode.sconsts.length)
-		file.rawRead(bytecode.sconsts);
-
-	file.rawRead(bytecode.opcodes);
-	file.close();
-	return bytecode;
-}
-
-Bytecode getBytecodeFromFile(File file) {
-	Bytecode bytecode;
-	uint[4] header;
-	file.rawRead(header);
-	bytecode.iconsts.length = cast(size_t)header[0];
-	bytecode.fconsts.length = cast(size_t)header[1];
-	bytecode.sconsts.length = cast(size_t)header[2];
-	bytecode.opcodes.length = cast(size_t)header[3];
-
-	if(bytecode.iconsts.length)
-		file.rawRead(bytecode.iconsts);
-
-	if(bytecode.fconsts.length)
-		file.rawRead(bytecode.fconsts);
-
-	if(bytecode.sconsts.length)
-		file.rawRead(bytecode.sconsts);
-
-	file.rawRead(bytecode.opcodes);
-	return bytecode;
-}
+import script.bytecode;
 
 Bytecode compileFile(string fileName) {
 	Lexer lexer = new Lexer;

@@ -30,28 +30,36 @@ import std.stdio;
 
 import script.parser;
 import script.vm;
+import script.coroutine;
+import script.any;
+import script.array;
+import script.type;
+import script.mangle;
+
+
+Primitive[] primitives;
 
 class Primitive {
-	void function(Vm.Coroutine) callback;
-	VariableType[] signature;
-	VariableType returnType;
+	void function(Coroutine) callback;
+	VarType[] signature;
+	VarType returnType;
 	dstring name, mangledName;
 	uint index;
 }
 
-Primitive[] primitives;
-bool isLoaded = false;
-
-void bindPrimitive(void function(Vm.Coroutine) callback, dstring name, VariableType returnType, VariableType[] signature) {
+void bindPrimitive(void function(Coroutine) callback, dstring name, VarType retType, VarType[] signature) {
 	Primitive primitive = new Primitive;
 	primitive.callback = callback;
 	primitive.signature = signature;
-	primitive.returnType = returnType;
+	primitive.returnType = retType;
 	primitive.name = name;
 	primitive.mangledName = mangleName(name, signature);
 	primitive.index = cast(uint)primitives.length;
 	primitives ~= primitive;
-	//writeln("Mangled name: ", primitive.mangledName);
+}
+
+void bindOperator(void function(Coroutine) callback, dstring name, VarType retType, VarType[] signature) {
+	bindPrimitive(callback, "@op_" ~ name, retType, signature);
 }
 
 bool isPrimitiveDeclared(dstring mangledName) {
@@ -68,58 +76,4 @@ Primitive getPrimitive(dstring mangledName) {
 			return primitive;
 	}
 	throw new Exception("Undeclared primitive " ~ to!string(mangledName));
-}
-
-void loadPrimitives() {
-	bindPrimitive(&prints, "print", VariableType.VoidType, [VariableType.StringType]);
-	bindPrimitive(&printi, "print", VariableType.VoidType, [VariableType.IntType]);
-	bindPrimitive(&printf, "print", VariableType.VoidType, [VariableType.FloatType]);
-	bindPrimitive(&printa, "print", VariableType.VoidType, [VariableType.AnyType]);
-	bindPrimitive(&toStringi, "to_string", VariableType.StringType, [VariableType.IntType]);
-	bindPrimitive(&toStringf, "to_string", VariableType.StringType, [VariableType.FloatType]);
-	bindPrimitive(&toInta, "to_int", VariableType.IntType, [VariableType.AnyType]);
-	bindPrimitive(&toAnyi, "to_any", VariableType.AnyType, [VariableType.IntType]);
-	isLoaded = true;
-}
-
-void prints(Vm.Coroutine coro) {
-	writeln(coro.sstack[$ - 1]);
-	coro.sstack.length --;
-}
-
-void printi(Vm.Coroutine coro) {
-	writeln(coro.istack[$ - 1]);
-	coro.sstack.length --;
-}
-
-void printf(Vm.Coroutine coro) {
-	writeln(coro.fstack[$ - 1]);
-	coro.sstack.length --;
-}
-
-void printa(Vm.Coroutine coro) {
-	writeln(coro.astack[$ - 1].getString());
-	coro.astack.length --;
-}
-
-void toStringi(Vm.Coroutine coro) {
-	coro.sstack ~= to!dstring(coro.istack[$ - 1]);
-	coro.istack.length --;
-}
-
-void toStringf(Vm.Coroutine coro) {
-	coro.sstack ~= to!dstring(coro.fstack[$ - 1]);
-	coro.fstack.length --;
-}
-
-void toInta(Vm.Coroutine coro) {
-	coro.istack ~= (coro.astack[$ - 1]).getInteger();
-	coro.astack.length --;
-}
-
-void toAnyi(Vm.Coroutine coro) {
-	Vm.AnyValue value;
-	value.setInteger(coro.istack[$ - 1]);
-	coro.astack ~= value;
-	coro.istack.length --;
 }

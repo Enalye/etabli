@@ -47,7 +47,7 @@ class Widget {
 	protected {
 		Hint _hint;
 		bool _isLocked = false, _isMovable = false, _isHovered = false, _isSelected = false, _isValidated = false, _hasFocus = false, _isInteractable = true;
-		Vec2f _position = Vec2f.zero, _size = Vec2f.zero, _anchor = Vec2f.half;
+		Vec2f _position = Vec2f.zero, _size = Vec2f.zero, _anchor = Vec2f.half, _padding = Vec2f.zero;
 		float _angle = 0f;
 		Widget _callbackWidget;
 		string _callbackId;
@@ -136,8 +136,8 @@ class Widget {
 		final Vec2f size() const { return _size; }
 		final Vec2f size(Vec2f newSize) {
             auto oldSize = _size;
-            _size = newSize;
-            onDeltaSize(newSize - oldSize);         
+            _size = newSize - _padding;
+            onDeltaSize(_size - oldSize);         
             onSize();
             return _size;
         }
@@ -155,6 +155,14 @@ class Widget {
 			return _position + _size * (Vec2f.half - _anchor);
 		}
 
+		final Vec2f padding() const { return _padding; }
+		final Vec2f padding(Vec2f newPadding) {
+            _padding = newPadding;
+			size(_size);
+            onPadding();
+            return _padding;
+        }
+
 		final float angle() const { return _angle; }
 		final float angle(float newAngle) {
             _angle = newAngle;
@@ -166,7 +174,8 @@ class Widget {
 	this() {}
 
 	bool isInside(const Vec2f pos) const {
-		return (_position - pos).isBetween(-_size * (Vec2f.one - anchor), _size * _anchor);
+		Vec2f collision = _size + _padding;
+		return (_position - pos).isBetween(-collision * (Vec2f.one - anchor), collision * _anchor);
 	}
 
 	bool isOnInteractableWidget(Vec2f pos) const {
@@ -187,8 +196,8 @@ class Widget {
 			drawRect(_position - _anchor * _size, _size, Color.green);
 	}
 
-	void setCallback(string callbackId, Widget widget) {
-		_callbackWidget = widget;
+	void setCallback(Widget callbackWidget, string callbackId) {
+		_callbackWidget = callbackWidget;
 		_callbackId = callbackId;
 	}
 
@@ -219,6 +228,7 @@ class Widget {
         void onSize() {}
         void onDeltaAnchor(Vec2f delta) {}
         void onAnchor() {}
+        void onPadding() {}
         void onAngle() {}
     }
 }

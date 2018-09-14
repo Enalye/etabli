@@ -98,7 +98,7 @@ private class Application: IMainWidget {
 		initializeEvents();
 		loadResources();
 		initializeOverlay();
-		loadPrimitives();
+		loadStandardLibrary();
 		_tickStartFrame = Clock.currStdTime();
 	}
 

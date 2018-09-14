@@ -37,23 +37,23 @@ import ui.panel;
 private {
 	Widget[] _widgetsBackup;
 	ModalWindow _modal;
-	string _modalName;
+//	string _modalName;
 	bool _isModal = false;
 }
 
-void setModalWindow(string newModalName, ModalWindow newModal) {
+void setModalWindow(ModalWindow newModal) {
 	if(_isModal)
 		throw new Exception("Modal window already set");
 	_isModal = true;
-	_modalName = newModalName;
+	//_modalName = newModalName;
 	_widgetsBackup = getWidgets();
 	removeWidgets();
 	_modal = newModal;
 	addWidget(_modal);
-	Event event = EventType.ModalOpen;
+	/+Event event = EventType.ModalOpen;
 	event.id = _modalName;
 	event.widget = _modal;
-	sendEvent(event);
+	sendEvent(event);+/
 }
 
 bool isModal() {
@@ -105,45 +105,63 @@ class ModalWindow: WidgetGroup {
 		_exitBtn = new ImgButton;
 		_exitBtn.idleSprite = fetch!Sprite("gui_window_exit");
 		_exitBtn.onClick = {
+			{
+				Event event;
+				event.type = EventType.Callback;
+				event.id = "exit";
+				_modal.onEvent(event);
+			}
 			onModalClose();
-			Event event = EventType.ModalCancel;
+			/+Event event = EventType.ModalCancel;
 			event.id = _modalName;
 			event.widget = _modal;
 			_modal.onEvent(event);
 			sendEvent(event);
 			event.type = EventType.ModalClose;
 			_modal.onEvent(event);
-			sendEvent(event);
+			sendEvent(event);+/
 		};
 
 		{ //Confirmation buttons
 			_lowerBox = new HLayout;
 			_lowerBox.isLocked = true;
-			_lowerBox.padding = Vec2f(10f, 15f);
+			_lowerBox.spacing = Vec2f(10f, 15f);
 
 			cancelBtn = new TextButton("Annuler");
 			applyBtn = new TextButton("Valider");
 			cancelBtn.onClick = {
+				{
+					Event event;
+					event.type = EventType.Callback;
+					event.id = "cancel";
+					_modal.onEvent(event);
+				}
 				onModalClose();
-				Event event = EventType.ModalCancel;
+				/+Event event = EventType.ModalCancel;
 				event.id = _modalName;
 				event.widget = _modal;
 				_modal.onEvent(event);
 				sendEvent(event);
 				event.type = EventType.ModalClose;
 				_modal.onEvent(event);
-				sendEvent(event);
+				sendEvent(event);+/
 			};
 			applyBtn.onClick = {
+				{
+					Event event;
+					event.type = EventType.Callback;
+					event.id = "apply";
+					_modal.onEvent(event);
+				}
 				onModalClose();
-				Event event = EventType.ModalApply;
+				/+Event event = EventType.ModalApply;
 				event.id = _modalName;
 				event.widget = _modal;
 				_modal.onEvent(event);
 				sendEvent(event);
 				event.type = EventType.ModalClose;
 				_modal.onEvent(event);
-				sendEvent(event);
+				sendEvent(event);+/
 			};
 
 			addChild(_lowerBox);

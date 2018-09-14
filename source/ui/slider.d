@@ -142,10 +142,17 @@ class VScrollbar: Slider {
 		Sprite _circleSprite, _barSprite;
 	}
 
+	Color backColor, frontColor;
+
 	this() {
 		_angle = 90f;
 		_circleSprite = fetch!Sprite("gui_circle");
 		_barSprite = fetch!Sprite("gui_texel");
+
+		backColor = Color.white * .25f;
+		backColor.a = 1f;
+		frontColor = Color.white * .45f;
+		frontColor.a = 1f;
 	}
 	
 	override void draw() {
@@ -170,30 +177,22 @@ class VScrollbar: Slider {
 		if(sliderLength < 0f)
 			sliderLength = 0f;
 
-		Color backColor = Color.white * .25f,
-			frontColor = Color.white * .45f;
-		backColor.a = 1f;
-		frontColor.a = 1f;
-
 		_circleSprite.size = Vec2f(_size.x, _size.x);
-		_circleSprite.texture.setColorMod(backColor);
+		_circleSprite.color = backColor;
 		_circleSprite.draw(_position - Vec2f(0f, _length / 2f));
 		_circleSprite.draw(_position + Vec2f(0f, _length / 2f));
 
-		_barSprite.texture.setColorMod(backColor);
+		_barSprite.color = backColor;
 		_barSprite.size = Vec2f(_size.x, _length);
 		_barSprite.draw(_position);
 
-		_circleSprite.texture.setColorMod(frontColor);
+		_circleSprite.color = frontColor;
 		_circleSprite.draw(sliderPosition - Vec2f(0f, sliderLength / 2f));
 		_circleSprite.draw(sliderPosition + Vec2f(0f, sliderLength / 2f));
 
-		_barSprite.texture.setColorMod(frontColor);
+		_barSprite.color = frontColor;
 		_barSprite.size = Vec2f(_size.x, sliderLength);
 		_barSprite.draw(sliderPosition);
-
-		_circleSprite.texture.setColorMod(Color.white);
-		_barSprite.texture.setColorMod(Color.white);
 
 		_circleSprite.size = Vec2f.one;
 		_barSprite.size = Vec2f.one;
@@ -209,10 +208,17 @@ class HScrollbar: Slider {
 		Sprite _circleSprite, _barSprite;
 	}
 
+	Color backColor, frontColor;
+
 	this() {
 		_angle = 0f;
 		_circleSprite = fetch!Sprite("gui_circle");
 		_barSprite = fetch!Sprite("gui_texel");
+
+		backColor = Color.white * .25f;
+		backColor.a = 1f;
+		frontColor = Color.white * .45f;
+		frontColor.a = 1f;
 	}
 	
 	override void draw() {
@@ -237,30 +243,22 @@ class HScrollbar: Slider {
 		if(sliderLength < 0f)
 			sliderLength = 0f;
 
-		Color backColor = Color.white * .25f,
-			frontColor = Color.white * .45f;
-		backColor.a = 1f;
-		frontColor.a = 1f;
-
 		_circleSprite.size = Vec2f(_size.y, _size.y);
-		_circleSprite.texture.setColorMod(backColor);
+		_circleSprite.color = backColor;
 		_circleSprite.draw(_position - Vec2f(_length / 2f, 0f));
 		_circleSprite.draw(_position + Vec2f(_length / 2f, 0f));
 
-		_barSprite.texture.setColorMod(backColor);
+		_barSprite.color = backColor;
 		_barSprite.size = Vec2f(_length, _size.y);
 		_barSprite.draw(_position);
 
-		_circleSprite.texture.setColorMod(frontColor);
+		_circleSprite.color = frontColor;
 		_circleSprite.draw(sliderPosition - Vec2f(sliderLength / 2f, 0f));
 		_circleSprite.draw(sliderPosition + Vec2f(sliderLength / 2f, 0f));
 
-		_barSprite.texture.setColorMod(frontColor);
+		_barSprite.color = frontColor;
 		_barSprite.size = Vec2f(sliderLength, _size.y);
 		_barSprite.draw(sliderPosition);
-
-		_circleSprite.texture.setColorMod(Color.white);
-		_barSprite.texture.setColorMod(Color.white);
 
 		_circleSprite.size = Vec2f.one;
 		_barSprite.size = Vec2f.one;
@@ -294,8 +292,8 @@ class VGauge: Slider {
 		_endSprite.clip.w = _clipSizeH;
 		_endSprite.size = Vec2f(_size.x, _clipSizeH);
 
-		_barSprite.texture.setColorMod(Color.white * .25f);
-		_endSprite.texture.setColorMod(Color.white * .25f);
+		_barSprite.color = Color.white * .25f;
+		_endSprite.color = Color.white * .25f;
 
 		_barSprite.draw(_position);
 		_endSprite.flip = Flip.NoFlip;
@@ -304,8 +302,8 @@ class VGauge: Slider {
 		_endSprite.draw(_position + Vec2f(0f, _length / 2f - _endSprite.size.y / 2f));
 
 		//Gauge
-		_barSprite.texture.setColorMod(Color.white);
-		_endSprite.texture.setColorMod(Color.white);
+		_barSprite.color = Color.white;
+		_endSprite.color = Color.white;
 		if(sliderPosition.y > (_position.y +_length / 2f - _endSprite.size.y)) {
 			_endSprite.size.y = _clipSizeH + (((_position.y +_length / 2f - _endSprite.size.y) - sliderPosition.y) * 2f);
 			_endSprite.clip.w = to!int(_endSprite.size.y);
@@ -369,13 +367,13 @@ class HGauge: Slider {
 		//Base
 		_barSprite.anchor = Vec2f(0f, .5f);
 		_barSprite.size = Vec2f((rightAnchor.x - leftAnchor.x), _size.y);
-		_barSprite.texture.setColorMod(Color.white * .25f);
+		_barSprite.color = Color.white * .25f;
 		_barSprite.draw(leftAnchor);
 
 		_endSprite.clip.y = _clipSizeY;
 		_endSprite.clip.w = _clipSizeH;
 		_endSprite.size = Vec2f(_size.y, _clipSizeH);
-		_endSprite.texture.setColorMod(Color.white * .25f);
+		_endSprite.color = Color.white * .25f;
 
 		_endSprite.flip = Flip.VerticalFlip;
 		_endSprite.draw(leftEnd);
@@ -383,8 +381,8 @@ class HGauge: Slider {
 		_endSprite.draw(rightEnd);
 
 		//Gauge
-		_barSprite.texture.setColorMod(Color.white);
-		_endSprite.texture.setColorMod(Color.white);
+		_barSprite.color = Color.white;
+		_endSprite.color = Color.white;
 
 		if(sliderPosition.x > rightAnchor.x) {
 			//Static left end
@@ -431,10 +429,17 @@ class HGauge: Slider {
 class VSlider: Slider {
 	private Sprite _circleSprite, _barSprite;
 
+	Color backColor, frontColor;
+
 	this() {
 		_angle = 90f;
 		_barSprite = fetch!Sprite("gui_bar");
 		_circleSprite = fetch!Sprite("gui_circle");
+
+		backColor = Color.white * .25f;
+		backColor.a = 1f;
+		frontColor = Color.cyan * .8f;
+		frontColor.a = 1f;
 	}
 	
 	override void draw() {
@@ -443,29 +448,21 @@ class VSlider: Slider {
 		Vec2f upPos = _position - Vec2f(0f, _length / 2f);
 		Vec2f downPos = _position + Vec2f(0f, _length / 2f);
 
-		Color backColor = Color.white * .25f,
-			frontColor = Color.cyan * .8f;
-		backColor.a = 1f;
-		frontColor.a = 1f;
-
 		_circleSprite.size = Vec2f(_size.x, _size.x);
-		_circleSprite.texture.setColorMod(backColor);
+		_circleSprite.color = backColor;
 		_circleSprite.draw(upPos);
 
-		_barSprite.texture.setColorMod(backColor);
+		_barSprite.color = backColor;
 		_barSprite.size = Vec2f(_size.x, _length);
 		_barSprite.draw(_position);
 
-		_circleSprite.texture.setColorMod(frontColor);
+		_circleSprite.color = frontColor;
 		_circleSprite.draw(downPos);
 		_circleSprite.draw(sliderPosition);
 
-		_barSprite.texture.setColorMod(frontColor);
+		_barSprite.color = frontColor;
 		_barSprite.size = Vec2f(_size.x, downPos.y - sliderPosition.y);
 		_barSprite.draw(sliderPosition + Vec2f(0f, (downPos.y - sliderPosition.y) / 2f));
-
-		_circleSprite.texture.setColorMod(Color.white);
-		_barSprite.texture.setColorMod(Color.white);
 
 		_circleSprite.size = Vec2f.one;
 		_barSprite.size = Vec2f.one;
@@ -479,10 +476,17 @@ class VSlider: Slider {
 class HSlider: Slider {
 	private Sprite _circleSprite, _barSprite;
 
+	Color backColor, frontColor;
+
 	this() {
 		_angle = 0f;
 		_barSprite = fetch!Sprite("gui_bar");
 		_circleSprite = fetch!Sprite("gui_circle");
+
+		backColor = Color.white * .25f;
+		backColor.a = 1f;
+		frontColor = Color.cyan * .8f;
+		frontColor.a = 1f;
 	}
 	
 	override void draw() {
@@ -491,29 +495,21 @@ class HSlider: Slider {
 		Vec2f leftPos = _position - Vec2f(_length / 2f, 0f);
 		Vec2f rightPos = _position + Vec2f(_length / 2f, 0f);
 
-		Color backColor = Color.white * .25f,
-			frontColor = Color.cyan * .8f;
-		backColor.a = 1f;
-		frontColor.a = 1f;
-
 		_circleSprite.size = Vec2f(_size.y, _size.y);
-		_circleSprite.texture.setColorMod(backColor);
+		_circleSprite.color = backColor;
 		_circleSprite.draw(rightPos);
 
-		_barSprite.texture.setColorMod(backColor);
+		_barSprite.color = backColor;
 		_barSprite.size = Vec2f(_length, _size.y);
 		_barSprite.draw(_position);
 
-		_circleSprite.texture.setColorMod(frontColor);
+		_circleSprite.color = frontColor;
 		_circleSprite.draw(leftPos);
 		_circleSprite.draw(sliderPosition);
 
-		_barSprite.texture.setColorMod(frontColor);
+		_barSprite.color = frontColor;
 		_barSprite.size = Vec2f(sliderPosition.x - leftPos.x, _size.y);
 		_barSprite.draw(leftPos + Vec2f((sliderPosition.x - leftPos.x) / 2f, 0f));
-
-		_circleSprite.texture.setColorMod(Color.white);
-		_barSprite.texture.setColorMod(Color.white);
 
 		_circleSprite.size = Vec2f.one;
 		_barSprite.size = Vec2f.one;
