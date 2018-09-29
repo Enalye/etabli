@@ -34,7 +34,6 @@ import core.util;
 import core.json;
 import core.vec2;
 import render.all;
-import script.all;
 import audio.all;
 
 private {

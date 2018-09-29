@@ -4,14 +4,14 @@ import atelier;
 
 void main() {
 	try {
-		loadPrimitives();
-		auto bytecode = compileFile("../script.txt");
-		Vm vm = new Vm;
-		vm.load(bytecode);
-
-
-		//createApplication(Vec2u(800u, 600u));
-		//runApplication();
+        //Set data location
+        setResourceFolder("../data/");
+        setResourceSubFolder!Texture("graphic");
+        setResourceSubFolder!Font("font");
+        setResourceSubFolder!Sprite("graphic");
+        
+		createApplication(Vec2u(800u, 600u));
+		runApplication();
 	}
 	catch(Exception e) {
 		writeln(e.msg);

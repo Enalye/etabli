@@ -31,5 +31,4 @@ public {
 	import audio.all;
 	import ui.all;
 	import net.all;
-	import script.all;
 }

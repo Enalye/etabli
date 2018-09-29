@@ -32,7 +32,6 @@ import std.datetime;
 import core.all;
 import render.all;
 import ui.all;
-import script.all;
 
 import common.event;
 import common.settings;
@@ -41,7 +40,7 @@ import common.resource;
 private Application _application;
 uint nominalFps = 60u;
 
-void createApplication(Vec2u size, string title = "Grimoire") {
+void createApplication(Vec2u size, string title = "Atelier") {
 	if(_application !is null)
 		throw new Exception("The application cannot be run twice.");
 	_application = new Application(size, title);
@@ -98,7 +97,6 @@ private class Application: IMainWidget {
 		initializeEvents();
 		loadResources();
 		initializeOverlay();
-		loadStandardLibrary();
 		_tickStartFrame = Clock.currStdTime();
 	}
 

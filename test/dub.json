@@ -2,7 +2,7 @@
 	"name": "test",
 	"targetType": "executable",
 	"dependencies": {
-		"grimoire": {"path": "../"}
+		"atelier": {"path": "../"}
 	},
 	"targetPath": "bin",
 	"workingDirectory": "bin"
