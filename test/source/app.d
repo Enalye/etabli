@@ -1,3 +1,12 @@
+
+/**
+    Test application
+
+    Copyright: (c) Enalye 2017
+    License: Zlib
+    Authors: Enalye
+*/
+
 import std.stdio: writeln;
 
 import atelier;
