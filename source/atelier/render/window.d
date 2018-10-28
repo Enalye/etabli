@@ -99,6 +99,7 @@ void createWindow(const Vec2u windowSize, string title) {
 	if(-1 == SDL_CreateWindowAndRenderer(windowSize.x, windowSize.y, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_WINDOW_RESIZABLE, &window, &renderer))
 		throw new Exception("Window initialization failed.");
 
+    SDL_RenderSetLogicalSize(renderer, windowSize.x, windowSize.y);
 	ViewReference viewRef;
 	viewRef.target = null;
 	viewRef.position = cast(Vec2f)(windowSize) / 2;

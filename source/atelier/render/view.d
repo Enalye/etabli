@@ -61,6 +61,10 @@ class View {
 		this(to!Vec2u(newRenderSize));
 	}
 
+    this(Vec2i newRenderSize) {
+		this(to!Vec2u(newRenderSize));
+	}
+
 	this(Vec2u newRenderSize) {
 		if(newRenderSize.x >= 2048u || newRenderSize.y >= 2048u)
 			throw new Exception("View render size exceeds limits.");
