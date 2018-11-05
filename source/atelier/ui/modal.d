@@ -90,17 +90,17 @@ class ModalWindow: WidgetGroup {
 	}
 
 	this(string newTitle, Vec2f newSize) {
-		_size = newSize + Vec2f(22f, 116f);
-		_isMovable = true;
+		size = newSize + Vec2f(22f, 116f);
+		isMovable = true;
 		_isFrame = false;
 		position = centerScreen;
 
 		_titleLabel = new Label(newTitle);
 		_titleLabel.color = Color.white * 0.21;
 		_panel = new Panel;
-		_panel.position = _position;
+		_panel.position = pivot;
 		layout = new AnchoredLayout;
-		layout.position = _position;
+		layout.position = pivot;
 
 		_exitBtn = new ImgButton;
 		_exitBtn.idleSprite = fetch!Sprite("gui_window_exit");
@@ -177,7 +177,7 @@ class ModalWindow: WidgetGroup {
 	}
 
 	override void update(float deltaTime) {
-		layout.position = _position;
+		layout.position = pivot;
 		//Update suspended widgets
 		foreach(child; _widgetsBackup)
 			child.update(deltaTime);
@@ -192,17 +192,17 @@ class ModalWindow: WidgetGroup {
 	}
 
     override void onSize() {
-        _size += Vec2f(22f, 116f);
+        size += Vec2f(22f, 116f);
         resize();
     }
 
 	protected void resize() {
-		_exitBtn.position = _position + Vec2f((_size.x - _exitBtn.size.x), (-_size.y + _exitBtn.size.y)) / 2f;
-		_lowerBox.size = Vec2f(_size.x - 25f, 40f);
-		_lowerBox.position = _position + Vec2f(0f, _size.y / 2f - 30f);
-		_panel.size = _size;
-		layout.position = _position - Vec2f(8f, 0f);
-		layout.size = Vec2f(_size.x - 22f, _size.y - 116f);
-		_titleLabel.position = Vec2f(_position.x, _position.y - _size.y / 2f + 25f);
+		_exitBtn.position = pivot + Vec2f((size.x - _exitBtn.size.x), (-size.y + _exitBtn.size.y)) / 2f;
+		_lowerBox.size = Vec2f(size.x - 25f, 40f);
+		_lowerBox.position = pivot + Vec2f(0f, size.y / 2f - 30f);
+		_panel.size = size;
+		layout.position = pivot - Vec2f(8f, 0f);
+		layout.size = Vec2f(size.x - 22f, size.y - 116f);
+		_titleLabel.position = Vec2f(pivot.x, pivot.y - size.y / 2f + 25f);
 	}
 }

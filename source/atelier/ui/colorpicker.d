@@ -38,7 +38,7 @@ class ColorViewer: Widget {
 	override void onEvent(Event event) {}
 	override void update(float deltaTime) {}
 	override void draw() {
-		drawFilledRect(_position - _size / 2f, _size, color);
+		drawFilledRect(pivot - size / 2f, size, color);
 	}
 }
 

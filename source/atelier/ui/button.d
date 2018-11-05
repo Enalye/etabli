@@ -40,14 +40,14 @@ class Button: Widget {
 	override void onEvent(Event event) {}
 
     override void onSelect() {
-        if(!_isLocked && !_isSelected && _isHovered)
+        if(!isLocked && !isSelected && isHovered)
             isValidated = true;
 		else
 			isValidated = false;
     }
 
     override void onValidate() {
-        if(_isValidated) {
+        if(isValidated) {
 			if(onClick !is null)
 				onClick();
 			triggerCallback();
@@ -74,7 +74,7 @@ class ListButton: Button {
 	this(string text) {
 		label = new Label;
 		label.text = text;
-		_size = label.size;
+		size = label.size;
 	}
 
 	this(Sprite newSprite) {
@@ -86,26 +86,26 @@ class ListButton: Button {
 	this(string text, Sprite newSprite) {
 		label = new Label;
 		label.text = text;
-		_size = label.size;
+		size = label.size;
 		_sprite = newSprite;
 		reload();
 	}
 
 	override void update(float deltaTime) {
 		super.update(deltaTime);
-		label.position = _position;
+		label.position = pivot;
 	}
 
 	override void draw() {
-		if(_isValidated)
-			drawFilledRect(_position - _size / 2f, _size, Color.white * 0.8f);
-		else if(_isHovered)
-			drawFilledRect(_position - _size / 2f, _size, Color.white * 0.25f);
+		if(isValidated)
+			drawFilledRect(pivot - size / 2f, size, Color.white * 0.8f);
+		else if(isHovered)
+			drawFilledRect(pivot - size / 2f, size, Color.white * 0.25f);
 		else
-			drawFilledRect(_position - _size / 2f, _size, Color.white * 0.15f);
+			drawFilledRect(pivot - size / 2f, size, Color.white * 0.15f);
 
 		if(sprite.texture)
-			sprite.draw(_position);
+			sprite.draw(pivot);
 
 		if(label.isLoaded)
 			label.draw();
@@ -120,9 +120,9 @@ class ListButton: Button {
     }
 
 	private void reload() {
-		label.position = _position;
+		label.position = pivot;
 		if(_sprite.texture) {
-			_sprite.fit(_size);
+			_sprite.fit(size);
 		}
 	}
 }
@@ -138,29 +138,29 @@ class TextButton: Button {
 	this(string text) {
 		label = new Label;
 		label.text = text;
-		_size = label.size;
+		size = label.size;
 	}
 
 	override void update(float deltaTime) {
 		super.update(deltaTime);
-		label.position = _position;
+		label.position = pivot;
 	}
 
 	override void draw() {
-		if(_isLocked)
-			drawFilledRect(_position - _size / 2f, _size, Color.white * 0.055f);
-		else if(_isSelected)
-			drawFilledRect(_position - _size / 2f + (_isSelected ? 1f : 0f), _size, Color.white * 0.4f);
-		else if(_isHovered)
-			drawFilledRect(_position - _size / 2f + (_isSelected ? 1f : 0f), _size, Color.white * 0.25f);
+		if(isLocked)
+			drawFilledRect(pivot - size / 2f, size, Color.white * 0.055f);
+		else if(isSelected)
+			drawFilledRect(pivot - size / 2f + (isSelected ? 1f : 0f), size, Color.white * 0.4f);
+		else if(isHovered)
+			drawFilledRect(pivot - size / 2f + (isSelected ? 1f : 0f), size, Color.white * 0.25f);
 		else
-			drawFilledRect(_position - _size / 2f + (_isSelected ? 1f : 0f), _size, Color.white * 0.15f);
+			drawFilledRect(pivot - size / 2f + (isSelected ? 1f : 0f), size, Color.white * 0.15f);
 		if(label.isLoaded)
 			label.draw();
 	}
 
     override void onPosition() {
-        label.position = _position;
+        label.position = pivot;
     }
 }
 
@@ -195,7 +195,7 @@ class ImgButton: Button {
 			if(_isFixedSize)
 				setToSize(newSprite);
 			else
-				_size = newSprite.size;
+				size = newSprite.size;
 			return _idleSprite = newSprite;
 		}
 
@@ -205,7 +205,7 @@ class ImgButton: Button {
 				setToSize(newSprite);
 			else {
 				if(_idleSprite.texture is null)
-					_size = newSprite.size;
+					size = newSprite.size;
 			}
 			return _hoveredSprite = newSprite;
 		}
@@ -216,7 +216,7 @@ class ImgButton: Button {
 				setToSize(newSprite);
 			else {
 				if(_idleSprite.texture is null)
-					_size = newSprite.size;
+					size = newSprite.size;
 			}
 			return _clickedSprite = newSprite;
 		}
@@ -227,7 +227,7 @@ class ImgButton: Button {
 				setToSize(newSprite);
 			else {
 				if(_idleSprite.texture is null)
-					_size = newSprite.size;
+					size = newSprite.size;
 			}
 			return _lockedSprite = newSprite;
 		}
@@ -240,7 +240,7 @@ class ImgButton: Button {
 	this(string text) {
 		label = new Label;
 		label.text = text;
-		_size = label.size;
+		size = label.size;
 	}
 
 	private void setToSize(Sprite sprite) {
@@ -250,51 +250,51 @@ class ImgButton: Button {
 		if(_isScaleLocked) {
 			Vec2f clip = to!Vec2f(sprite.clip.zw);
 			float scale;
-			if(_size.x / _size.y > clip.x / clip.y)
-				scale = _size.y / clip.y;
+			if(size.x / size.y > clip.x / clip.y)
+				scale = size.y / clip.y;
 			else
-				scale = _size.x / clip.x;
+				scale = size.x / clip.x;
 			sprite.size = clip * scale;
 		}
 		else
-			sprite.size = _size;
+			sprite.size = size;
 	}
 
 	override void update(float deltaTime) {
 		super.update(deltaTime);
-		label.position = _position;
+		label.position = pivot;
 	}
 
 	override void draw() {
-		if(_isLocked) {
+		if(isLocked) {
 			if(_lockedSprite.texture)
-				_lockedSprite.drawUnchecked(_position);
+				_lockedSprite.drawUnchecked(pivot);
 			else if(_idleSprite.texture)
-				_idleSprite.drawUnchecked(_position);
+				_idleSprite.drawUnchecked(pivot);
 			else
-				drawFilledRect(_position - _size / 2f, _size, Color.gray);
+				drawFilledRect(pivot - size / 2f, size, Color.gray);
 		}
-		else if(_isSelected) {
+		else if(isSelected) {
 			if(_clickedSprite.texture)
-				_clickedSprite.drawUnchecked(_position);
+				_clickedSprite.drawUnchecked(pivot);
 			else if(_idleSprite.texture)
-				_idleSprite.drawUnchecked(_position + Vec2f.one);
+				_idleSprite.drawUnchecked(pivot + Vec2f.one);
 			else
-				drawFilledRect(_position - _size / 2f + Vec2f.one, _size, Color.blue);
+				drawFilledRect(pivot - size / 2f + Vec2f.one, size, Color.blue);
 		}
-		else if(_isHovered) {
+		else if(isHovered) {
 			if(_hoveredSprite.texture)
-				_hoveredSprite.drawUnchecked(_position);
+				_hoveredSprite.drawUnchecked(pivot);
 			else if(_idleSprite.texture)
-				_idleSprite.drawUnchecked(_position);
+				_idleSprite.drawUnchecked(pivot);
 			else
-				drawFilledRect(_position - _size / 2f, _size, Color.green);
+				drawFilledRect(pivot - size / 2f, size, Color.green);
 		}
 		else {
 			if(_idleSprite.texture)
-				_idleSprite.drawUnchecked(_position);
+				_idleSprite.drawUnchecked(pivot);
 			else
-				drawFilledRect(_position - _size / 2f, _size, Color.red);
+				drawFilledRect(pivot - size / 2f, size, Color.red);
 		}
 		if(label.isLoaded)
 			label.draw();

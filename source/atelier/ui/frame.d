@@ -45,7 +45,7 @@ class Frame: WidgetGroup {
 
 	this(Vec2u newSize) {
 		_view = new View(newSize);
-		_size = to!Vec2f(newSize);
+		size = to!Vec2f(newSize);
 		_isFrame = true;
 	}
 
@@ -64,14 +64,14 @@ class Frame: WidgetGroup {
 		pushView(_view, clearRenderer);
 		super.draw();
 		popView();
-		_view.draw(_position);
+		_view.draw(pivot);
 	}
 
     override void onPosition() {
-        _view.position = _position;
+        _view.position = pivot;
     }
 
     override void onSize() {
-        _view.position = _position;
+        _view.position = pivot;
     }
 }

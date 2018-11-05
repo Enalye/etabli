@@ -235,7 +235,7 @@ class Text: Widget {
 			throw new Exception("Error while fetching cached characters");
 		charSize = _standardCache.get('a').size;
 
-		_size = Vec2f(charSize.x * _maxLineLength, charSize.y * (_rowLength + 1));
+		size = Vec2f(charSize.x * _maxLineLength, charSize.y * (_rowLength + 1));
 	}
 
 	override void onEvent(Event event) {}
@@ -249,7 +249,7 @@ class Text: Widget {
 			switch(token.type) with(TextTokenType) {
 			case CharacterType:
 				token.charSprite.color = currentColor;
-				token.charSprite.draw(_position + charSize * Vec2f(
+				token.charSprite.draw(pivot + charSize * Vec2f(
 					to!float(currentPos.x) - _maxLineLength / 2f,
 					to!float(currentPos.y) - _rowLength / 2f));
 				token.charSprite.color = Color.white;

@@ -92,7 +92,7 @@ class Label: Widget {
 
 	this(string newText) {
 		this();
-		_isInteractable = false;
+		isInteractable = false;
 		_text = newText;
 		reload();
 	}
@@ -109,7 +109,7 @@ class Label: Widget {
 
 	override void draw() {
 		if(_text.length > 0)
-			_sprite.draw(_position);
+			_sprite.draw(position);
 	}
 
 	void reload() {
@@ -129,6 +129,6 @@ class Label: Widget {
 		}
 		_sprite = _texture;
 		_sprite.size *= _font.scale;
-		_size = _sprite.size;
+		size = _sprite.size;
 	}
 }

@@ -133,16 +133,16 @@ private class Console: AnchoredLayout {
 	}
 
 	this() {
-		_size = Vec2f(screenWidth, screenHeight / 2f);
+		size = Vec2f(screenWidth, screenHeight / 2f);
 
-		float inputFieldRatio = 25f / _size.y;
-		float inputFieldHeight = _size.y * inputFieldRatio;
+		float inputFieldRatio = 25f / size.y;
+		float inputFieldHeight = size.y * inputFieldRatio;
 
-		_inputField = new InputField(Vec2f(_size.x, inputFieldHeight));
-		_log = new LogList(_size - Vec2f(0f, inputFieldHeight));
+		_inputField = new InputField(Vec2f(size.x, inputFieldHeight));
+		_log = new LogList(size - Vec2f(0f, inputFieldHeight));
 		
 		_background = fetch!Sprite("gui_texel");
-		_background.size = _size;
+		_background.size = size;
 
 		addChild(_log, Vec2f(.5f, .5f - inputFieldRatio / 2f), Vec2f(1f, 1f - inputFieldRatio));
 		addChild(_inputField, Vec2f(.5f, 1f - inputFieldRatio / 2f), Vec2f(1f, inputFieldRatio));
@@ -168,7 +168,7 @@ private class Console: AnchoredLayout {
 
 	override void draw() {
 		_background.texture.setColorMod(Color.black * .25f);
-		_background.draw(_position);
+		_background.draw(pivot);
 		super.draw();
 	}
 

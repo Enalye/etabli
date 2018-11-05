@@ -51,7 +51,7 @@ class DropDownList: WidgetGroup {
 		_maxListLength = maxListLength;
 		_originalSize = newSize;
 		_list = new VList(_originalSize * Vec2f(1f, _maxListLength));
-		_size = _originalSize;
+		size = _originalSize;
 	}
 
 	override void onEvent(Event event) {
@@ -75,7 +75,7 @@ class DropDownList: WidgetGroup {
 	}
 
     override void onPosition() {
-        _originalPosition = _position;
+        _originalPosition = pivot;
     }
 
 	override void update(float deltaTime) {

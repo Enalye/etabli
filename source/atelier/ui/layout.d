@@ -65,8 +65,8 @@ class VLayout: WidgetGroup {
 	protected void resize() {
 		if(!_children.length)
 			return;
-		Vec2f childSize = Vec2f(_size.x, _size.y / (_capacity != 0u ? _capacity : _children.length));
-		Vec2f origin = (_isFrame ? Vec2f.zero : _position) - _size / 2 + childSize / 2f;
+		Vec2f childSize = Vec2f(size.x, size.y / (_capacity != 0u ? _capacity : _children.length));
+		Vec2f origin = (_isFrame ? Vec2f.zero : pivot) - size / 2 + childSize / 2f;
 		foreach(uint id, Widget widget; _children) {
 			widget.position = origin + Vec2f(0f, childSize.y * to!float(id));
 			widget.size = childSize - _spacing;
@@ -106,8 +106,8 @@ class HLayout: WidgetGroup {
 	protected void resize() {
 		if(!_children.length)
 			return;
-		Vec2f childSize = Vec2f(_size.x / (_capacity != 0u ? _capacity : _children.length), _size.y);
-		Vec2f origin = (_isFrame ? Vec2f.zero : _position) - _size / 2 + childSize / 2f;
+		Vec2f childSize = Vec2f(size.x / (_capacity != 0u ? _capacity : _children.length), size.y);
+		Vec2f origin = (_isFrame ? Vec2f.zero : pivot) - size / 2 + childSize / 2f;
 		foreach(uint id, Widget widget; _children) {
 			widget.position = origin + Vec2f(childSize.x * to!float(id), 0f);
 			widget.size = childSize - _spacing;
@@ -152,8 +152,8 @@ class GridLayout: WidgetGroup {
 		if(yCapacity == 0u)
 			yCapacity = (to!int(_children.length) / _capacity.x) + 1;
 
-		Vec2f childSize = Vec2f(_size.x / _capacity.x, _size.y / yCapacity);
-		Vec2f origin = (_isFrame ? Vec2f.zero : _position) - _size / 2 + childSize / 2f;
+		Vec2f childSize = Vec2f(size.x / _capacity.x, size.y / yCapacity);
+		Vec2f origin = (_isFrame ? Vec2f.zero : pivot) - size / 2 + childSize / 2f;
 		foreach(uint id, Widget widget; _children) {
 			Vec2u coords = Vec2u(id % _capacity.x, id / _capacity.x);
 			widget.position = origin + Vec2f(childSize.x * coords.x, childSize.y * coords.y);
@@ -191,9 +191,15 @@ class VContainer: WidgetGroup {
         resize();
     }
 
+    private bool isResizeCalled;
 	protected void resize() {
+        if(isResizeCalled)
+            return;
+        isResizeCalled = true;
+
 		if(!_children.length) {
-			_size = Vec2f.zero;
+			size = Vec2f.zero;
+            isResizeCalled = false;
 			return;
 		}
 
@@ -202,12 +208,13 @@ class VContainer: WidgetGroup {
 			totalSize.y += widget.size.y + _spacing.y;
 			totalSize.x = max(totalSize.x, widget.size.x);
 		}
-		_size = totalSize + Vec2f(_spacing.x * 2f, _spacing.y);
-		Vec2f currentPosition = _position - (_size * _anchor) + _spacing;
+		size = totalSize + Vec2f(_spacing.x * 2f, _spacing.y);
+		Vec2f currentPosition = (pivot - size / 2f) + _spacing;
 		foreach(Widget widget; _children) {
 			widget.position = currentPosition + widget.size / 2f;
 			currentPosition = currentPosition + Vec2f(0f, widget.size.y + _spacing.y);
 		}
+        isResizeCalled = false;
 	}
 }
 
@@ -240,9 +247,15 @@ class HContainer: WidgetGroup {
         resize();
     }
 
+	private bool isResizeCalled;
 	protected void resize() {
+        if(isResizeCalled)
+            return;
+        isResizeCalled = true;
+
 		if(!_children.length) {
-			_size = Vec2f.zero;
+			size = Vec2f.zero;
+            isResizeCalled = false;
 			return;
 		}
 
@@ -251,12 +264,13 @@ class HContainer: WidgetGroup {
 			totalSize.y = max(totalSize.y, widget.size.y);
 			totalSize.x += widget.size.x + _spacing.x;
 		}
-		_size = totalSize + Vec2f(_spacing.x, _spacing.y * 2f);
-		Vec2f currentPosition = _position - (_size * _anchor) + _spacing;
+		size = totalSize + Vec2f(_spacing.x, _spacing.y * 2f);
+		Vec2f currentPosition = (pivot - size / 2f) + _spacing;
 		foreach(Widget widget; _children) {
 			widget.position = currentPosition + widget.size / 2f;
 			currentPosition = currentPosition + Vec2f(widget.size.x + _spacing.x, 0f);
 		}
+        isResizeCalled = false;
 	}
 }
 
@@ -302,10 +316,11 @@ class AnchoredLayout: WidgetGroup {
 	protected void resize() {
 		if(!_children.length)
 			return;
-		Vec2f origin = (_isFrame ? Vec2f.zero : _position) - _size / 2;
+        
+		Vec2f origin = (_isFrame ? Vec2f.zero : pivot) - size / 2;
 		foreach(uint id, Widget widget; _children) {
-			widget.position = origin + _size * _childrenPositions[id];
-			widget.size = _size * _childrenSizes[id];
+			widget.position = origin + size * _childrenPositions[id];
+			widget.size = size * _childrenSizes[id];
 		}
 	}
 }
@@ -322,20 +337,29 @@ class LogLayout: WidgetGroup {
         resize();
     }
 
+	private bool isResizeCalled;
 	protected void resize() {
-		if(!_children.length)
+        if(isResizeCalled)
+            return;
+        isResizeCalled = true;
+
+		if(!_children.length) {
+            isResizeCalled = false;
 			return;
+        }
 
 		Vec2f totalSize = Vec2f.zero;
 		foreach(Widget widget; _children) {
 			totalSize.y += widget.size.y;
 			totalSize.x = max(totalSize.x, widget.size.x);
 		}
-		_size = totalSize;
-		Vec2f currentPosition = _position - _size / 2f;
+		size = totalSize;
+		Vec2f currentPosition = pivot - size / 2f;
 		foreach(Widget widget; _children) {
 			widget.position = currentPosition + widget.size / 2f;
 			currentPosition = currentPosition + Vec2f(0f, widget.size.y);
 		}
+
+        isResizeCalled = false;
 	}
 }

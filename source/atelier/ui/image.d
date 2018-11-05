@@ -37,30 +37,30 @@ class Image: Widget {
 		Sprite sprite() { return _sprite; }
 		Sprite sprite(Sprite newSprite) {
 			_sprite = newSprite;
-			_size = _sprite.size;
+			size = _sprite.size;
 			return _sprite;
 		}
 	}
 
 	this(Sprite newSprite) {
 		_sprite = newSprite;
-		_size = _sprite.size;
-		_angle = _sprite.angle;
-		_isInteractable = false;
+		size = _sprite.size;
+		angle = _sprite.angle;
+		isInteractable = false;
 	}
 
 	override void onEvent(Event event) {}
 	override void update(float deltaTime) {}
     
     override void onAngle() {
-        _sprite.angle = _angle;
+        _sprite.angle = angle;
     }
 
     override void onSize() {
-        _sprite.size = _size;
+        _sprite.size = size;
     }
 
 	override void draw() {
-		_sprite.drawUnchecked(anchoredPosition());
+		_sprite.drawUnchecked(pivot);
 	}
 }

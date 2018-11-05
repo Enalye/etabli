@@ -142,17 +142,17 @@ private class HintWindow: Widget {
 	override void update(float deltaTime) {
 		if(!_isRendered)
 			return;
-		_size = Vec2f(max(title.size.x, text.size.x) + 25f, title.size.y + text.size.y);
-		_position = getMousePos() + _size / 2f + Vec2f(20f, 10f);
-		title.position = _position + Vec2f(0f, (title.size.y - _size.y) / 2f);
-		text.position = _position + Vec2f(0f, title.size.y + (text.size.y - _size.y) / 2f);
+		size = Vec2f(max(title.size.x, text.size.x) + 25f, title.size.y + text.size.y);
+		position = getMousePos() + size / 2f + Vec2f(20f, 10f);
+		title.position = pivot + Vec2f(0f, (title.size.y - size.y) / 2f);
+		text.position = pivot + Vec2f(0f, title.size.y + (text.size.y - size.y) / 2f);
 	}
 
 	override void draw() {
 		if(!_isRendered)
 			return;
-		drawFilledRect(_position - _size / 2f, _size, Color.white * .21f);
-		drawFilledRect(_position - _size / 2f, Vec2f(_size.x, title.size.y), Color.white * .11f);
+		drawFilledRect(pivot - size / 2f, size, Color.white * .21f);
+		drawFilledRect(pivot - size / 2f, Vec2f(size.x, title.size.y), Color.white * .11f);
 		title.draw();
 		text.draw();
 	}

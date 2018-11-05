@@ -61,7 +61,7 @@ private class LogContainer: WidgetGroup {
 		pushView(view, true);
 		layout.draw();
 		popView();
-		view.draw(_position);
+		view.draw(pivot);
 	}
 
 	protected void createGui(Vec2f newSize) {
@@ -119,13 +119,13 @@ class LogList: WidgetGroup {
 	}
 
     override void onPosition() {
-        _slider.position = _position - Vec2f((_size.x - _slider.size.x) / 2f, 0f);
-        _container.position = _position + Vec2f(_slider.size.x / 2f, 0f);
+        _slider.position = pivot - Vec2f((size.x - _slider.size.x) / 2f, 0f) + size / 2f;
+        _container.position = pivot + Vec2f(_slider.size.x / 2f, 0f) + size / 2f;
     }
 
     override void onSize() {
-        _slider.size = Vec2f(10f, _size.y);
-        _container.size = Vec2f(_size.x - _slider.size.x, _size.y);
+        _slider.size = Vec2f(10f, size.y);
+        _container.size = Vec2f(size.x - _slider.size.x, size.y);
         _container.view.renderSize = _container.size.to!Vec2u;
         onPosition();
     }

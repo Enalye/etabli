@@ -60,7 +60,7 @@ private class GridContainer: WidgetGroup {
 		pushView(view, true);
 		super.draw();
 		popView();
-		view.draw(_position);
+		view.draw(pivot);
 	}
 
 	protected void createGui(Vec2f newSize) {
@@ -122,15 +122,15 @@ class GridList: WidgetGroup {
 	}
 
 		override void onPosition() {
-			_slider.position = _position - Vec2f((_size.x - _slider.size.x) / 2f, 0f);
-			_container.position = _position + Vec2f(_slider.size.x / 2f, 0f);
+			_slider.position = pivot - Vec2f((size.x - _slider.size.x) / 2f, 0f) + size / 2f;
+			_container.position = pivot + Vec2f(_slider.size.x / 2f, 0f) + size / 2f;
 		}
 
 		override void onSize() {
-			_slider.size = Vec2f(10f, _size.y);
+			_slider.size = Vec2f(10f, size.y);
 			_container.layout.capacity = Vec2u(_nbElementsPerLine, 0u);
-			_container.layout.size = Vec2f(_size.x, _layoutLength * (_nbElements / _nbElementsPerLine));
-			_container.size = Vec2f(_size.x - _slider.size.x, _size.y);
+			_container.layout.size = Vec2f(size.x, _layoutLength * (_nbElements / _nbElementsPerLine));
+			_container.size = Vec2f(size.x - _slider.size.x, size.y);
 			_container.view.renderSize = _container.size.to!Vec2u;
 			onPosition();
 		}
@@ -156,7 +156,7 @@ class GridList: WidgetGroup {
 		widget.isValidated = (_nbElements == 0u);
 
 		_nbElements ++;
-		_container.layout.size = Vec2f(_size.x, _layoutLength * (_nbElements / _nbElementsPerLine));
+		_container.layout.size = Vec2f(size.x, _layoutLength * (_nbElements / _nbElementsPerLine));
 		_container.layout.position = Vec2f(0f, _container.layout.size.y / 2f);
 		_container.layout.addChild(widget);
 	}
@@ -173,7 +173,7 @@ class GridList: WidgetGroup {
 		_container.layout.removeChild(id);
 		_nbElements = _container.layout.getChildrenCount();
 		_idElementSelected = 0u;
-		_container.layout.size = Vec2f(_size.x, _layoutLength * (_nbElements / _nbElementsPerLine));
+		_container.layout.size = Vec2f(size.x, _layoutLength * (_nbElements / _nbElementsPerLine));
 		_container.layout.position = Vec2f(0f, _container.layout.size.y / 2f);
 	}
 

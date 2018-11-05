@@ -37,7 +37,7 @@ class Panel: Widget {
 	}
 	
 	this() {
-		_isInteractable = false;
+		isInteractable = false;
 		_cornerULSprite = fetch!Sprite("gui_window_corner_up_left");
 		_cornerURSprite = fetch!Sprite("gui_window_corner_up_right");
 		_cornerDLSprite = fetch!Sprite("gui_window_corner_down_left");
@@ -52,26 +52,26 @@ class Panel: Widget {
 	override void update(float deltaTime) {}
 
 	override void draw() {
-		Vec2f panelSize = _size - 16f;
+		Vec2f panelSize = size - 16f;
 		Vec2f halfSize = panelSize / 2f;
 
-		drawFilledRect(_position - halfSize, panelSize, Color.white * .11f);
-		drawFilledRect(_position - halfSize, Vec2f(panelSize.x, 50f), Color.white);
-		drawFilledRect(_position + Vec2f(-halfSize.x, halfSize.y - 50f), Vec2f(panelSize.x, 50f), Color.white);
+		drawFilledRect(pivot - halfSize, panelSize, Color.white * .11f);
+		drawFilledRect(pivot - halfSize, Vec2f(panelSize.x, 50f), Color.white);
+		drawFilledRect(pivot + Vec2f(-halfSize.x, halfSize.y - 50f), Vec2f(panelSize.x, 50f), Color.white);
 		
-		_cornerULSprite.drawUnchecked(_position - halfSize);
-		_cornerURSprite.drawUnchecked(_position + Vec2f(halfSize.x, -halfSize.y));
-		_cornerDLSprite.drawUnchecked(_position + Vec2f(-halfSize.x, halfSize.y));
-		_cornerDRSprite.drawUnchecked(_position + halfSize);
+		_cornerULSprite.drawUnchecked(pivot - halfSize);
+		_cornerURSprite.drawUnchecked(pivot + Vec2f(halfSize.x, -halfSize.y));
+		_cornerDLSprite.drawUnchecked(pivot + Vec2f(-halfSize.x, halfSize.y));
+		_cornerDRSprite.drawUnchecked(pivot + halfSize);
 
 		_borderUpSprite.size = Vec2f(panelSize.x - 16f, 16f);
 		_borderDownSprite.size = Vec2f(panelSize.x - 16f, 16f);
 		_borderLeftSprite.size = Vec2f(16f, panelSize.y - 16f);
 		_borderRightSprite.size = Vec2f(16f, panelSize.y - 16f);
 
-		_borderUpSprite.drawUnchecked(_position + Vec2f(0f, -halfSize.y));
-		_borderDownSprite.drawUnchecked(_position + Vec2f(0f, halfSize.y));
-		_borderLeftSprite.drawUnchecked(_position + Vec2f(-halfSize.x, 0f));
-		_borderRightSprite.drawUnchecked(_position + Vec2f(halfSize.x, 0f));
+		_borderUpSprite.drawUnchecked(pivot + Vec2f(0f, -halfSize.y));
+		_borderDownSprite.drawUnchecked(pivot + Vec2f(0f, halfSize.y));
+		_borderLeftSprite.drawUnchecked(pivot + Vec2f(-halfSize.x, 0f));
+		_borderRightSprite.drawUnchecked(pivot + Vec2f(halfSize.x, 0f));
 	}
 }

@@ -44,10 +44,10 @@ interface IMainWidget {
 }
 
 class Widget {
-	protected {
+	private {
 		Hint _hint;
 		bool _isLocked = false, _isMovable = false, _isHovered = false, _isSelected = false, _isValidated = false, _hasFocus = false, _isInteractable = true;
-		Vec2f _position = Vec2f.zero, _size = Vec2f.zero, _anchor = Vec2f.half, _padding = Vec2f.zero;
+		Vec2f _position = Vec2f.zero, _size = Vec2f.zero, _anchor = Vec2f.half, _padding = Vec2f.zero, _pivot = Vec2f.zero;
 		float _angle = 0f;
 		Widget _callbackWidget;
 		string _callbackId;
@@ -128,8 +128,10 @@ class Widget {
 		final Vec2f position(Vec2f newPosition) {
             auto oldPosition = _position;
             _position = newPosition;
+			_pivot = _position + _size * (Vec2f.half - _anchor);
             onDeltaPosition(newPosition - oldPosition);
             onPosition();
+            onPivot();
             return _position;
         }
 
@@ -137,8 +139,10 @@ class Widget {
 		final Vec2f size(Vec2f newSize) {
             auto oldSize = _size;
             _size = newSize - _padding;
+			_pivot = _position + _size * (Vec2f.half - _anchor);
             onDeltaSize(_size - oldSize);         
             onSize();
+            onPivot();
             return _size;
         }
 
@@ -146,14 +150,14 @@ class Widget {
 		final Vec2f anchor(Vec2f newAnchor) {
             auto oldAnchor = _anchor;
             _anchor = newAnchor;
+			_pivot = _position + _size * (Vec2f.half - _anchor);            
             onDeltaAnchor(newAnchor - oldAnchor);
             onAnchor();
+            onPivot();
             return _anchor;
         }
 
-		final Vec2f anchoredPosition() const {
-			return _position + _size * (Vec2f.half - _anchor);
-		}
+		final Vec2f pivot() const { return _pivot; }
 
 		final Vec2f padding() const { return _padding; }
 		final Vec2f padding(Vec2f newPadding) {
@@ -203,16 +207,21 @@ class Widget {
 
 	protected void triggerCallback() {
 		if(_callbackWidget !is null) {
-			Event ev = EventType.Callback;
-			ev.id = _callbackId;
-			ev.widget = this;
-			_callbackWidget.onEvent(ev);
+			_callbackWidget.onCallback(_callbackId);
 		}
 	}
 
-	abstract void update(float deltaTime);
-	abstract void onEvent(Event event);
-	abstract void draw();
+	void update(float deltaTime) {};
+	void draw() {};
+
+    //deprecated("Use onSubmit or onCancel instead.")
+	void onEvent(Event event) {};
+
+    //Will replace the old onEvent eventually
+    package {
+        void onSubmit() {}
+        void onCancel() {}
+    }
 
     protected {
         void onLock() {}
@@ -228,8 +237,10 @@ class Widget {
         void onSize() {}
         void onDeltaAnchor(Vec2f delta) {}
         void onAnchor() {}
+        void onPivot() {}
         void onPadding() {}
         void onAngle() {}
+        void onCallback(string id) {}
     }
 }
 

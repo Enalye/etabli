@@ -69,12 +69,12 @@ class InputField: Widget {
 	}
 
 	this(Vec2f newSize, string defaultText = "", bool startWithFocus = false) {
-		_size = newSize;
+		size = newSize;
 		_view = new View(newSize);
 		_view.position = Vec2f.zero;
 		_view.setColorMod(Color.white, Blend.AlphaBlending);
 		_label = new Label;
-		_hasFocus = startWithFocus;
+		hasFocus = startWithFocus;
 		_text = to!dstring(defaultText);
 		_caretIndex = to!uint(_text.length);
 		_label.text = to!string(_text);
@@ -86,7 +86,7 @@ class InputField: Widget {
 
 	override void onEvent(Event event) {
 		pushView(_view, false);
-		if(_hasFocus) {
+		if(hasFocus) {
 			switch(event.type) with(EventType) {
 			case MouseDown:
 				hasFocus = true;
@@ -153,7 +153,7 @@ class InputField: Widget {
 		if(_caretIndex == 0U)
 			_view.position.x = 0f;
 
-		if(_hasFocus)
+		if(hasFocus)
 			_borderColor = lerp(_borderColor, Color.white, deltaTime * .25f);
 		else
 			_borderColor = lerp(_borderColor, Color.white * .21f, deltaTime * .1f);
@@ -165,11 +165,11 @@ class InputField: Widget {
 	override void draw() {
 		pushView(_view, true);
 		_label.draw();
-		if(_text.length && _hasFocus)
+		if(_text.length && hasFocus)
 			drawFilledRect(_caretPosition, Vec2f(2f, _label.size.y), _caretColor);
 		popView();
-		_view.draw(_position);
-		drawRect(_position - _size / 2f, _size, _borderColor);
+		_view.draw(pivot);
+		drawRect(pivot - size / 2f, size, _borderColor);
 	}
 
 	void clear() {

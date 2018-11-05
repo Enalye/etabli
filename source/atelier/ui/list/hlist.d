@@ -58,7 +58,7 @@ private class ListContainer: WidgetGroup {
 		pushView(view, true);
 		super.draw();
 		popView();
-		view.draw(_position);
+		view.draw(pivot);
 	}
 
 	protected void createGui(Vec2f newSize) {
@@ -94,7 +94,7 @@ class HList: WidgetGroup {
 		float layoutLength() const { return _layoutLength; }
 		float layoutLength(float length) {
 			_layoutLength = length;
-			_container.layout.size = Vec2f(_layoutLength * _nbElements, _size.y);
+			_container.layout.size = Vec2f(_layoutLength * _nbElements, size.y);
 			return _layoutLength;
 		}
 	}
@@ -133,18 +133,17 @@ class HList: WidgetGroup {
 			_slider.onEvent(event);
 	}
 
-    override void onPosition() {
-        auto offset = _size * (.5f - _anchor);
-        _slider.position = _position - Vec2f(0f, (_size.y - _slider.size.y) / 2f) + offset;
-        _container.position = _position + Vec2f(0f, _slider.size.y / 2f) + offset;
+    override void onPivot() {
+        _slider.position = pivot - Vec2f(0f, (size.y - _slider.size.y) / 2f);
+        _container.position = pivot + Vec2f(0f, _slider.size.y / 2f);
     }
 
     override void onSize() {
-        _slider.size = Vec2f(_size.x, 10f);
-        _container.layout.size = Vec2f(_layoutLength * _nbElements, _size.y);
-        _container.size = Vec2f(_size.x, _size.y - _slider.size.y);
+        _slider.size = Vec2f(size.x, 10f);
+        _container.layout.size = Vec2f(_layoutLength * _nbElements, size.y);
+        _container.size = Vec2f(size.x, size.y - _slider.size.y);
         _container.view.renderSize = _container.size.to!Vec2u;
-        onPosition();
+        onPivot();
     }
 
 	override void update(float deltaTime) {
