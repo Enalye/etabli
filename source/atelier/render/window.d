@@ -34,7 +34,7 @@ import derelict.sdl2.ttf;
 
 import atelier.core;
 import atelier.common;
-import atelier.render.view;
+import atelier.render.canvas;
 import atelier.render.quadview;
 import atelier.render.sprite;
 
@@ -61,14 +61,15 @@ static {
 	Vec2f centerScreen() { return _centerScreen; }
 }
 
-private struct ViewReference {
+private struct CanvasReference {
 	const(SDL_Texture)* target;
 	Vec2f position;
 	Vec2f renderSize;
 	Vec2f size;
+    Canvas canvas;
 }
 
-static private ViewReference[] _views;
+static private CanvasReference[] _canvases;
 
 enum Fullscreen {
 	RealFullscreen,
@@ -100,12 +101,12 @@ void createWindow(const Vec2u windowSize, string title) {
 		throw new Exception("Window initialization failed.");
 
     SDL_RenderSetLogicalSize(renderer, windowSize.x, windowSize.y);
-	ViewReference viewRef;
-	viewRef.target = null;
-	viewRef.position = cast(Vec2f)(windowSize) / 2;
-	viewRef.size = cast(Vec2f)(windowSize);
-	viewRef.renderSize = cast(Vec2f)(windowSize);
-	_views ~= viewRef;
+	CanvasReference canvasRef;
+	canvasRef.target = null;
+	canvasRef.position = cast(Vec2f)(windowSize) / 2;
+	canvasRef.size = cast(Vec2f)(windowSize);
+	canvasRef.renderSize = cast(Vec2f)(windowSize);
+	_canvases ~= canvasRef;
 
 	_windowSize = windowSize;
 	_screenSize = cast(Vec2f)(windowSize);
@@ -143,8 +144,8 @@ void setWindowSize(const Vec2u windowSize) {
 	//_screenSize = cast(Vec2f)(windowSize);
 	//_centerScreen = _screenSize / 2f;
 	
-	if (_views.length)
-		_views[0].renderSize = cast(Vec2f)windowSize;
+	if (_canvases.length)
+		_canvases[0].renderSize = cast(Vec2f)windowSize;
 	SDL_SetWindowSize(window, windowSize.x, windowSize.y);
 }
 
@@ -199,61 +200,64 @@ void renderWindow() {
 	SDL_RenderClear(renderer);
 }
 
-void pushView(const View view, bool clear = true) {
-	ViewReference viewRef;
-	viewRef.target = view.target;
-	viewRef.position = view.position;
-	viewRef.size = view.size;
-	viewRef.renderSize = cast(Vec2f)view.renderSize;
-	_views ~= viewRef;
+void pushCanvas(Canvas canvas, bool clear = true) {
+    canvas.isTarget = true;
+	CanvasReference canvasRef;
+	canvasRef.target = canvas.target;
+	canvasRef.position = canvas.position;
+	canvasRef.size = canvas.size;
+	canvasRef.renderSize = cast(Vec2f)canvas.renderSize;
+    canvasRef.canvas = canvas;
+	_canvases ~= canvasRef;
 
-	SDL_SetRenderTarget(renderer, cast(SDL_Texture*)viewRef.target);
-	setRenderColor(view.clearColor);
+	SDL_SetRenderTarget(renderer, cast(SDL_Texture*)canvasRef.target);
+	setRenderColor(canvas.clearColor);
 	if(clear)
 		SDL_RenderClear(renderer);
 }
-
-void pushView(QuadView quadView, bool clear = true) {
-	pushView(quadView.getCurrent(), clear);
+/*
+void pushCanvas(QuadView quadView, bool clear = true) {
+	pushCanvas(quadView.getCurrent(), clear);
 	if(clear)
 		quadView.advance();
-}
+}*/
 
-void popView() {
-	if (_views.length <= 1)
-		throw new Exception("Attempt to pop the main view.");
+void popCanvas() {
+	if (_canvases.length <= 1)
+		throw new Exception("Attempt to pop the main canvas.");
 
-	_views.length --;
-	SDL_SetRenderTarget(renderer, cast(SDL_Texture*)_views[_views.length - 1].target);
+    _canvases[$ - 1].canvas.isTarget = false;
+	_canvases.length --;
+	SDL_SetRenderTarget(renderer, cast(SDL_Texture*)_canvases[$ - 1].target);
 	setRenderColor(windowClearColor);
 }
 
-Vec2f getViewRenderPos(const Vec2f pos) {
-	const ViewReference* viewRef = &_views[_views.length - 1];
-	return (pos - viewRef.position) * (viewRef.renderSize / viewRef.size) + viewRef.renderSize * 0.5f;
+Vec2f transformRenderSpace(const Vec2f pos) {
+	const CanvasReference* canvasRef = &_canvases[$ - 1];
+	return (pos - canvasRef.position) * (canvasRef.renderSize / canvasRef.size) + canvasRef.renderSize * 0.5f;
 }
 
-Vec2f getViewVirtualPos(const Vec2f pos, const Vec2f renderPos) {
-	const ViewReference* viewRef = &_views[_views.length - 1];
-	return (pos - renderPos) * (viewRef.size / viewRef.renderSize) + viewRef.position;
+Vec2f transformCanvasSpace(const Vec2f pos, const Vec2f renderPos) {
+	const CanvasReference* canvasRef = &_canvases[$ - 1];
+	return (pos - renderPos) * (canvasRef.size / canvasRef.renderSize) + canvasRef.position;
 }
 
-Vec2f getViewVirtualPos(const Vec2f pos) {
-	const ViewReference* viewRef = &_views[_views.length - 1];
-	return pos * (viewRef.size / viewRef.renderSize);
+Vec2f transformCanvasSpace(const Vec2f pos) {
+	const CanvasReference* canvasRef = &_canvases[$ - 1];
+	return pos * (canvasRef.size / canvasRef.renderSize);
 }
 
-Vec2f getViewScale() {
-	const ViewReference* viewRef = &_views[_views.length - 1];
-	return viewRef.renderSize / viewRef.size;
+Vec2f transformScale() {
+	const CanvasReference* canvasRef = &_canvases[$ - 1];
+	return canvasRef.renderSize / canvasRef.size;
 }
 
 bool isVisible(const Vec2f targetPosition, const Vec2f targetSize) {
-	const ViewReference* viewRef = &_views[_views.length - 1];
-	return (((viewRef.position.x - viewRef.size.x * .5f) < (targetPosition.x + targetSize.x * .5f))
-		&& ((viewRef.position.x + viewRef.size.x * .5f) > (targetPosition.x - targetSize.x * .5f))
-		&& ((viewRef.position.y - viewRef.size.y * .5f) < (targetPosition.y + targetSize.y * .5f))
-		&& ((viewRef.position.y + viewRef.size.y * .5f) > (targetPosition.y - targetSize.y * .5f)));
+	const CanvasReference* canvasRef = &_canvases[$ - 1];
+	return (((canvasRef.position.x - canvasRef.size.x * .5f) < (targetPosition.x + targetSize.x * .5f))
+		&& ((canvasRef.position.x + canvasRef.size.x * .5f) > (targetPosition.x - targetSize.x * .5f))
+		&& ((canvasRef.position.y - canvasRef.size.y * .5f) < (targetPosition.y + targetSize.y * .5f))
+		&& ((canvasRef.position.y + canvasRef.size.y * .5f) > (targetPosition.y - targetSize.y * .5f)));
 }
 
 void setRenderColor(const Color color) {
@@ -263,7 +267,7 @@ void setRenderColor(const Color color) {
 
 void drawPoint(const Vec2f position, const Color color) {
 	if (isVisible(position, Vec2f(.0f, .0f))) {
-		Vec2f rpos = getViewRenderPos(position);
+		Vec2f rpos = transformRenderSpace(position);
 
 		setRenderColor(color);
 		SDL_RenderDrawPoint(renderer, cast(int)rpos.x, cast(int)rpos.y);
@@ -271,16 +275,16 @@ void drawPoint(const Vec2f position, const Color color) {
 }
 
 void drawLine(const Vec2f startPosition, const Vec2f endPosition, const Color color) {
-	Vec2f pos1 = getViewRenderPos(startPosition);
-	Vec2f pos2 = getViewRenderPos(endPosition);
+	Vec2f pos1 = transformRenderSpace(startPosition);
+	Vec2f pos2 = transformRenderSpace(endPosition);
 
 	setRenderColor(color);
 	SDL_RenderDrawLine(renderer, cast(int)pos1.x, cast(int)pos1.y, cast(int)pos2.x, cast(int)pos2.y);
 }
 
 void drawArrow(const Vec2f startPosition, const Vec2f endPosition, const Color color) {
-	Vec2f pos1 = getViewRenderPos(startPosition);
-	Vec2f pos2 = getViewRenderPos(endPosition);
+	Vec2f pos1 = transformRenderSpace(startPosition);
+	Vec2f pos2 = transformRenderSpace(endPosition);
 	Vec2f dir = (pos2 - pos1).normalized;
 	Vec2f arrowBase = pos2 - dir * 25f;
 	Vec2f pos3 = arrowBase + dir.normal * 20f;
@@ -293,8 +297,8 @@ void drawArrow(const Vec2f startPosition, const Vec2f endPosition, const Color c
 }
 
 void drawRect(const Vec2f origin, const Vec2f size, const Color color) {
-	Vec2f pos1 = getViewRenderPos(origin);
-	Vec2f pos2 = size * getViewScale();
+	Vec2f pos1 = transformRenderSpace(origin);
+	Vec2f pos2 = size * transformScale();
 
 	SDL_Rect rect = {
 		cast(int)pos1.x,
@@ -308,8 +312,8 @@ void drawRect(const Vec2f origin, const Vec2f size, const Color color) {
 }
 
 void drawFilledRect(const Vec2f origin, const Vec2f size, const Color color) {
-	Vec2f pos1 = getViewRenderPos(origin);
-	Vec2f pos2 = size * getViewScale();
+	Vec2f pos1 = transformRenderSpace(origin);
+	Vec2f pos2 = size * transformScale();
 
 	SDL_Rect rect = {
 		cast(int)pos1.x,
@@ -323,7 +327,7 @@ void drawFilledRect(const Vec2f origin, const Vec2f size, const Color color) {
 }
 
 void drawPixel(const Vec2f position, const Color color) {
-	Vec2f pos = getViewRenderPos(position);
+	Vec2f pos = transformRenderSpace(position);
 
 	SDL_Rect rect = {
 		cast(int)pos.x,

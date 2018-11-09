@@ -34,10 +34,9 @@ import atelier.common;
 import atelier.ui.widget;
 import atelier.ui.label;
 
-class InputField: Widget {
+class InputField: WidgetCanvas {
 	private {
 		Label _label;
-		View _view;
 		Color _borderColor, _caretColor;
 		dstring _text;
 		Timer _time;
@@ -70,9 +69,6 @@ class InputField: Widget {
 
 	this(Vec2f newSize, string defaultText = "", bool startWithFocus = false) {
 		size = newSize;
-		_view = new View(newSize);
-		_view.position = Vec2f.zero;
-		_view.setColorMod(Color.white, Blend.AlphaBlending);
 		_label = new Label;
 		hasFocus = startWithFocus;
 		_text = to!dstring(defaultText);
@@ -85,12 +81,8 @@ class InputField: Widget {
 	}
 
 	override void onEvent(Event event) {
-		pushView(_view, false);
 		if(hasFocus) {
 			switch(event.type) with(EventType) {
-			case MouseDown:
-				hasFocus = true;
-				break;
 			case KeyInput:
 				if(_caretIndex >= _limit)
 					break;
@@ -138,20 +130,19 @@ class InputField: Widget {
 				break;
 			}	
 		}
-		popView();
 	}
 
 	override void update(float deltaTime) {
 		_caretPosition = Vec2f(_label.position.x - _label.size.x / 2f + (_label.size.x / _text.length) * _caretIndex, _label.position.y - _label.size.y / 2f);
-		_label.position = Vec2f(10f + (_label.size.x - _view.size.x) / 2f, 0f);
+		_label.position = Vec2f(10f + (_label.size.x - canvas.size.x) / 2f, 0f);
 
-		if(_caretPosition.x > _view.position.x + _view.size.x / 2f - 10f)
-			_view.position.x = _caretPosition.x - _view.size.x / 2f + 10f;
-		else if(_caretPosition.x < _view.position.x - _view.size.x / 2f + 10f)
-			_view.position.x = _caretPosition.x + _view.size.x / 2f - 10f;
+		if(_caretPosition.x > canvas.position.x + canvas.size.x / 2f - 10f)
+			canvas.position.x = _caretPosition.x - canvas.size.x / 2f + 10f;
+		else if(_caretPosition.x < canvas.position.x - canvas.size.x / 2f + 10f)
+			canvas.position.x = _caretPosition.x + canvas.size.x / 2f - 10f;
 
 		if(_caretIndex == 0U)
-			_view.position.x = 0f;
+			canvas.position.x = 0f;
 
 		if(hasFocus)
 			_borderColor = lerp(_borderColor, Color.white, deltaTime * .25f);
@@ -163,14 +154,14 @@ class InputField: Widget {
 	}
 
 	override void draw() {
-		pushView(_view, true);
 		_label.draw();
 		if(_text.length && hasFocus)
 			drawFilledRect(_caretPosition, Vec2f(2f, _label.size.y), _caretColor);
-		popView();
-		_view.draw(pivot);
-		drawRect(pivot - size / 2f, size, _borderColor);
 	}
+
+    override void drawOverlay() {
+		drawRect(pivot - _size / 2f, _size, _borderColor);
+    }
 
 	void clear() {
 		_text.length = 0L;

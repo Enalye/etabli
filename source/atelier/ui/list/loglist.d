@@ -34,48 +34,24 @@ import atelier.ui.widget;
 import atelier.ui.layout;
 import atelier.ui.slider;
 
-private class LogContainer: WidgetGroup {
+private class LogContainer: WidgetCanvas {
 	public {
-		View view;
 		LogLayout layout;
 	}
 
-	this(Vec2f size) {
-		createGui(size);
-	}
-
-	override void onEvent(Event event) {
-		pushView(view, false);
-		super.onEvent(event);
-		popView();
-	}
-
-	override void update(float deltaTime) {
-		pushView(view, false);
-		super.update(deltaTime);
-		popView();
-	}
-
-	override void draw() {
-		view.setColorMod(Color.white, Blend.AlphaBlending);
-		pushView(view, true);
-		layout.draw();
-		popView();
-		view.draw(pivot);
-	}
-
-	protected void createGui(Vec2f newSize) {
-		_isFrame = true;
+	this(Vec2f newSize) {
 		isLocked = true;
 		layout = new LogLayout;
-		view = new View(to!Vec2u(newSize));
-		view.position = Vec2f.zero;
 		size(newSize);
 		addChild(layout);
 	}
+
+	override void draw() {
+		layout.draw();
+	}
 }
 
-class LogList: WidgetGroup {
+class LogList: Widget {
 	protected {
 		LogContainer _container;
 		Slider _slider;
@@ -126,25 +102,25 @@ class LogList: WidgetGroup {
     override void onSize() {
         _slider.size = Vec2f(10f, size.y);
         _container.size = Vec2f(size.x - _slider.size.x, size.y);
-        _container.view.renderSize = _container.size.to!Vec2u;
+        _container.canvas.renderSize = _container.size.to!Vec2u;
         onPosition();
     }
 
 	override void update(float deltaTime) {
 		_slider.update(deltaTime);
-		float min = _container.view.size.y / 2f;
-		float max = _container.layout.size.y - _container.view.size.y / 2f;
-		float exceedingHeight = _container.layout.size.y - _container.view.size.y;
+		float min = _container.canvas.size.y / 2f;
+		float max = _container.layout.size.y - _container.canvas.size.y / 2f;
+		float exceedingHeight = _container.layout.size.y - _container.canvas.size.y;
 
 		if(exceedingHeight < 0f) {
 			_slider.max = 0;
 			_slider.step = 0;
 		}
 		else {
-			_slider.max = exceedingHeight / (_container.view.size.y / 50f);
+			_slider.max = exceedingHeight / (_container.canvas.size.y / 50f);
 			_slider.step = to!uint(_slider.max);
 		}
-		_container.view.position = Vec2f(0f, lerp(min, max, _slider.offset));
+		_container.canvas.position = Vec2f(0f, lerp(min, max, _slider.offset));
 	}
 
 	private void repositionContainer() {

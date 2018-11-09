@@ -238,10 +238,6 @@ class Text: Widget {
 		size = Vec2f(charSize.x * _maxLineLength, charSize.y * (_rowLength + 1));
 	}
 
-	override void onEvent(Event event) {}
-
-	override void update(float deltaTime) {}
-
 	override void draw() {
 		Color currentColor = Color.white;
 		Vec2i currentPos = Vec2i.zero;

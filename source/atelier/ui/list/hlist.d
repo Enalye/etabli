@@ -32,47 +32,20 @@ import atelier.common;
 
 import atelier.ui;
 
-private class ListContainer: WidgetGroup {
+private class ListContainer: WidgetCanvas {
 	public {
-		View view;
 		HLayout layout;
 	}
 
-	this(Vec2f size) {
-		createGui(size);
-	}
-
-	override void onEvent(Event event) {
-		pushView(view, false);
-		super.onEvent(event);
-		popView();
-	}
-
-	override void update(float deltaTime) {
-		pushView(view, false);
-		super.update(deltaTime);
-		popView();
-	}
-
-	override void draw() {
-		pushView(view, true);
-		super.draw();
-		popView();
-		view.draw(pivot);
-	}
-
-	protected void createGui(Vec2f newSize) {
-		_isFrame = true;
+	this(Vec2f newSize) {
 		isLocked = true;
 		layout = new HLayout;
-		view = new View(to!Vec2u(newSize));
-		view.position = Vec2f.zero;
 		size(newSize);
 		addChild(layout);
 	}
 }
 
-class HList: WidgetGroup {
+class HList: Widget {
 	protected {
 		ListContainer _container;
 		Slider _slider;
@@ -142,15 +115,15 @@ class HList: WidgetGroup {
         _slider.size = Vec2f(size.x, 10f);
         _container.layout.size = Vec2f(_layoutLength * _nbElements, size.y);
         _container.size = Vec2f(size.x, size.y - _slider.size.y);
-        _container.view.renderSize = _container.size.to!Vec2u;
+        _container.canvas.renderSize = _container.size.to!Vec2u;
         onPivot();
     }
 
 	override void update(float deltaTime) {
 		super.update(deltaTime);
-		float min = _container.view.size.x / 2f;
-		float max = _container.layout.size.x - _container.view.size.x / 2f;
-		float exceedingWidth = _container.layout.size.x - _container.view.size.x;
+		float min = _container.canvas.size.x / 2f;
+		float max = _container.layout.size.x - _container.canvas.size.x / 2f;
+		float exceedingWidth = _container.layout.size.x - _container.canvas.size.x;
 
 		if(exceedingWidth < 0f) {
 			_slider.max = 0;
@@ -160,7 +133,7 @@ class HList: WidgetGroup {
 			_slider.max = exceedingWidth / _layoutLength;
 			_slider.step = to!uint(_slider.max);
 		}
-		_container.view.position = Vec2f(lerp(min, max, _slider.offset), 0f);
+		_container.canvas.position = Vec2f(lerp(min, max, _slider.offset), 0f);
 	}
 
 	override void addChild(Widget widget) {

@@ -67,10 +67,6 @@ class Checkbox: Widget {
 		checkedSprite(fetch!Sprite("gui_checked"));
 	}
 
-	override void update(float deltaTime) {}
-	
-	override void onEvent(Event event) {}
-
 	override void draw() {
 		if(_isChecked)
 			_checkedSprite.draw(pivot);
@@ -78,8 +74,8 @@ class Checkbox: Widget {
 			_uncheckedSprite.draw(pivot);
 	}
 
-	override void onSelect() {
-		if(isSelected || isLocked)
+	override void onSubmit() {
+		if(isLocked)
 			return;
 		isChecked = !isChecked;
 	}

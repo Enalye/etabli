@@ -34,7 +34,7 @@ import atelier.ui.list.vlist;
 import atelier.ui.widget;
 import atelier.ui.overlay;
 
-class DropDownList: WidgetGroup {
+class DropDownList: Widget {
 	private {
 		VList _list;
 		Vec2f _originalSize, _originalPosition;
@@ -74,7 +74,7 @@ class DropDownList: WidgetGroup {
 			_list.onEvent(event);
 	}
 
-    override void onPosition() {
+    override void onPivot() {
         _originalPosition = pivot;
     }
 
@@ -83,6 +83,18 @@ class DropDownList: WidgetGroup {
 			Vec2f newSize = _originalSize * Vec2f(1f, _maxListLength + 1f);
 			_list.position = _originalPosition + Vec2f(0f, newSize.y / 2f);
 			_list.update(deltaTime);
+
+            int id;
+            foreach(widget; _list.getList()) {
+                if(widget.hasFocus) {
+                    _isClicked = false;
+                    selected = id;
+
+                    stopOverlay();
+					triggerCallback();
+                }
+                id ++;
+            }
 		}
 	}
 

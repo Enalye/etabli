@@ -48,9 +48,6 @@ class Panel: Widget {
 		_borderRightSprite = fetch!Sprite("gui_window_border_right");
 	}
 
-	override void onEvent(Event event) {}
-	override void update(float deltaTime) {}
-
 	override void draw() {
 		Vec2f panelSize = size - 16f;
 		Vec2f halfSize = panelSize / 2f;

@@ -29,13 +29,13 @@ import std.conv;
 import atelier.core;
 import atelier.common;
 import atelier.render.sprite;
-import atelier.render.view;
+import atelier.render.canvas;
 import atelier.render.window;
 
 import atelier.ui.widget;
 
-class Frame: WidgetGroup {
-	protected View _view;
+class Frame: Widget {
+	/*protected View _view;
 	bool clearRenderer = true;
 	
 	@property {
@@ -73,5 +73,5 @@ class Frame: WidgetGroup {
 
     override void onSize() {
         _view.position = pivot;
-    }
+    }*/
 }

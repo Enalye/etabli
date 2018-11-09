@@ -37,8 +37,11 @@ import atelier.common.event;
 import atelier.common.settings;
 import atelier.common.resource;
 
-private Application _application;
-uint nominalFps = 60u;
+private {
+    Application _application;
+    }
+        uint nominalFps = 60u;
+
 
 void createApplication(Vec2u size, string title = "Atelier") {
 	if(_application !is null)
@@ -52,31 +55,7 @@ void runApplication() {
 	_application.run();
 }
 
-void addWidget(Widget widget) {
-	if(_application is null)
-		throw new Exception("The application is not running.");
-	_application.addChild(widget);
-}
-
-void removeWidgets() {
-	if(_application is null)
-		throw new Exception("The application is not running.");
-	_application.removeChildren();
-}
-
-void setWidgets(Widget[] widgets) {
-	if(_application is null)
-		throw new Exception("The application is not running.");
-	_application.setChildren(widgets);
-}
-
-Widget[] getWidgets() {
-	if(_application is null)
-		throw new Exception("The application is not running.");
-	return _application.getChildren();
-}
-
-private class Application: IMainWidget {
+private class Application {
 	private {
 		float _deltaTime = 1f;
 		float _currentFps;
@@ -96,6 +75,7 @@ private class Application: IMainWidget {
 		createWindow(size, title);
 		initializeEvents();
 		loadResources();
+        initializeUI();
 		initializeOverlay();
 		_tickStartFrame = Clock.currStdTime();
 	}
@@ -165,14 +145,11 @@ private class Application: IMainWidget {
 	}
 
 	void run() {
-		while(processEvents(this)) {
+		while(processEvents()) {
             updateEvents(_deltaTime);
 			processOverlayBack(_deltaTime);
-			foreach(Widget widget; _children) {
-				widget.update(_deltaTime);
-				widget.draw();
-				widget.drawOverlay();
-			}
+			updateWidgets(_deltaTime);
+            drawWidgets();
 			processOverlayFront(_deltaTime);
 			renderWindow();
 			endOverlay();
@@ -186,22 +163,5 @@ private class Application: IMainWidget {
 			_currentFps = (_deltaTime == .0f) ? .0f : (10_000_000f / cast(float)(deltaTicks));
 			_tickStartFrame = Clock.currStdTime();
 		}
-	}
-
-	void addChild(Widget widget) {
-		_children ~= widget;
-	}
-
-	void removeChildren() {
-        _isChildGrabbed = false;
-		_children.length = 0uL;
-	}
-
-	Widget[] getChildren() {
-		return _children;
-	}
-
-	void setChildren(Widget[] newChildren) {
-		_children = newChildren;
 	}
 }

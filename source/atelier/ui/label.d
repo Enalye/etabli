@@ -104,12 +104,9 @@ class Label: Widget {
 		_font = fetch!Font("VeraMoBd");
 	}
 
-	override void onEvent(Event event) {}
-	override void update(float deltaTime) {}
-
 	override void draw() {
 		if(_text.length > 0)
-			_sprite.draw(position);
+			_sprite.draw(pivot);
 	}
 
 	void reload() {

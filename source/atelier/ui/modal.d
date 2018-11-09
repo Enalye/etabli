@@ -33,6 +33,7 @@ import atelier.ui.layout;
 import atelier.ui.label;
 import atelier.ui.button;
 import atelier.ui.panel;
+import atelier.ui.root;
 
 private {
 	Widget[] _widgetsBackup;
@@ -78,7 +79,7 @@ private void onModalClose() {
 	_isModal = false;
 }
 
-class ModalWindow: WidgetGroup {
+class ModalWindow: Widget {
 	AnchoredLayout layout;
 	TextButton cancelBtn, applyBtn;
 
@@ -92,7 +93,6 @@ class ModalWindow: WidgetGroup {
 	this(string newTitle, Vec2f newSize) {
 		size = newSize + Vec2f(22f, 116f);
 		isMovable = true;
-		_isFrame = false;
 		position = centerScreen;
 
 		_titleLabel = new Label(newTitle);

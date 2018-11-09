@@ -25,6 +25,7 @@ it freely, subject to the following restrictions:
 module atelier.ui;
 
 public {
+	import atelier.ui.root;
 	import atelier.ui.widget;
 	import atelier.ui.button;
 	import atelier.ui.checkbox;

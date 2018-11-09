@@ -33,6 +33,7 @@ import atelier.common;
 import atelier.ui.widget;
 import atelier.ui.label;
 import atelier.ui.text;
+import atelier.ui.root;
 
 private {
 	HintWindow _hintWindow;
@@ -93,17 +94,17 @@ void processOverlayEvent(Event event) {
 		foreach(widget; _widgetsBackup)
 			widget.onEvent(event);
 	}
-	foreach(widget; _overlayWidgets) {
+	/*foreach(widget; _overlayWidgets) {
 		widget.isHovered = true;
 		widget.hasFocus = true;
 		widget.onEvent(event);
-	}
+	}*/
 }
 
 void processOverlayBack(float deltaTime) {
 	foreach(widget; _widgetsBackup) {
-		widget.update(deltaTime);	
-		widget.draw();
+		updateWidgets(widget);	
+		drawWidgets(widget);
 	}
 }
 
@@ -136,8 +137,6 @@ private class HintWindow: Widget {
 		title = new Label;
 		text = new Text;
 	}
-
-	override void onEvent(Event event) {}
 
 	override void update(float deltaTime) {
 		if(!_isRendered)

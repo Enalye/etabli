@@ -3,21 +3,21 @@ module atelier.render.ninepatch;
 import std.conv: to;
 import std.algorithm.comparison: min;
 import atelier.common, atelier.core;
-import atelier.render.drawable, atelier.render.view, atelier.render.texture, atelier.render.window;
+import atelier.render.drawable, atelier.render.canvas, atelier.render.texture, atelier.render.window;
 
 final class NinePatch: IDrawable {
     @property {
         Vec2f size() { return _size; }
         Vec2f size(const Vec2f newSize) {
             _size = newSize;
-            _cache = new View(_size);
+            _cache = new Canvas(_size);
             renderToCache();
             return _size;
         }
     }
 
     private {
-        View _cache;
+        Canvas _cache;
         Vec2f _size;
         Texture _texture;
         Vec4i _clip;
@@ -36,7 +36,7 @@ final class NinePatch: IDrawable {
         _left = newLeft;
         _right = newRight;
 		_size = to!Vec2f(_clip.zw);
-        _cache = new View(_clip.zw);
+        _cache = new Canvas(_clip.zw);
         renderToCache();
     }
 
@@ -46,7 +46,7 @@ final class NinePatch: IDrawable {
 	}
 
     private void renderToCache() {
-        pushView(_cache, true);
+        pushCanvas(_cache, true);
 
         Vec4i localClip;
         Vec2i localSize;
@@ -156,10 +156,10 @@ final class NinePatch: IDrawable {
             _texture.draw(Vec2f(to!int(_size.x) - _right, to!int(_size.y) - _bottom), to!Vec2f(localSize), localClip, 0f, Flip.NoFlip, Vec2f.zero);
         }
 
-        popView();
+        popCanvas();
     }
 
     void draw(const Vec2f position) {
-        _cache.draw(getViewRenderPos(position));
+        _cache.draw(transformRenderSpace(position));
     }
 }

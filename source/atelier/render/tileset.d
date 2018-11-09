@@ -91,13 +91,13 @@ struct Tileset {
 		if(coord.y > _grid.y)
 			throw new Exception("Tileset id out of bounds");
 
-		Vec2f finalSize = scale * cast(Vec2f)(_tileSize) * getViewScale();
+		Vec2f finalSize = scale * cast(Vec2f)(_tileSize) * transformScale();
 		Vec2f dist = (anchor - Vec2f.half).rotated(angle) * cast(Vec2f)(_tileSize) * scale;
 
 		Vec4i clip = Vec4i(_offset.x + coord.x * _tileSize.x, _offset.y + coord.y * _tileSize.y, _tileSize.x, _tileSize.y);
 		//if (isVisible(position, finalSize)) {
             _texture.setColorMod(color, blend);
-			_texture.draw(getViewRenderPos(position - dist), finalSize, clip, angle, flip);
+			_texture.draw(transformRenderSpace(position - dist), finalSize, clip, angle, flip);
             _texture.setColorMod(Color.white);
 		//}
 	}
@@ -111,14 +111,14 @@ struct Tileset {
 		if(id >= _nbTiles)
 			return;
 
-		Vec2f finalSize = scale * to!Vec2f(_tileSize) * getViewScale();
+		Vec2f finalSize = scale * to!Vec2f(_tileSize) * transformScale();
 		Vec2i coord = Vec2i(id % _grid.x, id / _grid.x);
 		if(coord.y > _grid.y)
 			throw new Exception("Tileset id out of bounds");
 		Vec4i clip = Vec4i(_offset.x + coord.x * _tileSize.x, _offset.y + coord.y * _tileSize.y, _tileSize.x, _tileSize.y);
 		//if (isVisible(position, finalSize)) {
             _texture.setColorMod(color, blend);
-			_texture.draw(getViewRenderPos(position), finalSize, clip, angle, flip, anchor);
+			_texture.draw(transformRenderSpace(position), finalSize, clip, angle, flip, anchor);
             _texture.setColorMod(Color.white);
 		//}
 	}

@@ -32,47 +32,20 @@ import atelier.common;
 
 import atelier.ui;
 
-private class ListContainer: WidgetGroup {
+private class ListContainer: WidgetCanvas {
 	public {
-		View view;
 		VLayout layout;
 	}
 
-	this(Vec2f size) {
-		createGui(size);
-	}
-
-	override void onEvent(Event event) {
-		pushView(view, false);
-		super.onEvent(event);
-		popView();
-	}
-
-	override void update(float deltaTime) {
-		pushView(view, false);
-		super.update(deltaTime);
-		popView();
-	}
-
-	override void draw() {
-		pushView(view, true);
-		super.draw();
-		popView();
-		view.draw(pivot);
-	}
-
-	protected void createGui(Vec2f newSize) {
-		_isFrame = true;
+	this(Vec2f newSize) {
 		isLocked = true;
 		layout = new VLayout;
-		view = new View(to!Vec2u(newSize));
-		view.position = Vec2f.zero;
 		size(newSize);
 		addChild(layout);
 	}
 }
 
-class VList: WidgetGroup {
+class VList: Widget {
 	protected {
 		ListContainer _container;
 		Slider _slider;
@@ -94,7 +67,7 @@ class VList: WidgetGroup {
 		float layoutLength() const { return _layoutLength; }
 		float layoutLength(float length) {
 			_layoutLength = length;
-			_container.layout.size = Vec2f(size.x, _layoutLength * _nbElements);
+			_container.layout.size = Vec2f(_size.x, _layoutLength * _nbElements);
 			return _layoutLength;
 		}
 	}
@@ -133,25 +106,25 @@ class VList: WidgetGroup {
 			_slider.onEvent(event);
 	}
 
-    override void onPivot() {
-        _slider.position = pivot - Vec2f((size.x - _slider.size.x) / 2f, 0f);
-        _container.position = pivot + Vec2f(_slider.size.x / 2f, 0f);
-
+    override void onPosition() {
+        auto offset = _size * (.5f - _anchor);
+        _slider.position = _position - Vec2f((_size.x - _slider.size.x) / 2f, 0f) + offset;
+        _container.position = _position + Vec2f(_slider.size.x / 2f, 0f) + offset;
     }
 
     override void onSize() {
-        _slider.size = Vec2f(10f, size.y);
-        _container.layout.size = Vec2f(size.x, _layoutLength * _nbElements);
-        _container.size = Vec2f(size.x - _slider.size.x, size.y);
-        _container.view.renderSize = _container.size.to!Vec2u;
-        onPivot();
+        _slider.size = Vec2f(10f, _size.y);
+        _container.layout.size = Vec2f(_size.x, _layoutLength * _nbElements);
+        _container.size = Vec2f(_size.x - _slider.size.x, _size.y);
+        _container.canvas.renderSize = _container.size.to!Vec2u;
+        onPosition();
     }
 
 	override void update(float deltaTime) {
 		super.update(deltaTime);
-		float min = _container.view.size.y / 2f;
-		float max = _container.layout.size.y - _container.view.size.y / 2f;
-		float exceedingHeight = _container.layout.size.y - _container.view.size.y;
+		float min = _container.canvas.size.y / 2f;
+		float max = _container.layout.size.y - _container.canvas.size.y / 2f;
+		float exceedingHeight = _container.layout.size.y - _container.canvas.size.y;
 
 		if(exceedingHeight < 0f) {
 			_slider.max = 0;
@@ -161,7 +134,7 @@ class VList: WidgetGroup {
 			_slider.max = exceedingHeight / _layoutLength;
 			_slider.step = to!uint(_slider.max);
 		}
-		_container.view.position = Vec2f(0f, lerp(min, max, _slider.offset));
+		_container.canvas.position = Vec2f(0f, lerp(min, max, _slider.offset));
 	}
 
 	override void addChild(Widget widget) {
@@ -197,4 +170,3 @@ class VList: WidgetGroup {
 		return _container.layout.children;
 	}
 }
-

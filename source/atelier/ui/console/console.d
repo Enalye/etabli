@@ -34,6 +34,7 @@ import atelier.ui.layout;
 import atelier.ui.inputfield;
 import atelier.ui.overlay;
 import atelier.ui.text;
+import atelier.ui.root;
 
 private {
 	Console _console;

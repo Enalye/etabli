@@ -48,9 +48,6 @@ class Image: Widget {
 		angle = _sprite.angle;
 		isInteractable = false;
 	}
-
-	override void onEvent(Event event) {}
-	override void update(float deltaTime) {}
     
     override void onAngle() {
         _sprite.angle = angle;

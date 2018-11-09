@@ -36,22 +36,10 @@ import atelier.ui.label;
 class Button: Widget {
 	void function() onClick;
 
-	override void update(float deltaTime) {}
-	override void onEvent(Event event) {}
-
-    override void onSelect() {
-        if(!isLocked && !isSelected && isHovered)
-            isValidated = true;
-		else
-			isValidated = false;
-    }
-
-    override void onValidate() {
-        if(isValidated) {
-			if(onClick !is null)
-				onClick();
-			triggerCallback();
-		}
+    override void onSubmit() {
+        if(onClick !is null)
+            onClick();
+        triggerCallback();
     }
 }
 
@@ -143,23 +131,22 @@ class TextButton: Button {
 
 	override void update(float deltaTime) {
 		super.update(deltaTime);
-		label.position = pivot;
 	}
 
 	override void draw() {
 		if(isLocked)
 			drawFilledRect(pivot - size / 2f, size, Color.white * 0.055f);
 		else if(isSelected)
-			drawFilledRect(pivot - size / 2f + (isSelected ? 1f : 0f), size, Color.white * 0.4f);
+			drawFilledRect(pivot - size / 2f, size, Color.white * 0.4f);
 		else if(isHovered)
-			drawFilledRect(pivot - size / 2f + (isSelected ? 1f : 0f), size, Color.white * 0.25f);
+			drawFilledRect(pivot - size / 2f, size, Color.white * 0.25f);
 		else
-			drawFilledRect(pivot - size / 2f + (isSelected ? 1f : 0f), size, Color.white * 0.15f);
+			drawFilledRect(pivot - size / 2f, size, Color.white * 0.15f);
 		if(label.isLoaded)
 			label.draw();
 	}
 
-    override void onPosition() {
+    override void onPivot() {
         label.position = pivot;
     }
 }
