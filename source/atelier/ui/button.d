@@ -25,15 +25,10 @@ it freely, subject to the following restrictions:
 module atelier.ui.button;
 
 import std.conv: to;
+import atelier.core, atelier.render, atelier.common;
+import atelier.ui.gui_element, atelier.ui.label;
 
-import atelier.core;
-import atelier.render;
-import atelier.common;
-
-import atelier.ui.widget;
-import atelier.ui.label;
-
-class Button: Widget {
+class Button: GuiElement {
 	void function() onClick;
 
     override void onSubmit() {
@@ -81,19 +76,19 @@ class ListButton: Button {
 
 	override void update(float deltaTime) {
 		super.update(deltaTime);
-		label.position = pivot;
+		label.position = center;
 	}
 
 	override void draw() {
 		if(isValidated)
-			drawFilledRect(pivot - size / 2f, size, Color.white * 0.8f);
+			drawFilledRect(center - size / 2f, size, Color.white * 0.8f);
 		else if(isHovered)
-			drawFilledRect(pivot - size / 2f, size, Color.white * 0.25f);
+			drawFilledRect(center - size / 2f, size, Color.white * 0.25f);
 		else
-			drawFilledRect(pivot - size / 2f, size, Color.white * 0.15f);
+			drawFilledRect(center - size / 2f, size, Color.white * 0.15f);
 
 		if(sprite.texture)
-			sprite.draw(pivot);
+			sprite.draw(center);
 
 		if(label.isLoaded)
 			label.draw();
@@ -108,7 +103,7 @@ class ListButton: Button {
     }
 
 	private void reload() {
-		label.position = pivot;
+		label.position = center;
 		if(_sprite.texture) {
 			_sprite.fit(size);
 		}
@@ -125,8 +120,10 @@ class TextButton: Button {
 
 	this(string text) {
 		label = new Label;
+        label.setAlign(GuiAlignX.Center, GuiAlignY.Center);
 		label.text = text;
 		size = label.size;
+        addChildGui(label);
 	}
 
 	override void update(float deltaTime) {
@@ -135,20 +132,16 @@ class TextButton: Button {
 
 	override void draw() {
 		if(isLocked)
-			drawFilledRect(pivot - size / 2f, size, Color.white * 0.055f);
+			drawFilledRect(origin, size, Color.white * 0.055f);
 		else if(isSelected)
-			drawFilledRect(pivot - size / 2f, size, Color.white * 0.4f);
+			drawFilledRect(origin, size, Color.white * 0.4f);
 		else if(isHovered)
-			drawFilledRect(pivot - size / 2f, size, Color.white * 0.25f);
+			drawFilledRect(origin, size, Color.white * 0.25f);
 		else
-			drawFilledRect(pivot - size / 2f, size, Color.white * 0.15f);
+			drawFilledRect(origin, size, Color.white * 0.15f);
 		if(label.isLoaded)
 			label.draw();
 	}
-
-    override void onPivot() {
-        label.position = pivot;
-    }
 }
 
 class ImgButton: Button {
@@ -226,8 +219,10 @@ class ImgButton: Button {
 
 	this(string text) {
 		label = new Label;
+        label.setAlign(GuiAlignX.Center, GuiAlignY.Center);
 		label.text = text;
 		size = label.size;
+        addChildGui(label);
 	}
 
 	private void setToSize(Sprite sprite) {
@@ -249,39 +244,38 @@ class ImgButton: Button {
 
 	override void update(float deltaTime) {
 		super.update(deltaTime);
-		label.position = pivot;
 	}
 
 	override void draw() {
 		if(isLocked) {
 			if(_lockedSprite.texture)
-				_lockedSprite.drawUnchecked(pivot);
+				_lockedSprite.drawUnchecked(center);
 			else if(_idleSprite.texture)
-				_idleSprite.drawUnchecked(pivot);
+				_idleSprite.drawUnchecked(center);
 			else
-				drawFilledRect(pivot - size / 2f, size, Color.gray);
+				drawFilledRect(center - size / 2f, size, Color.gray);
 		}
 		else if(isSelected) {
 			if(_clickedSprite.texture)
-				_clickedSprite.drawUnchecked(pivot);
+				_clickedSprite.drawUnchecked(center);
 			else if(_idleSprite.texture)
-				_idleSprite.drawUnchecked(pivot + Vec2f.one);
+				_idleSprite.drawUnchecked(center + Vec2f.one);
 			else
-				drawFilledRect(pivot - size / 2f + Vec2f.one, size, Color.blue);
+				drawFilledRect(center - size / 2f + Vec2f.one, size, Color.blue);
 		}
 		else if(isHovered) {
 			if(_hoveredSprite.texture)
-				_hoveredSprite.drawUnchecked(pivot);
+				_hoveredSprite.drawUnchecked(center);
 			else if(_idleSprite.texture)
-				_idleSprite.drawUnchecked(pivot);
+				_idleSprite.drawUnchecked(center);
 			else
-				drawFilledRect(pivot - size / 2f, size, Color.green);
+				drawFilledRect(center - size / 2f, size, Color.green);
 		}
 		else {
 			if(_idleSprite.texture)
-				_idleSprite.drawUnchecked(pivot);
+				_idleSprite.drawUnchecked(center);
 			else
-				drawFilledRect(pivot - size / 2f, size, Color.red);
+				drawFilledRect(center - size / 2f, size, Color.red);
 		}
 		if(label.isLoaded)
 			label.draw();

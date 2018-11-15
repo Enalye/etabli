@@ -24,13 +24,10 @@ it freely, subject to the following restrictions:
 
 module atelier.ui.image;
 
-import atelier.core.vec2;
-import atelier.render.sprite;
-import atelier.common;
+import atelier.core, atelier.render, atelier.common;
+import atelier.ui.gui_element;
 
-import atelier.ui.widget;
-
-class Image: Widget {
+class Image: GuiElement {
 	private Sprite _sprite;
 
 	@property {
@@ -45,19 +42,15 @@ class Image: Widget {
 	this(Sprite newSprite) {
 		_sprite = newSprite;
 		size = _sprite.size;
-		angle = _sprite.angle;
 		isInteractable = false;
 	}
     
-    override void onAngle() {
-        _sprite.angle = angle;
-    }
-
-    override void onSize() {
+    override void update(float deltaTime) {
+        _sprite.angle = currentState.angle;
         _sprite.size = size;
     }
 
 	override void draw() {
-		_sprite.drawUnchecked(pivot);
+		_sprite.drawUnchecked(center);
 	}
 }

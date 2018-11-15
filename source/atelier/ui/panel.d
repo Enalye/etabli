@@ -24,13 +24,10 @@ it freely, subject to the following restrictions:
 
 module atelier.ui.panel;
 
-import atelier.core;
-import atelier.render;
-import atelier.common;
+import atelier.core, atelier.render, atelier.common;
+import atelier.ui.gui_element;
 
-import atelier.ui.widget;
-
-class Panel: Widget {
+class Panel: GuiElement {
 	private {
 		Sprite _cornerULSprite, _cornerURSprite, _cornerDLSprite, _cornerDRSprite;
 		Sprite _borderUpSprite, _borderDownSprite, _borderLeftSprite, _borderRightSprite;
@@ -52,23 +49,23 @@ class Panel: Widget {
 		Vec2f panelSize = size - 16f;
 		Vec2f halfSize = panelSize / 2f;
 
-		drawFilledRect(pivot - halfSize, panelSize, Color.white * .11f);
-		drawFilledRect(pivot - halfSize, Vec2f(panelSize.x, 50f), Color.white);
-		drawFilledRect(pivot + Vec2f(-halfSize.x, halfSize.y - 50f), Vec2f(panelSize.x, 50f), Color.white);
+		drawFilledRect(center - halfSize, panelSize, Color.white * .11f);
+		drawFilledRect(center - halfSize, Vec2f(panelSize.x, 50f), Color.white);
+		drawFilledRect(center + Vec2f(-halfSize.x, halfSize.y - 50f), Vec2f(panelSize.x, 50f), Color.white);
 		
-		_cornerULSprite.drawUnchecked(pivot - halfSize);
-		_cornerURSprite.drawUnchecked(pivot + Vec2f(halfSize.x, -halfSize.y));
-		_cornerDLSprite.drawUnchecked(pivot + Vec2f(-halfSize.x, halfSize.y));
-		_cornerDRSprite.drawUnchecked(pivot + halfSize);
+		_cornerULSprite.drawUnchecked(center - halfSize);
+		_cornerURSprite.drawUnchecked(center + Vec2f(halfSize.x, -halfSize.y));
+		_cornerDLSprite.drawUnchecked(center + Vec2f(-halfSize.x, halfSize.y));
+		_cornerDRSprite.drawUnchecked(center + halfSize);
 
 		_borderUpSprite.size = Vec2f(panelSize.x - 16f, 16f);
 		_borderDownSprite.size = Vec2f(panelSize.x - 16f, 16f);
 		_borderLeftSprite.size = Vec2f(16f, panelSize.y - 16f);
 		_borderRightSprite.size = Vec2f(16f, panelSize.y - 16f);
 
-		_borderUpSprite.drawUnchecked(pivot + Vec2f(0f, -halfSize.y));
-		_borderDownSprite.drawUnchecked(pivot + Vec2f(0f, halfSize.y));
-		_borderLeftSprite.drawUnchecked(pivot + Vec2f(-halfSize.x, 0f));
-		_borderRightSprite.drawUnchecked(pivot + Vec2f(halfSize.x, 0f));
+		_borderUpSprite.drawUnchecked(center + Vec2f(0f, -halfSize.y));
+		_borderDownSprite.drawUnchecked(center + Vec2f(0f, halfSize.y));
+		_borderLeftSprite.drawUnchecked(center + Vec2f(-halfSize.x, 0f));
+		_borderRightSprite.drawUnchecked(center + Vec2f(halfSize.x, 0f));
 	}
 }

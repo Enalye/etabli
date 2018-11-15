@@ -24,17 +24,9 @@ it freely, subject to the following restrictions:
 
 module atelier.ui.console.console;
 
-import atelier.common;
-import atelier.core;
-import atelier.render;
-
-import atelier.ui.list;
-import atelier.ui.widget;
-import atelier.ui.layout;
-import atelier.ui.inputfield;
-import atelier.ui.overlay;
-import atelier.ui.text;
-import atelier.ui.root;
+import atelier.common, atelier.core, atelier.render;
+import atelier.ui.list, atelier.ui.gui_element, atelier.ui.layout, atelier.ui.inputfield;
+import atelier.ui.gui_overlay, atelier.ui.text, atelier.ui.gui_manager;
 
 private {
 	Console _console;
@@ -46,10 +38,10 @@ private {
 void setupConsole(string invokeKey) {
 	_consoleHandler = new ConsoleHandler(invokeKey);
 	_console = new Console;
-	addWidget(_consoleHandler);
+	addRootGui(_consoleHandler);
 }
 
-void addConsoleCmd(string cmd, WidgetCallback callback) {
+void addConsoleCmd(string cmd, GuiElementCallback callback) {
 	if(!_console)
 		return;
 	_console.addCmd(cmd, callback);
@@ -73,7 +65,7 @@ void logConsole(string log) {
 	_console.addMessage(log);
 }
 
-private class ConsoleHandler: Widget {
+private class ConsoleHandler: GuiElement {
 	private {
 		bool _isToggled = false;
 		string _invokeKey;
@@ -128,7 +120,7 @@ private class Console: AnchoredLayout {
 	private {
 		LogList _log;
 		InputField _inputField;
-		WidgetCallback[string] _widgetCallbacks;
+		GuiElementCallback[string] _widgetCallbacks;
 		FunctionCallback[string] _functionCallbacks;
 		Sprite _background;
 	}
@@ -145,8 +137,8 @@ private class Console: AnchoredLayout {
 		_background = fetch!Sprite("gui_texel");
 		_background.size = size;
 
-		addChild(_log, Vec2f(.5f, .5f - inputFieldRatio / 2f), Vec2f(1f, 1f - inputFieldRatio));
-		addChild(_inputField, Vec2f(.5f, 1f - inputFieldRatio / 2f), Vec2f(1f, inputFieldRatio));
+		addChildGui(_log, Vec2f(.5f, .5f - inputFieldRatio / 2f), Vec2f(1f, 1f - inputFieldRatio));
+		addChildGui(_inputField, Vec2f(.5f, 1f - inputFieldRatio / 2f), Vec2f(1f, inputFieldRatio));
 	}
 
 	override void onEvent(Event event) {
@@ -169,7 +161,7 @@ private class Console: AnchoredLayout {
 
 	override void draw() {
 		_background.texture.setColorMod(Color.black * .25f);
-		_background.draw(pivot);
+		_background.draw(center);
 		super.draw();
 	}
 
@@ -177,7 +169,7 @@ private class Console: AnchoredLayout {
 		_inputField.hasFocus = true;
 	}
 
-	void addCmd(string cmd, WidgetCallback callback) {
+	void addCmd(string cmd, GuiElementCallback callback) {
 		_widgetCallbacks[cmd] = callback;
 	}
 
@@ -192,7 +184,7 @@ private class Console: AnchoredLayout {
 
 	void addMessage(string message) {
 		//The bold tag is temporary since the font in LogList is not properly rendered.
-		_log.addChild(new Text("{b}" ~ message));
+		_log.addChildGui(new Text("{b}" ~ message));
 	}
 
 	protected void parse(string text) {

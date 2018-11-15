@@ -25,15 +25,10 @@ it freely, subject to the following restrictions:
 module atelier.ui.checkbox;
 
 import std.conv: to;
+import atelier.core, atelier.common, atelier.render;
+import atelier.ui.gui_element, atelier.ui.label;
 
-import atelier.core;
-import atelier.common;
-import atelier.render.sprite;
-
-import atelier.ui.widget;
-import atelier.ui.label;
-
-class Checkbox: Widget {
+class Checkbox: GuiElement {
 	private {
 		Sprite _uncheckedSprite, _checkedSprite;
 		bool _isChecked;
@@ -69,9 +64,9 @@ class Checkbox: Widget {
 
 	override void draw() {
 		if(_isChecked)
-			_checkedSprite.draw(pivot);
+			_checkedSprite.draw(center);
 		else
-			_uncheckedSprite.draw(pivot);
+			_uncheckedSprite.draw(center);
 	}
 
 	override void onSubmit() {
@@ -103,7 +98,7 @@ class TextCheckbox: Checkbox {
 	}	
 
 	override void onPosition() {
-        label.position = pivot + Vec2f((size.x - label.size.x) / 2f, 0f);
+        label.position = center + Vec2f((size.x - label.size.x) / 2f, 0f);
     }
 
 	override void onSize() {
@@ -116,7 +111,7 @@ class TextCheckbox: Checkbox {
 	override void update(float deltaTime) {}
 
 	override void draw() {
-		const Vec2f checkboxPosition = pivot - Vec2f((size.x - label.size.y) / 2f, 0f);
+		const Vec2f checkboxPosition = center - Vec2f((size.x - label.size.y) / 2f, 0f);
 
 		label.draw();
 		if(_isChecked)

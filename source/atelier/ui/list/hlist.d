@@ -32,7 +32,7 @@ import atelier.common;
 
 import atelier.ui;
 
-private class ListContainer: WidgetCanvas {
+private class ListContainer: GuiElementCanvas {
 	public {
 		HLayout layout;
 	}
@@ -41,11 +41,11 @@ private class ListContainer: WidgetCanvas {
 		isLocked = true;
 		layout = new HLayout;
 		size(newSize);
-		addChild(layout);
+		addChildGui(layout);
 	}
 }
 
-class HList: Widget {
+class HList: GuiElement {
 	protected {
 		ListContainer _container;
 		Slider _slider;
@@ -67,7 +67,7 @@ class HList: Widget {
 		float layoutLength() const { return _layoutLength; }
 		float layoutLength(float length) {
 			_layoutLength = length;
-			_container.layout.size = Vec2f(_layoutLength * _nbElements, size.y);
+			_container.layout.size = Vec2f(_layoutLength * _nbElements, _container.size.y);
 			return _layoutLength;
 		}
 	}
@@ -75,10 +75,13 @@ class HList: Widget {
 	this(Vec2f newSize) {
 		isLocked = true;
 		_slider = new HScrollbar;
+        _slider.setAlign(GuiAlignX.Left, GuiAlignY.Center);
 		_container = new ListContainer(newSize);
+        _container.setAlign(GuiAlignX.Right, GuiAlignY.Top);
+        _container.layout.setAlign(GuiAlignX.Right, GuiAlignY.Top);
 
-		super.addChild(_slider);
-		super.addChild(_container);
+		super.addChildGui(_slider);
+		super.addChildGui(_container);
 
 		size(newSize);
 		position(Vec2f.zero);
@@ -92,9 +95,9 @@ class HList: Widget {
 			else if(event.type == EventType.MouseDown) {
 
 				auto widgets = _container.layout.children;
-				foreach(uint id, ref Widget widget; _container.layout.children) {
-					widget.isValidated = false;
-					if(widget.isHovered)
+				foreach(uint id, ref GuiElement gui; _container.layout.children) {
+					gui.isValidated = false;
+					if(gui.isHovered)
 						_idElementSelected = id;
 				}
 				if(_idElementSelected < widgets.length)
@@ -102,27 +105,21 @@ class HList: Widget {
 			}
 		}
 
-		if(!isOnInteractableWidget(_lastMousePos) && event.type == EventType.MouseWheel)
+		if(!isOnInteractableGuiElement(_lastMousePos) && event.type == EventType.MouseWheel)
 			_slider.onEvent(event);
 	}
 
-    override void onPivot() {
-        _slider.position = pivot - Vec2f(0f, (size.y - _slider.size.y) / 2f);
-        _container.position = pivot + Vec2f(0f, _slider.size.y / 2f);
-    }
-
     override void onSize() {
         _slider.size = Vec2f(size.x, 10f);
-        _container.layout.size = Vec2f(_layoutLength * _nbElements, size.y);
+        _container.layout.size = Vec2f(_layoutLength * _nbElements, _container.size.y);
         _container.size = Vec2f(size.x, size.y - _slider.size.y);
         _container.canvas.renderSize = _container.size.to!Vec2u;
-        onPivot();
     }
 
 	override void update(float deltaTime) {
 		super.update(deltaTime);
-		float min = _container.canvas.size.x / 2f;
-		float max = _container.layout.size.x - _container.canvas.size.x / 2f;
+		float min = 0f;
+		float max = _container.layout.size.x - _container.canvas.size.x;
 		float exceedingWidth = _container.layout.size.x - _container.canvas.size.x;
 
 		if(exceedingWidth < 0f) {
@@ -133,40 +130,41 @@ class HList: Widget {
 			_slider.max = exceedingWidth / _layoutLength;
 			_slider.step = to!uint(_slider.max);
 		}
-		_container.canvas.position = Vec2f(lerp(min, max, _slider.offset), 0f);
+		_container.canvas.position = _container.canvas.size / 2f + Vec2f(lerp(min, max, _slider.offset), 0f);
 	}
 
-	override void addChild(Widget widget) {
-		widget.isValidated = (_nbElements == 0u);
+	override void addChildGui(GuiElement gui) {
+        gui.position = Vec2f.zero;
+        gui.setAlign(GuiAlignX.Right, GuiAlignY.Top);
+		gui.isValidated = (_nbElements == 0u);
 
 		_nbElements ++;
-		_container.layout.size = Vec2f(_layoutLength * _nbElements, size.y);
-		_container.layout.position = Vec2f(_container.layout.size.x / 2f, 0f);
-		_container.layout.addChild(widget);
+		_container.layout.size = Vec2f(_layoutLength * _nbElements, _container.size.y);
+		_container.layout.position = Vec2f.zero;
+		_container.layout.addChildGui(gui);
 	}
 
-	override void removeChildren() {
+	override void removeChildrenGuis() {
 		_nbElements = 0u;
 		_idElementSelected = 0u;
-		_container.layout.size = Vec2f(0f, size.y);
+		_container.layout.size = Vec2f(0f, _container.size.y);
 		_container.layout.position = Vec2f.zero;
-		_container.layout.removeChildren();
+		_container.layout.removeChildrenGuis();
 	}
 
-	override void removeChild(uint id) {
-		_container.layout.removeChild(id);
-		_nbElements = _container.layout.getChildrenCount();
+	override void removeChildGui(uint id) {
+		_container.layout.removeChildGui(id);
+		_nbElements = _container.layout.getChildrenGuisCount();
 		_idElementSelected = 0u;
 		_container.layout.size = Vec2f(_layoutLength * _nbElements, size.y);
 		_container.layout.position = Vec2f(_container.layout.size.x / 2f, 0f);
 	}
 
-	override int getChildrenCount() {
-		return _container.layout.getChildrenCount();	
+	override int getChildrenGuisCount() {
+		return _container.layout.getChildrenGuisCount();	
 	}
 
-	Widget[] getList() {
+	GuiElement[] getList() {
 		return _container.layout.children;
 	}
 }
-

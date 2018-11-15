@@ -25,16 +25,10 @@ it freely, subject to the following restrictions:
 module atelier.ui.list.loglist;
 
 import std.conv: to;
+import atelier.core, atelier.render, atelier.common;
+import atelier.ui.gui_element, atelier.ui.layout, atelier.ui.slider;
 
-import atelier.core;
-import atelier.render;
-import atelier.common;
-
-import atelier.ui.widget;
-import atelier.ui.layout;
-import atelier.ui.slider;
-
-private class LogContainer: WidgetCanvas {
+private class LogContainer: GuiElementCanvas {
 	public {
 		LogLayout layout;
 	}
@@ -43,7 +37,7 @@ private class LogContainer: WidgetCanvas {
 		isLocked = true;
 		layout = new LogLayout;
 		size(newSize);
-		addChild(layout);
+		addChildGui(layout);
 	}
 
 	override void draw() {
@@ -51,7 +45,7 @@ private class LogContainer: WidgetCanvas {
 	}
 }
 
-class LogList: Widget {
+class LogList: GuiElement {
 	protected {
 		LogContainer _container;
 		Slider _slider;
@@ -69,8 +63,8 @@ class LogList: Widget {
 		_slider.value01 = 1f;
 		_container = new LogContainer(newSize);
 
-		super.addChild(_slider);
-		super.addChild(_container);
+		super.addChildGui(_slider);
+		super.addChildGui(_container);
 
 		size(newSize);
 		position(Vec2f.zero);
@@ -84,19 +78,19 @@ class LogList: Widget {
 				_slider.onEvent(event);
 			else if(event.type == EventType.MouseDown) {
 				auto widgets = _container.layout.children;
-				foreach(uint id, const Widget widget; widgets) {
+				foreach(uint id, const GuiElement widget; widgets) {
 					if(widget.isHovered)
 						_idElementSelected = id;
 				}
 			}
 		}
-		if(!isOnInteractableWidget(_lastMousePos) && event.type == EventType.MouseWheel)
+		if(!isOnInteractableGuiElement(_lastMousePos) && event.type == EventType.MouseWheel)
 			_slider.onEvent(event);
 	}
 
     override void onPosition() {
-        _slider.position = pivot - Vec2f((size.x - _slider.size.x) / 2f, 0f) + size / 2f;
-        _container.position = pivot + Vec2f(_slider.size.x / 2f, 0f) + size / 2f;
+        _slider.position = center - Vec2f((size.x - _slider.size.x) / 2f, 0f) + size / 2f;
+        _container.position = center + Vec2f(_slider.size.x / 2f, 0f) + size / 2f;
     }
 
     override void onSize() {
@@ -127,22 +121,22 @@ class LogList: Widget {
 		_container.layout.position = Vec2f(5f + _container.layout.size.x / 2f - _container.size.x / 2f, _container.layout.size.y / 2f);
 	}
 
-	override void addChild(Widget widget) {
-		_container.layout.addChild(widget);
+	override void addChildGui(GuiElement widget) {
+		_container.layout.addChildGui(widget);
 		repositionContainer();
 	}
 
-	override void removeChildren() {
-		_container.layout.removeChildren();
+	override void removeChildrenGuis() {
+		_container.layout.removeChildrenGuis();
 		repositionContainer();
 	}
 
-	override void removeChild(uint id) {
-		_container.layout.removeChild(id);
+	override void removeChildGui(uint id) {
+		_container.layout.removeChildGui(id);
 		repositionContainer();
 	}
 
-	override int getChildrenCount() {
-		return _container.layout.getChildrenCount();
+	override int getChildrenGuisCount() {
+		return _container.layout.getChildrenGuisCount();
 	}
 }

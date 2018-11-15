@@ -26,15 +26,10 @@ module atelier.ui.inputfield;
 
 import std.utf;
 import std.conv: to;
+import atelier.core, atelier.render, atelier.common;
+import atelier.ui.gui_element, atelier.ui.label;
 
-import atelier.core;
-import atelier.render;
-import atelier.common;
-
-import atelier.ui.widget;
-import atelier.ui.label;
-
-class InputField: WidgetCanvas {
+class InputField: GuiElementCanvas {
 	private {
 		Label _label;
 		Color _borderColor, _caretColor;
@@ -70,6 +65,8 @@ class InputField: WidgetCanvas {
 	this(Vec2f newSize, string defaultText = "", bool startWithFocus = false) {
 		size = newSize;
 		_label = new Label;
+        _label.setAlign(GuiAlignX.Left, GuiAlignY.Center);
+        addChildGui(_label);
 		hasFocus = startWithFocus;
 		_text = to!dstring(defaultText);
 		_caretIndex = to!uint(_text.length);
@@ -133,16 +130,13 @@ class InputField: WidgetCanvas {
 	}
 
 	override void update(float deltaTime) {
-		_caretPosition = Vec2f(_label.position.x - _label.size.x / 2f + (_label.size.x / _text.length) * _caretIndex, _label.position.y - _label.size.y / 2f);
-		_label.position = Vec2f(10f + (_label.size.x - canvas.size.x) / 2f, 0f);
+		_caretPosition = Vec2f(_label.position.x + (_label.size.x / _text.length) * _caretIndex, _label.origin.y);
+		_label.position = Vec2f(10f, 0f);
 
 		if(_caretPosition.x > canvas.position.x + canvas.size.x / 2f - 10f)
 			canvas.position.x = _caretPosition.x - canvas.size.x / 2f + 10f;
 		else if(_caretPosition.x < canvas.position.x - canvas.size.x / 2f + 10f)
 			canvas.position.x = _caretPosition.x + canvas.size.x / 2f - 10f;
-
-		if(_caretIndex == 0U)
-			canvas.position.x = 0f;
 
 		if(hasFocus)
 			_borderColor = lerp(_borderColor, Color.white, deltaTime * .25f);
@@ -154,13 +148,12 @@ class InputField: WidgetCanvas {
 	}
 
 	override void draw() {
-		_label.draw();
 		if(_text.length && hasFocus)
 			drawFilledRect(_caretPosition, Vec2f(2f, _label.size.y), _caretColor);
 	}
 
     override void drawOverlay() {
-		drawRect(pivot - _size / 2f, _size, _borderColor);
+		drawRect(origin, size, _borderColor);
     }
 
 	void clear() {

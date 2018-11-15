@@ -26,14 +26,11 @@ module atelier.ui.layout;
 
 import std.conv: to;
 import std.algorithm.comparison: max;
-
-import atelier.render.window;
-import atelier.core;
-import atelier.common;
-import atelier.ui.widget;
+import atelier.render, atelier.core, atelier.common;
+import atelier.ui.gui_element;
 
 
-class VLayout: Widget {
+class VLayout: GuiElement {
 	private {
 		Vec2f _spacing = Vec2f.zero;
 		uint _capacity;
@@ -53,8 +50,9 @@ class VLayout: Widget {
 		size = newSize;
 	}
 
-	override void addChild(Widget widget) {
-		super.addChild(widget);
+	override void addChildGui(GuiElement gui) {
+        gui.setAlign(GuiAlignX.Left, GuiAlignY.Top);
+		super.addChildGui(gui);
 		resize();
 	}
 
@@ -65,16 +63,15 @@ class VLayout: Widget {
 	protected void resize() {
 		if(!_children.length)
 			return;
-		Vec2f childSize = Vec2f(size.x, size.y / (_capacity != 0u ? _capacity : _children.length));
-		Vec2f origin = (hasCanvas ? Vec2f.zero : pivot) - size / 2 + childSize / 2f;
-		foreach(uint id, Widget widget; _children) {
-			widget.position = origin + Vec2f(0f, childSize.y * to!float(id));
-			widget.size = childSize - _spacing;
+		const Vec2f childSize = Vec2f(size.x, size.y / (_capacity != 0u ? _capacity : _children.length));
+		foreach(uint id, GuiElement gui; _children) {
+			gui.position = origin + Vec2f(0f, childSize.y * to!float(id));
+			gui.size = childSize - _spacing;
 		}
 	}
 }
 
-class HLayout: Widget {
+class HLayout: GuiElement {
 	private {
 		Vec2f _spacing = Vec2f.zero;
 		uint _capacity;
@@ -94,8 +91,9 @@ class HLayout: Widget {
 		size = newSize;
 	}
 
-	override void addChild(Widget widget) {
-		super.addChild(widget);
+	override void addChildGui(GuiElement gui) {
+        gui.setAlign(GuiAlignX.Left, GuiAlignY.Top);
+		super.addChildGui(gui);
 		resize();
 	}
 
@@ -107,15 +105,14 @@ class HLayout: Widget {
 		if(!_children.length)
 			return;
 		Vec2f childSize = Vec2f(size.x / (_capacity != 0u ? _capacity : _children.length), size.y);
-		Vec2f origin = (hasCanvas ? Vec2f.zero : pivot) - size / 2 + childSize / 2f;
-		foreach(uint id, Widget widget; _children) {
-			widget.position = origin + Vec2f(childSize.x * to!float(id), 0f);
-			widget.size = childSize - _spacing;
+		foreach(uint id, GuiElement gui; _children) {
+			gui.position = Vec2f(childSize.x * to!float(id), 0f);
+			gui.size = childSize - _spacing;
 		}
 	}
 }
 
-class GridLayout: Widget {
+class GridLayout: GuiElement {
 	private {
 		Vec2f _spacing = Vec2f.zero;
 		Vec2u _capacity;
@@ -135,8 +132,9 @@ class GridLayout: Widget {
 		size = newSize;
 	}
 
-	override void addChild(Widget widget) {
-		super.addChild(widget);
+	override void addChildGui(GuiElement gui) {
+        gui.setAlign(GuiAlignX.Left, GuiAlignY.Top);
+		super.addChildGui(gui);
 		resize();
 	}
 
@@ -153,18 +151,18 @@ class GridLayout: Widget {
 			yCapacity = (to!int(_children.length) / _capacity.x) + 1;
 
 		Vec2f childSize = Vec2f(size.x / _capacity.x, size.y / yCapacity);
-		Vec2f origin = (hasCanvas ? Vec2f.zero : pivot) - size / 2 + childSize / 2f;
-		foreach(uint id, Widget widget; _children) {
+		foreach(uint id, GuiElement gui; _children) {
 			Vec2u coords = Vec2u(id % _capacity.x, id / _capacity.x);
-			widget.position = origin + Vec2f(childSize.x * coords.x, childSize.y * coords.y);
-			widget.size = childSize - _spacing;
+			gui.position = Vec2f(childSize.x * coords.x, childSize.y * coords.y);
+			gui.size = childSize - _spacing;
 		}
 	}
 }
 
-class VContainer: Widget {
+class VContainer: GuiElement {
 	protected {
 		Vec2f _spacing = Vec2f.zero;
+		GuiAlignX _childAlignX = GuiAlignX.Center;
 	}
 
 	@property {
@@ -174,20 +172,22 @@ class VContainer: Widget {
 
 	this() {}
 
-	override void addChild(Widget widget) {
-		super.addChild(widget);
+	override void addChildGui(GuiElement gui) {
+        gui.setAlign(_childAlignX, GuiAlignY.Top);
+		super.addChildGui(gui);
 		resize();
 	}
 
-    override void onPosition() {
+    void setChildAlign(GuiAlignX childAlignX) {
+        _childAlignX = childAlignX;
+        resize();
+    }
+
+    override void update(float deltatime) {
         resize();
     }
 
     override void onSize() {
-        resize();
-    }
-
-    override void onAnchor() {
         resize();
     }
 
@@ -204,23 +204,25 @@ class VContainer: Widget {
 		}
 
 		Vec2f totalSize = Vec2f.zero;
-		foreach(Widget widget; _children) {
-			totalSize.y += widget.size.y + _spacing.y;
-			totalSize.x = max(totalSize.x, widget.size.x);
+		foreach(GuiElement gui; _children) {
+			totalSize.y += gui.size.y + _spacing.y;
+			totalSize.x = max(totalSize.x, gui.size.x);
 		}
 		size = totalSize + Vec2f(_spacing.x * 2f, _spacing.y);
-		Vec2f currentPosition = pivot - size / 2f + _spacing;
-		foreach(Widget widget; _children) {
-			widget.position = currentPosition + widget.size / 2f;
-			currentPosition = currentPosition + Vec2f(0f, widget.size.y + _spacing.y);
+		Vec2f currentPosition = _spacing;
+		foreach(GuiElement gui; _children) {
+            gui.setAlign(_childAlignX, GuiAlignY.Top);
+			gui.position = currentPosition;
+			currentPosition = currentPosition + Vec2f(0f, gui.size.y + _spacing.y);
 		}
         isResizeCalled = false;
 	}
 }
 
-class HContainer: Widget {
+class HContainer: GuiElement {
 	protected {
 		Vec2f _spacing = Vec2f.zero;
+		GuiAlignY _childAlignY = GuiAlignY.Center;
 	}
 
 	@property {
@@ -230,23 +232,24 @@ class HContainer: Widget {
 
 	this() {}
 
-	override void addChild(Widget widget) {
-		super.addChild(widget);
+	override void addChildGui(GuiElement gui) {
+        gui.setAlign(GuiAlignX.Left, _childAlignY);
+		super.addChildGui(gui);
 		resize();
 	}
 
-    override void onPosition() {
+    void setChildAlign(GuiAlignY childAlignY) {
+        _childAlignY = childAlignY;
+        resize();
+    }
+
+    override void update(float deltatime) {
         resize();
     }
 
     override void onSize() {
         resize();
     }
-
-    override void onAnchor() {
-        resize();
-    }
-
 	private bool isResizeCalled;
 	protected void resize() {
         if(isResizeCalled)
@@ -260,21 +263,22 @@ class HContainer: Widget {
 		}
 
 		Vec2f totalSize = Vec2f.zero;
-		foreach(Widget widget; _children) {
-			totalSize.y = max(totalSize.y, widget.size.y);
-			totalSize.x += widget.size.x + _spacing.x;
+		foreach(GuiElement gui; _children) {
+			totalSize.y = max(totalSize.y, gui.size.y);
+			totalSize.x += gui.size.x + _spacing.x;
 		}
 		size = totalSize + Vec2f(_spacing.x, _spacing.y * 2f);
-		Vec2f currentPosition = pivot - size / 2f + _spacing;
-		foreach(Widget widget; _children) {
-			widget.position = currentPosition + widget.size / 2f;
-			currentPosition = currentPosition + Vec2f(widget.size.x + _spacing.x, 0f);
+		Vec2f currentPosition = _spacing;
+		foreach(GuiElement gui; _children) {
+            gui.setAlign(GuiAlignX.Left, _childAlignY);
+			gui.position = currentPosition;
+			currentPosition = currentPosition + Vec2f(gui.size.x + _spacing.x, 0f);
 		}
         isResizeCalled = false;
 	}
 }
 
-class AnchoredLayout: Widget {
+class AnchoredLayout: GuiElement {
 	private {
 		Vec2f[] _childrenPositions, _childrenSizes;
 	}
@@ -285,8 +289,8 @@ class AnchoredLayout: Widget {
 		size = newSize;
 	}
 
-	override void addChild(Widget widget) {
-		super.addChild(widget);
+	override void addChildGui(GuiElement gui) {
+		super.addChildGui(gui);
 		_childrenPositions ~= Vec2f.half;
 		_childrenSizes ~= Vec2f.one;
 		resize();
@@ -300,15 +304,16 @@ class AnchoredLayout: Widget {
         resize();
     }
 
-	void addChild(Widget widget, Vec2f position, Vec2f size) {
-		super.addChild(widget);
+	void addChildGui(GuiElement gui, Vec2f position, Vec2f size) {
+        gui.setAlign(GuiAlignX.Left, GuiAlignY.Top);
+		super.addChildGui(gui);
 		_childrenPositions ~= position;
 		_childrenSizes ~= size;
 		resize();
 	}
 
-	override void removeChildren() {
-		super.removeChildren();
+	override void removeChildrenGuis() {
+		super.removeChildrenGuis();
 		_childrenPositions.length = 0L;
 		_childrenSizes.length = 0L;
 	}
@@ -316,20 +321,19 @@ class AnchoredLayout: Widget {
 	protected void resize() {
 		if(!_children.length)
 			return;
-        
-		Vec2f origin = (hasCanvas ? Vec2f.zero : pivot) - size / 2;
-		foreach(uint id, Widget widget; _children) {
-			widget.position = origin + size * _childrenPositions[id];
-			widget.size = size * _childrenSizes[id];
+		foreach(uint id, GuiElement gui; _children) {
+			gui.position = size * _childrenPositions[id];
+			gui.size = size * _childrenSizes[id];
 		}
 	}
 }
 
-class LogLayout: Widget {
+class LogLayout: GuiElement {
 	this() {}
 
-	override void addChild(Widget widget) {
-		super.addChild(widget);
+	override void addChildGui(GuiElement gui) {
+        gui.setAlign(GuiAlignX.Left, GuiAlignY.Top);
+		super.addChildGui(gui);
 		resize();
 	}
 
@@ -349,15 +353,15 @@ class LogLayout: Widget {
         }
 
 		Vec2f totalSize = Vec2f.zero;
-		foreach(Widget widget; _children) {
-			totalSize.y += widget.size.y;
-			totalSize.x = max(totalSize.x, widget.size.x);
+		foreach(GuiElement gui; _children) {
+			totalSize.y += gui.size.y;
+			totalSize.x = max(totalSize.x, gui.size.x);
 		}
 		size = totalSize;
-		Vec2f currentPosition = pivot - size / 2f;
-		foreach(Widget widget; _children) {
-			widget.position = currentPosition + widget.size / 2f;
-			currentPosition = currentPosition + Vec2f(0f, widget.size.y);
+		Vec2f currentPosition = origin;
+		foreach(GuiElement gui; _children) {
+			gui.position = currentPosition + gui.size / 2f;
+			currentPosition = currentPosition + Vec2f(0f, gui.size.y);
 		}
 
         isResizeCalled = false;

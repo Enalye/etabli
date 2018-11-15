@@ -25,16 +25,10 @@ it freely, subject to the following restrictions:
 module atelier.ui.frame;
 
 import std.conv;
+import atelier.core, atelier.common, atelier.render;
+import atelier.ui.gui_element;
 
-import atelier.core;
-import atelier.common;
-import atelier.render.sprite;
-import atelier.render.canvas;
-import atelier.render.window;
-
-import atelier.ui.widget;
-
-class Frame: Widget {
+class Frame: GuiElement {
 	/*protected View _view;
 	bool clearRenderer = true;
 	

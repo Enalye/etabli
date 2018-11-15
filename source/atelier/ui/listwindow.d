@@ -58,8 +58,8 @@ class ListWindow: ModalWindow {
 		_list = new VList(layout.size);
 		foreach(element; _elements) {
 			auto btn = new TextButton(element);
-			_list.addChild(btn);
+			_list.addChildGui(btn);
 		}
-		layout.addChild(_list);
+		layout.addChildGui(_list);
 	}
 }

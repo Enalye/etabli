@@ -87,15 +87,15 @@ struct Event {
 		string str;
 		int ivalue;
 		string[] sarray;
-		Widget widget;
+		GuiElement widget;
 	}
 }
 
-struct WidgetCallback {
-	Widget widget;
+struct GuiElementCallback {
+	GuiElement widget;
 	string id;
 
-	void trigger(Widget w) {
+	void trigger(GuiElement w) {
 		Event event;
 		event.type = EventType.Callback;
 		event.id = id;
@@ -196,7 +196,7 @@ bool processEvents() {
 
 	if(!_isRunning) {
 		event.type = EventType.Quit;
-		handleWidgetEvent(event);
+		handleGuiElementEvent(event);
         destroyWindow();
 		return false;
 	}
@@ -209,7 +209,7 @@ bool processEvents() {
 		case SDL_QUIT:
 			_isRunning = false;
 			event.type = EventType.Quit;
-			handleWidgetEvent(event);
+			handleGuiElementEvent(event);
 			destroyWindow();
 			//No operation involving the SDL after this.
 			return false;
@@ -220,36 +220,36 @@ bool processEvents() {
 			case SDL_SCANCODE_DELETE:
 				event.type = EventType.KeyDelete;
 				event.ivalue = 1;
-				handleWidgetEvent(event);
+				handleGuiElementEvent(event);
 				break;
 			case SDL_SCANCODE_BACKSPACE:
 				event.type = EventType.KeyDelete;
 				event.ivalue = -1;
-				handleWidgetEvent(event);
+				handleGuiElementEvent(event);
 				break;
 			case SDL_SCANCODE_RETURN:
 				event.type = EventType.KeyEnter;
-				handleWidgetEvent(event);
+				handleGuiElementEvent(event);
 				break;
 			case SDL_SCANCODE_UP:
 				event.type = EventType.KeyDir;
 				event.position = Vec2f(0f, -1f);
-				handleWidgetEvent(event);
+				handleGuiElementEvent(event);
 				break;
 			case SDL_SCANCODE_DOWN:
 				event.type = EventType.KeyDir;
 				event.position = Vec2f(0f, 1f);
-				handleWidgetEvent(event);
+				handleGuiElementEvent(event);
 				break;
 			case SDL_SCANCODE_LEFT:
 				event.type = EventType.KeyDir;
 				event.position = Vec2f(-1f, 0f);
-				handleWidgetEvent(event);
+				handleGuiElementEvent(event);
 				break;
 			case SDL_SCANCODE_RIGHT:
 				event.type = EventType.KeyDir;
 				event.position = Vec2f(1f, 0f);
-				handleWidgetEvent(event);
+				handleGuiElementEvent(event);
 				break;
 			default:
 				break;
@@ -264,7 +264,7 @@ bool processEvents() {
 			text.length = stride(text);
 			event.type = EventType.KeyInput;
 			event.str = text;
-			handleWidgetEvent(event);
+			handleGuiElementEvent(event);
 			break;
 		case SDL_MOUSEMOTION:
 			_mousePosition.set(cast(float)sdlEvent.motion.x, cast(float)sdlEvent.motion.y);
@@ -273,7 +273,7 @@ bool processEvents() {
 			event.type = EventType.MouseUpdate;
 			event.position = _mousePosition;
 
-			handleWidgetEvent(event);
+			handleGuiElementEvent(event);
 			break;
 		case SDL_MOUSEBUTTONDOWN:
 			_mousePosition.set(cast(float)sdlEvent.motion.x, cast(float)sdlEvent.motion.y);
@@ -283,7 +283,7 @@ bool processEvents() {
 			event.type = EventType.MouseDown;
 			event.position = _mousePosition;
 
-			handleWidgetEvent(event);
+			handleGuiElementEvent(event);
 			break;
 		case SDL_MOUSEBUTTONUP:
 			_mousePosition.set(cast(float)sdlEvent.motion.x, cast(float)sdlEvent.motion.y);
@@ -293,12 +293,12 @@ bool processEvents() {
 			event.type = EventType.MouseUp;
 			event.position = _mousePosition;
 
-			handleWidgetEvent(event);
+			handleGuiElementEvent(event);
 			break;
 		case SDL_MOUSEWHEEL:
 			event.type = EventType.MouseWheel;
 			event.position = Vec2f(sdlEvent.wheel.x, sdlEvent.wheel.y);
-			handleWidgetEvent(event);
+			handleGuiElementEvent(event);
 			break;
 		case SDL_WINDOWEVENT:
 			switch (sdlEvent.window.event) {
@@ -329,7 +329,7 @@ bool processEvents() {
 
 			event.type = EventType.DropFile;
 			event.str = path;
-			handleWidgetEvent(event);
+			handleGuiElementEvent(event);
 
 			SDL_free(sdlEvent.drop.file);
 			break;
@@ -360,11 +360,11 @@ bool processEvents() {
 		switch(globalEvent.type) with(EventType) {
 			case Quit:
 				_isRunning = false;
-				handleWidgetEvent(globalEvent);
+				handleGuiElementEvent(globalEvent);
                 destroyWindow();
 				return false;
 			default:
-				handleWidgetEvent(globalEvent);
+				handleGuiElementEvent(globalEvent);
 				break;
 		}
 	}

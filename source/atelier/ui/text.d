@@ -26,15 +26,9 @@ module atelier.ui.text;
 
 import std.utf;
 import std.conv: to;
-
-import derelict.sdl2.sdl;
-import derelict.sdl2.ttf;
-
-import atelier.core;
-import atelier.render;
-import atelier.common;
-
-import atelier.ui.widget;
+import derelict.sdl2.sdl, derelict.sdl2.ttf;
+import atelier.core, atelier.render, atelier.common;
+import atelier.ui.gui_element;
 
 private {
 	ITextCache _standardCache, _italicCache, _boldCache, _italicBoldCache;
@@ -108,7 +102,7 @@ private {
 	}
 }
 
-class Text: Widget {
+class Text: GuiElement {
 	private {
 		dstring _text;
 		TextToken[] _tokens;
@@ -245,7 +239,7 @@ class Text: Widget {
 			switch(token.type) with(TextTokenType) {
 			case CharacterType:
 				token.charSprite.color = currentColor;
-				token.charSprite.draw(pivot + charSize * Vec2f(
+				token.charSprite.draw(center + charSize * Vec2f(
 					to!float(currentPos.x) - _maxLineLength / 2f,
 					to!float(currentPos.y) - _rowLength / 2f));
 				token.charSprite.color = Color.white;

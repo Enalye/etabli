@@ -22,29 +22,76 @@ it freely, subject to the following restrictions:
 	3. This notice may not be removed or altered from any source distribution.
 */
 
-module atelier.ui.widget;
+module atelier.ui.gui_element;
 
-import atelier.render.window;
-import atelier.core;
-import atelier.common;
-import atelier.render;
+import atelier.render, atelier.core, atelier.common, atelier.render;
+import atelier.ui.gui_overlay, atelier.ui.modal;
 
-import atelier.ui.overlay;
-import atelier.ui.modal;
+enum GuiAlignX {
+    Left, Center, Right
+}
 
-class Widget {
+enum GuiAlignY {
+    Top, Center, Bottom
+}
+
+struct GuiState {
+    Vec2f offset = Vec2f.zero;
+    Vec2f scale = Vec2f.one;
+    Color color = Color.white;
+    float angle = 0f;
+    float time = .5f;
+    EasingFunction easingFunction = &easeLinear;
+}
+
+class GuiElement {
     private {
         Canvas _canvas;
         bool _hasCanvas;
     }
 
+    string currentStateName = "default";
+    GuiState currentState, targetState, initState;
+    GuiState[string] states;
+    Timer timer;
+
+    GuiAlignX xalign = GuiAlignX.Left;
+    GuiAlignY yalign = GuiAlignY.Top;
+
+    //Transition
+    
+
+    void doTransitionState(string stateName) {
+        auto ptr = stateName in states;
+        if(!(ptr))
+            throw new Exception("No state " ~ stateName ~ " in GuiElement");
+        currentStateName = stateName;
+        initState = currentState;
+        targetState = *ptr;
+        timer.start(targetState.time);
+    }
+
+    void setState(string stateName) {
+        //no timer
+    }
+
+    void setAlign(GuiAlignX x, GuiAlignY y) {
+        xalign = x;
+        yalign = y;
+    }
+
+    void setScreenCoords(Vec2f screenCoords) {
+        _center = screenCoords;
+        _origin = _center - _size / 2f;
+    }
+
 	protected {
-		Widget[] _children;
+		GuiElement[] _children;
 		Hint _hint;
 		bool _isLocked = false, _isMovable = false, _isHovered = false, _isSelected = false, _isValidated = false, _hasFocus = false, _isInteractable = true;
-		Vec2f _position = Vec2f.zero, _size = Vec2f.zero, _anchor = Vec2f.half, _padding = Vec2f.zero, _pivot = Vec2f.zero;
-		float _angle = 0f;
-		Widget _callbackWidget;
+		Vec2f _position = Vec2f.zero, _size = Vec2f.zero, _anchor = Vec2f.half, _padding = Vec2f.zero, _center = Vec2f.zero, _origin = Vec2f.zero;
+		//float _angle = 0f;
+		GuiElement _callbackGuiElement;
 		string _callbackId;
 
         //Mouse control        
@@ -64,8 +111,8 @@ class Widget {
 
         final Hint hint() { return _hint; }
 
-        const(Widget[]) children() const { return _children; }
-		Widget[] children() { return _children; }
+        const(GuiElement[]) children() const { return _children; }
+		GuiElement[] children() { return _children; }
 
 		final bool isLocked() const { return _isLocked; }
 		final bool isLocked(bool newIsLocked) {
@@ -141,10 +188,9 @@ class Widget {
 		final Vec2f position(Vec2f newPosition) {
             auto oldPosition = _position;
             _position = newPosition;
-			_pivot = _position + _size * (Vec2f.half - _anchor);
             onDeltaPosition(newPosition - oldPosition);
             onPosition();
-            onPivot();
+            onCenter();
             return _position;
         }
 
@@ -152,7 +198,6 @@ class Widget {
 		final Vec2f size(Vec2f newSize) {
             auto oldSize = _size;
             _size = newSize - _padding;
-			_pivot = _position + _size * (Vec2f.half - _anchor);
 
             if(_hasCanvas && oldSize != newSize) {
                 Canvas newCanvas;
@@ -162,11 +207,12 @@ class Widget {
                     newCanvas = new Canvas(Vec2u.one * 2);
                 newCanvas.position = _canvas.position;
                 _canvas = newCanvas;
+                _canvas.position = _canvas.size / 2f;
             }
 
             onDeltaSize(_size - oldSize);         
             onSize();
-            onPivot();
+            onCenter();
             return _size;
         }
 
@@ -174,14 +220,18 @@ class Widget {
 		final Vec2f anchor(Vec2f newAnchor) {
             auto oldAnchor = _anchor;
             _anchor = newAnchor;
-			_pivot = _position + _size * (Vec2f.half - _anchor);            
             onDeltaAnchor(newAnchor - oldAnchor);
             onAnchor();
-            onPivot();
+            onCenter();
             return _anchor;
         }
 
-		final Vec2f pivot() const { return _pivot; }
+        /*
+            Old algorithm:
+            _position + _size * (Vec2f.half - _anchor);
+        */
+		final Vec2f center() const { return _center; }
+		final Vec2f origin() const { return _origin; }
 
 		final Vec2f padding() const { return _padding; }
 		final Vec2f padding(Vec2f newPadding) {
@@ -191,12 +241,12 @@ class Widget {
             return _padding;
         }
 
-		final float angle() const { return _angle; }
-		final float angle(float newAngle) {
+		final float angle() const { return currentState.angle; }
+		/*final float angle(float newAngle) {
             _angle = newAngle;
             onAngle();
             return _angle;
-        }
+        }*/
 	}
 
 	this() {}
@@ -207,14 +257,17 @@ class Widget {
             _canvas = new Canvas(_size);
         else
             _canvas = new Canvas(Vec2u.one * 2);
+        _canvas.position = _canvas.size / 2f;
     }
 
 	bool isInside(const Vec2f pos) const {
-		Vec2f collision = _size + _padding;
-		return (_position - pos).isBetween(-collision * (Vec2f.one - anchor), collision * _anchor);
+        return (_center - pos).isBetween(-size / 2f, _size / 2f);
+
+		//Vec2f collision = _size + _padding;
+		//return (_position - pos).isBetween(-collision * (Vec2f.one - anchor), collision * _anchor);
 	}
 
-	bool isOnInteractableWidget(Vec2f pos) const {
+	bool isOnInteractableGuiElement(Vec2f pos) const {
 		if(isInside(pos))
 			return _isInteractable;
 		return false;
@@ -224,14 +277,14 @@ class Widget {
 		_hint = makeHint(title, text);
 	}
 
-	void setCallback(Widget callbackWidget, string callbackId) {
-		_callbackWidget = callbackWidget;
+	void setCallback(GuiElement callbackGuiElement, string callbackId) {
+		_callbackGuiElement = callbackGuiElement;
 		_callbackId = callbackId;
 	}
 
 	protected void triggerCallback() {
-		if(_callbackWidget !is null) {
-			_callbackWidget.onCallback(_callbackId);
+		if(_callbackGuiElement !is null) {
+			_callbackGuiElement.onCallback(_callbackId);
 		}
 	}
 
@@ -268,26 +321,26 @@ class Widget {
         void onSize() {}
         void onDeltaAnchor(Vec2f delta) {}
         void onAnchor() {}
-        void onPivot() {}
+        void onCenter() {}
         void onPadding() {}
-        void onAngle() {}
+        //void onAngle() {}
         void onCallback(string id) {}
     }
 
-    void addChild(Widget widget) {
+    void addChildGui(GuiElement widget) {
 		_children ~= widget;
 	}
 
-	void removeChildren() {
+	void removeChildrenGuis() {
         _isChildGrabbed = false;
 		_children.length = 0uL;
 	}
 
-	int getChildrenCount() {
+	int getChildrenGuisCount() {
 		return cast(int)(_children.length);
 	}
 
-	void removeChild(uint id) {
+	void removeChildGui(uint id) {
         _isChildGrabbed = false;
         _isChildHovered = false;
 		if(!_children.length)
@@ -301,23 +354,23 @@ class Widget {
 	}
 }
 
-class WidgetCanvas: Widget {
+class GuiElementCanvas: GuiElement {
     this() {
         initCanvas();
     }
 }
 /+
-class WidgetGroup: Widget {
+class GuiElementGroup: GuiElement {
 	/*override void update(float deltaTime) {
         _iteratorTimer.update(deltaTime);
         _iteratorTimeOutTimer.update(deltaTime);
-		foreach(Widget widget; _children)
+		foreach(GuiElement widget; _children)
 			widget.update(deltaTime);
 	}
 
     override void onHover() {
         if(!_isHovered) {
-            foreach(Widget widget; _children)
+            foreach(GuiElement widget; _children)
                 widget.isHovered = false;
         }
     }
@@ -329,15 +382,15 @@ class WidgetGroup: Widget {
         }
     }
 
-	override bool isOnInteractableWidget(Vec2f pos) const {
+	override bool isOnInteractableGuiElement(Vec2f pos) const {
 		if(!isInside(pos))
 			return false;
 
 		if(_isFrame)
 			pos = getViewVirtualPos(pos, _position);
 		
-		foreach(const Widget widget; _children) {
-			if(widget.isOnInteractableWidget(pos))
+		foreach(const GuiElement widget; _children) {
+			if(widget.isOnInteractableGuiElement(pos))
 				return true;
 		}
 		return false;
@@ -346,7 +399,7 @@ class WidgetGroup: Widget {
 	
 	
 	override void drawOverlay() {
-		//if(_isWidgetDebug)
+		//if(_isGuiElementDebug)
 		//	drawRect(_position - _anchor * _size, _size, Color.cyan);
 
 		if(!_isHovered)
@@ -402,7 +455,7 @@ class WidgetGroup: Widget {
         }
         else _idChildIterator --;
 
-        foreach(uint id, Widget widget; _children)
+        foreach(uint id, GuiElement widget; _children)
             widget.isHovered = (id == _idChildIterator);
     }
 
@@ -420,11 +473,11 @@ class WidgetGroup: Widget {
         }
         else _idChildIterator ++;
 
-        foreach(uint id, Widget widget; _children)
+        foreach(uint id, GuiElement widget; _children)
             widget.isHovered = (id == _idChildIterator);
     }
 
-    Widget selectChild() {
+    GuiElement selectChild() {
         startIteration();
 
         if(_idChildIterator < _children.length)

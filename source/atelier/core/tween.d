@@ -134,6 +134,51 @@ struct Timer {
 	}
 }
 
+alias EasingFunction = float function(float);
+
+EasingFunction getEasingFunction(string name) {
+    switch(name) {
+    case "linear": return &easeLinear;
+    case "sine-in": return &easeInSine;
+    case "sine-out": return &easeOutSine;
+    case "sine-in-out": return &easeInOutSine;
+    case "quad-in": return &easeInQuad;
+    case "quad-out": return &easeOutQuad;
+    case "quad-in-out": return &easeInOutQuad;
+    case "cubic-in": return &easeInCubic;
+    case "cubic-out": return &easeOutCubic;
+    case "cubic-in-out": return &easeInOutCubic;
+    case "quart-in": return &easeInQuart;
+    case "quart-out": return &easeOutQuart;
+    case "quart-in-out": return &easeInOutQuart;
+    case "quint-in": return &easeInQuint;
+    case "quint-out": return &easeOutQuint;
+    case "quint-in-out": return &easeInOutQuint;
+    case "exp-in": return &easeInExp;
+    case "exp-out": return &easeOutExp;
+    case "exp-in-out": return &easeInOutExp;
+    case "circ-in": return &easeInCirc;
+    case "circ-out": return &easeOutCirc;
+    case "circ-in-out": return &easeInOutCirc;
+    case "back-in": return &easeInBack;
+    case "back-out": return &easeOutBack;
+    case "back-in-out": return &easeInOutBack;
+    case "elastic-in": return &easeInElastic;
+    case "elastic-out": return &easeOutElastic;
+    case "elastic-in-out": return &easeInOutElastic;
+    case "bounce-in": return &easeInBounce;
+    case "bounce-out": return &easeOutBounce;
+    case "bounce-in-out": return &easeInOutBounce;
+    default:
+        throw new Exception("Undefined ease function " ~ name);
+    }
+}
+
+//Linear
+float easeLinear(float t) {
+	return t;
+}
+
 //Sine
 float easeInSine(float t) {
 	return sin((t - 1f) * PI_2) + 1f;

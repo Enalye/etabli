@@ -25,20 +25,11 @@ it freely, subject to the following restrictions:
 module atelier.ui.label;
 
 import std.string;
+import derelict.sdl2.sdl, derelict.sdl2.ttf;
+import atelier.core, atelier.common, atelier.render;
+import atelier.ui.gui_element;
 
-import derelict.sdl2.sdl;
-import derelict.sdl2.ttf;
-
-import atelier.core;
-import atelier.common;
-
-import atelier.render.texture;
-import atelier.render.sprite;
-import atelier.render.font;
-
-import atelier.ui.widget;
-
-class Label: Widget {
+class Label: GuiElement {
 	private {
 		string _text;
 		Font _font;
@@ -92,13 +83,12 @@ class Label: Widget {
 
 	this(string newText) {
 		this();
-		isInteractable = false;
 		_text = newText;
 		reload();
 	}
 
-
 	this() {
+		isInteractable = false;
 		_texture = new Texture;
 		_sprite = _texture;
 		_font = fetch!Font("VeraMoBd");
@@ -106,7 +96,7 @@ class Label: Widget {
 
 	override void draw() {
 		if(_text.length > 0)
-			_sprite.draw(pivot);
+			_sprite.draw(center);
 	}
 
 	void reload() {

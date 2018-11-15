@@ -23,20 +23,11 @@ it freely, subject to the following restrictions:
 */
 
 module atelier.ui.modal;
-
-import atelier.core;
-import atelier.render;
-import atelier.common;
-
-import atelier.ui.widget;
-import atelier.ui.layout;
-import atelier.ui.label;
-import atelier.ui.button;
-import atelier.ui.panel;
-import atelier.ui.root;
+import atelier.core, atelier.render, atelier.common;
+import atelier.ui.gui_element, atelier.ui.layout, atelier.ui.label, atelier.ui.button, atelier.ui.panel, atelier.ui.gui_manager;
 
 private {
-	Widget[] _widgetsBackup;
+	GuiElement[] _widgetsBackup;
 	ModalWindow _modal;
 //	string _modalName;
 	bool _isModal = false;
@@ -47,10 +38,10 @@ void setModalWindow(ModalWindow newModal) {
 		throw new Exception("Modal window already set");
 	_isModal = true;
 	//_modalName = newModalName;
-	_widgetsBackup = getWidgets();
-	removeWidgets();
+	_widgetsBackup = getRootGuis();
+	removeRootGuis();
 	_modal = newModal;
-	addWidget(_modal);
+	addRootGui(_modal);
 	/+Event event = EventType.ModalOpen;
 	event.id = _modalName;
 	event.widget = _modal;
@@ -71,15 +62,15 @@ T getModal(T)() {
 }
 
 private void onModalClose() {
-	removeWidgets();
+	removeRootGuis();
 	if(_modal is null)
 		throw new Exception("Modal: No window instanciated");
-	setWidgets(_widgetsBackup);
+	setRootGuis(_widgetsBackup);
 	_widgetsBackup.length = 0L;
 	_isModal = false;
 }
 
-class ModalWindow: Widget {
+class ModalWindow: GuiElement {
 	AnchoredLayout layout;
 	TextButton cancelBtn, applyBtn;
 
@@ -98,9 +89,9 @@ class ModalWindow: Widget {
 		_titleLabel = new Label(newTitle);
 		_titleLabel.color = Color.white * 0.21;
 		_panel = new Panel;
-		_panel.position = pivot;
+		_panel.position = center;
 		layout = new AnchoredLayout;
-		layout.position = pivot;
+		layout.position = center;
 
 		_exitBtn = new ImgButton;
 		_exitBtn.idleSprite = fetch!Sprite("gui_window_exit");
@@ -164,20 +155,20 @@ class ModalWindow: Widget {
 				sendEvent(event);+/
 			};
 
-			addChild(_lowerBox);
-			_lowerBox.addChild(cancelBtn);
-			_lowerBox.addChild(applyBtn);
+			addChildGui(_lowerBox);
+			_lowerBox.addChildGui(cancelBtn);
+			_lowerBox.addChildGui(applyBtn);
 		}
 
-		addChild(_titleLabel);
-		addChild(layout);
-		addChild(_exitBtn);
-		addChild(_panel);
+		addChildGui(_titleLabel);
+		addChildGui(layout);
+		addChildGui(_exitBtn);
+		addChildGui(_panel);
 		resize();
 	}
 
 	override void update(float deltaTime) {
-		layout.position = pivot;
+		layout.position = center;
 		//Update suspended widgets
 		foreach(child; _widgetsBackup)
 			child.update(deltaTime);
@@ -197,12 +188,12 @@ class ModalWindow: Widget {
     }
 
 	protected void resize() {
-		_exitBtn.position = pivot + Vec2f((size.x - _exitBtn.size.x), (-size.y + _exitBtn.size.y)) / 2f;
+		_exitBtn.position = center + Vec2f((size.x - _exitBtn.size.x), (-size.y + _exitBtn.size.y)) / 2f;
 		_lowerBox.size = Vec2f(size.x - 25f, 40f);
-		_lowerBox.position = pivot + Vec2f(0f, size.y / 2f - 30f);
+		_lowerBox.position = center + Vec2f(0f, size.y / 2f - 30f);
 		_panel.size = size;
-		layout.position = pivot - Vec2f(8f, 0f);
+		layout.position = center - Vec2f(8f, 0f);
 		layout.size = Vec2f(size.x - 22f, size.y - 116f);
-		_titleLabel.position = Vec2f(pivot.x, pivot.y - size.y / 2f + 25f);
+		_titleLabel.position = Vec2f(center.x, center.y - size.y / 2f + 25f);
 	}
 }

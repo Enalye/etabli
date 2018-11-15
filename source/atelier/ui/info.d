@@ -43,7 +43,7 @@ class InfoWindow: ModalWindow {
 		super(title, Vec2f.zero);
 		auto label = new Label(information);
 		size = label.size;
-		layout.addChild(label);
+		layout.addChildGui(label);
 	}
 
 	this(string information) {

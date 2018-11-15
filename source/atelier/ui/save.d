@@ -27,36 +27,29 @@ module atelier.ui.save;
 import std.file;
 import std.path;
 import std.conv: to;
-
-import atelier.core;
-import atelier.common;
-
-import atelier.ui.widget;
-import atelier.ui.modal;
-import atelier.ui.button;
-import atelier.ui.list.vlist;
-import atelier.ui.inputfield;
+import atelier.core, atelier.common;
+import atelier.ui.gui_element, atelier.ui.modal, atelier.ui.button, atelier.ui.list.vlist, atelier.ui.inputfield;
 
 private {
 	InStream _loadedStream = null;
 }
 
-void setSaveWindow(Widget callbackWidget, string callbackId, OutStream stream, string path, string extension) {
+void setSaveWindow(GuiElement callbackGuiElement, string callbackId, OutStream stream, string path, string extension) {
 	path = buildNormalizedPath(absolutePath(path));
 	if(!extension.length)
 		throw new Exception("Cannot save without a file extension");
 	auto modal = new SaveWindow(stream, path, extension);
-	modal.setCallback(callbackWidget, callbackId);
+	modal.setCallback(callbackGuiElement, callbackId);
 	setModalWindow(modal);
 }
 
-void setLoadWindow(Widget callbackWidget, string callbackId, string path, string extension) {
+void setLoadWindow(GuiElement callbackGuiElement, string callbackId, string path, string extension) {
 	InStream stream = new InStream;
 	path = buildNormalizedPath(absolutePath(path));
 	if(!extension.length)
 		throw new Exception("Cannot save without a file extension");
 	auto modal = new LoadWindow(stream, path, extension);
-	modal.setCallback(callbackWidget, callbackId);
+	modal.setCallback(callbackGuiElement, callbackId);
 	_loadedStream = null;
 	setModalWindow(modal);
 }
@@ -78,7 +71,7 @@ class SaveWindow: ModalWindow {
 		_path = path;
 		_extension = extension;
 		_inputField = new InputField(layout.size, "Sans Titre", true);
-		layout.addChild(_inputField);
+		layout.addChildGui(_inputField);
 	}
 
 	override void onEvent(Event event) {
@@ -115,9 +108,9 @@ class LoadWindow: ModalWindow {
 			_files ~= file;
 			string relativeFileName = stripExtension(baseName(file));
 			auto btn = new TextButton(relativeFileName);
-			_list.addChild(btn);
+			_list.addChildGui(btn);
 		}
-		layout.addChild(_list);
+		layout.addChildGui(_list);
 	}
 
 	override void onEvent(Event event) {

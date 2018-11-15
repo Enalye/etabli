@@ -24,13 +24,10 @@ it freely, subject to the following restrictions:
 
 module atelier.ui.knob;
 
-import atelier.core;
-import atelier.render;
-import atelier.common;
+import atelier.core, atelier.render, atelier.common;
+import atelier.ui.gui_element;
 
-import atelier.ui.widget;
-
-class Knob: Widget {
+class Knob: GuiElement {
 	protected {
 		float _value = 0f, _step = 1f, _min = 0f, _max = 1f, _minAngle = 0f, _maxAngle = 360f, _angle = 0f, _lastValue = 0f;
 		Sprite _baseSprite, _btnSprite;
@@ -89,7 +86,7 @@ class Knob: Widget {
 		case MouseUpdate:
 			if(!isSelected)
 				break;
-			Vec2f delta = event.position - pivot;
+			Vec2f delta = event.position - center;
 			Vec2f delta2 = event.position - _lastCursorPosition;
 			if(delta2.lengthSquared() > 0f)
 				delta2.normalize();
@@ -123,11 +120,11 @@ class Knob: Widget {
 	}
 
 	override void draw() {
-		_btnSprite.draw(pivot);
+		_btnSprite.draw(center);
 	}
 
 	override bool isInside(const Vec2f pos) const {
 		float halfSize = size.x / 2f;
-		return (pivot - pos).lengthSquared() < halfSize * halfSize;
+		return (pos - center).lengthSquared() < halfSize * halfSize;
 	}
 }

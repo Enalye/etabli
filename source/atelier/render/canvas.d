@@ -53,7 +53,6 @@ class Canvas {
 			if(_renderTexture !is null)
 				SDL_DestroyTexture(_renderTexture);
 			_renderTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _renderSize.x, _renderSize.y);
-            position = size / 2f;
 			return _renderSize;
 		}
 	}
@@ -79,7 +78,6 @@ class Canvas {
 
 		size = cast(Vec2f)_renderSize;
 		isCentered = false;
-        position = size / 2f;
 	}
 
 	this(const Canvas canvas) {
