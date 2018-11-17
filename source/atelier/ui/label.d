@@ -90,7 +90,7 @@ class Label: GuiElement {
 	this() {
 		isInteractable = false;
 		_texture = new Texture;
-		_sprite = _texture;
+		_sprite = new Sprite(_texture);
 		_font = fetch!Font("VeraMoBd");
 	}
 

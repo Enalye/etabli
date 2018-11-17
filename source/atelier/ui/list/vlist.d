@@ -61,6 +61,13 @@ class VList: GuiElement {
 			if(id > _nbElements)
 				throw new Exception("VList: index out of bounds");
 			_idElementSelected = id;
+
+            //Update children
+            auto widgets = _container.layout.children;
+            foreach(GuiElement gui; _container.layout.children)
+                gui.isSelected = false;
+            if(_idElementSelected < widgets.length)
+                widgets[_idElementSelected].isSelected = true;
 			return _idElementSelected;
 		}
 
@@ -95,13 +102,13 @@ class VList: GuiElement {
 			else if(event.type == EventType.MouseDown) {
 
 				auto widgets = _container.layout.children;
-				foreach(uint id, ref GuiElement widget; _container.layout.children) {
-					widget.isValidated = false;
-					if(widget.isHovered)
+				foreach(uint id, ref GuiElement gui; _container.layout.children) {
+					gui.isSelected = false;
+					if(gui.isHovered)
 						_idElementSelected = id;
 				}
 				if(_idElementSelected < widgets.length)
-					widgets[_idElementSelected].isValidated = true;
+					widgets[_idElementSelected].isSelected = true;
 			}
 		}
 
@@ -136,7 +143,7 @@ class VList: GuiElement {
 	override void addChildGui(GuiElement gui) {
         gui.position = Vec2f.zero;
         gui.setAlign(GuiAlignX.Right, GuiAlignY.Top);
-		gui.isValidated = (_nbElements == 0u);
+		gui.isSelected = (_nbElements == 0u);
 
 		_nbElements ++;
 		_container.layout.size = Vec2f(_container.size.x, _layoutLength * _nbElements);

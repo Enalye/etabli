@@ -163,11 +163,15 @@ class VContainer: GuiElement {
 	protected {
 		Vec2f _spacing = Vec2f.zero;
 		GuiAlignX _childAlignX = GuiAlignX.Center;
+        float _minimalWidth = 0f;
 	}
 
 	@property {
 		Vec2f spacing() const { return _spacing; }
 		Vec2f spacing(Vec2f newPadding) { _spacing = newPadding; resize(); return _spacing; }
+
+        float minimalWidth() const { return _minimalWidth; }
+		float minimalWidth(float newMinimalWidth) { _minimalWidth = newMinimalWidth; resize(); return _minimalWidth; }
 	}
 
 	this() {}
@@ -203,7 +207,7 @@ class VContainer: GuiElement {
 			return;
 		}
 
-		Vec2f totalSize = Vec2f.zero;
+		Vec2f totalSize = Vec2f(_minimalWidth, 0f);
 		foreach(GuiElement gui; _children) {
 			totalSize.y += gui.size.y + _spacing.y;
 			totalSize.x = max(totalSize.x, gui.size.x);
@@ -223,12 +227,16 @@ class HContainer: GuiElement {
 	protected {
 		Vec2f _spacing = Vec2f.zero;
 		GuiAlignY _childAlignY = GuiAlignY.Center;
+        float _minimalHeight = 0f;
 	}
 
 	@property {
 		Vec2f spacing() const { return _spacing; }
 		Vec2f spacing(Vec2f newPadding) { _spacing = newPadding; resize(); return _spacing; }
-	}
+	
+        float minimalHeight() const { return _minimalHeight; }
+		float minimalHeight(float newMinimalHeight) { _minimalHeight = newMinimalHeight; resize(); return _minimalHeight; }
+    }
 
 	this() {}
 
@@ -250,6 +258,7 @@ class HContainer: GuiElement {
     override void onSize() {
         resize();
     }
+
 	private bool isResizeCalled;
 	protected void resize() {
         if(isResizeCalled)
@@ -262,7 +271,7 @@ class HContainer: GuiElement {
 			return;
 		}
 
-		Vec2f totalSize = Vec2f.zero;
+		Vec2f totalSize = Vec2f(0f, _minimalHeight);
 		foreach(GuiElement gui; _children) {
 			totalSize.y = max(totalSize.y, gui.size.y);
 			totalSize.x += gui.size.x + _spacing.x;

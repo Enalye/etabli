@@ -48,7 +48,7 @@ enum Blend {
 	AlphaBlending
 }
 
-class Texture {
+final class Texture {
 	private {
 		bool _isLoaded = false;
 		SDL_Texture* _texture = null;

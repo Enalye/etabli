@@ -96,12 +96,12 @@ class HList: GuiElement {
 
 				auto widgets = _container.layout.children;
 				foreach(uint id, ref GuiElement gui; _container.layout.children) {
-					gui.isValidated = false;
+					gui.isSelected = false;
 					if(gui.isHovered)
 						_idElementSelected = id;
 				}
 				if(_idElementSelected < widgets.length)
-					widgets[_idElementSelected].isValidated = true;
+					widgets[_idElementSelected].isSelected = true;
 			}
 		}
 
@@ -136,7 +136,7 @@ class HList: GuiElement {
 	override void addChildGui(GuiElement gui) {
         gui.position = Vec2f.zero;
         gui.setAlign(GuiAlignX.Right, GuiAlignY.Top);
-		gui.isValidated = (_nbElements == 0u);
+		gui.isSelected = (_nbElements == 0u);
 
 		_nbElements ++;
 		_container.layout.size = Vec2f(_layoutLength * _nbElements, _container.size.y);

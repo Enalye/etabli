@@ -11,8 +11,62 @@ final class NinePatch: IDrawable {
         Vec2f size(const Vec2f newSize) {
             _size = newSize;
             _cache = new Canvas(_size);
-            renderToCache();
+            _isDirty = true;
             return _size;
+        }
+
+        Vec4i clip() { return _clip; }
+        Vec4i clip(const Vec4i newClip) {
+            if(_clip == newClip)
+                return _clip;
+            _clip = newClip;
+            _isDirty = true;
+            return _clip;
+        }
+
+        int top() const { return _top; }
+        int top(int newTop) {
+            if(_top == newTop)
+                return _top;
+            _top = newTop;
+            _isDirty = true;
+            return _top;
+        }
+
+        int bottom() const { return _bottom; }
+        int bottom(int newBottom) {
+            if(_bottom == newBottom)
+                return _bottom;
+            _bottom = newBottom;
+            _isDirty = true;
+            return _bottom;
+        }
+
+        int left() const { return _left; }
+        int left(int newLeft) {
+            if(_left == newLeft)
+                return _left;
+            _left = newLeft;
+            _isDirty = true;
+            return _left;
+        }
+
+        int right() const { return _right; }
+        int right(int newRight) {
+            if(_right == newRight)
+                return _right;
+            _right = newRight;
+            _isDirty = true;        
+            return _right;
+        }
+
+        Texture texture() { return _texture; }
+        Texture texture(Texture newTexture) {
+            if(_texture == newTexture)
+                return _texture;
+            _texture = newTexture;
+            _isDirty = true;        
+            return _texture;
         }
     }
 
@@ -22,7 +76,10 @@ final class NinePatch: IDrawable {
         Texture _texture;
         Vec4i _clip;
         int _top, _bottom, _left, _right;
+        bool _isDirty = true;
     }
+
+    this() {}
 	
     this(string _textureId, Vec4i newClip, int newTop, int newBottom, int newLeft, int newRight) {
         this(fetch!Texture(_textureId), newClip, newTop, newBottom, newLeft, newRight);
@@ -37,15 +94,19 @@ final class NinePatch: IDrawable {
         _right = newRight;
 		_size = to!Vec2f(_clip.zw);
         _cache = new Canvas(_clip.zw);
-        renderToCache();
+        _isDirty = true;
     }
 
     void fit(Vec2f newSize) {
 		_size = to!Vec2f(_clip.zw).fit(newSize);
-        renderToCache();
+        _isDirty = true;
 	}
 
     private void renderToCache() {
+        _isDirty = false;
+        if(_texture is null
+            || _clip.z <= (_left + _right) || _clip.w <= (_top + _bottom))
+            return;
         pushCanvas(_cache, true);
 
         Vec4i localClip;
@@ -59,11 +120,13 @@ final class NinePatch: IDrawable {
 
             while(filledHeight < fillHeight) {
                 int height = min(_clip.w - _top - _bottom, fillHeight - filledHeight);
-
+                if(height <= 0)
+                    break;
                 filledWidth = 0;
                 while(filledWidth < fillWidth) {
                     int width = min(_clip.z - _left - _right, fillWidth - filledWidth);
-
+                    if(width <= 0)
+                        break;
                     localClip = Vec4i(_clip.x + _left, _clip.y + _top, width, height);
                     _texture.draw(Vec2f(_left + filledWidth, _top + filledHeight), Vec2f(width, height), localClip, 0f, Flip.NoFlip, Vec2f.zero);
                     filledWidth += width;
@@ -80,6 +143,8 @@ final class NinePatch: IDrawable {
             int fillWidth = to!int(_size.x) - _left - _right;
             while(filled < fillWidth) {
                 int width = min(_clip.z - _left - _right, fillWidth - filled);
+                if(width < 0)
+                    break;
                 int height = _top;
                 localClip = Vec4i(_clip.x + _left, _clip.y, width, height);
                 _texture.draw(Vec2f(_left + filled, 0f), Vec2f(width, height), localClip, 0f, Flip.NoFlip, Vec2f.zero);
@@ -93,6 +158,8 @@ final class NinePatch: IDrawable {
             int fillWidth = to!int(_size.x) - _left - _right;
             while(filled < fillWidth) {
                 int width = min(_clip.z - _left - _right, fillWidth - filled);
+                if(width < 0)
+                    break;
                 int height = _bottom;
                 localClip = Vec4i(_clip.x + _left, _clip.y + _clip.w - _bottom, width, height);
                 _texture.draw(Vec2f(_left + filled, to!int(_size.y) - _bottom), Vec2f(width, height), localClip, 0f, Flip.NoFlip, Vec2f.zero);
@@ -106,6 +173,8 @@ final class NinePatch: IDrawable {
             int fillHeight = to!int(_size.y) - _top - _bottom;
             while(filled < fillHeight) {
                 int height = min(_clip.w - _top - _bottom, fillHeight - filled);
+                if(height < 0)
+                    break;
                 int width = _top;
                 localClip = Vec4i(_clip.x, _clip.y + _top, width, height);
                 _texture.draw(Vec2f(0f, _top + filled), Vec2f(width, height), localClip, 0f, Flip.NoFlip, Vec2f.zero);
@@ -119,6 +188,8 @@ final class NinePatch: IDrawable {
             int fillHeight = to!int(_size.y) - _top - _bottom;
             while(filled < fillHeight) {
                 int height = min(_clip.w - _top - _bottom, fillHeight - filled);
+                if(height < 0)
+                    break;
                 int width = _top;
                 localClip = Vec4i(_clip.x + _clip.z - _right, _clip.y + _top, width, height);
                 _texture.draw(Vec2f(to!int(_size.x) - _right, _top + filled), Vec2f(width, height), localClip, 0f, Flip.NoFlip, Vec2f.zero);
@@ -160,6 +231,8 @@ final class NinePatch: IDrawable {
     }
 
     void draw(const Vec2f position) {
+        if(_isDirty)
+            renderToCache();
         _cache.draw(transformRenderSpace(position));
     }
 }

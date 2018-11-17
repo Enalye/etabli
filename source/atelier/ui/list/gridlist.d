@@ -75,12 +75,12 @@ class GridList: GuiElement {
 
 				auto widgets = _container.layout.children;
 				foreach(uint id, ref GuiElement widget; _container.layout.children) {
-					widget.isValidated = false;
+					widget.isSelected = false;
 					if(widget.isHovered)
 						_idElementSelected = id;
 				}
 				if(_idElementSelected < widgets.length)
-					widgets[_idElementSelected].isValidated = true;
+					widgets[_idElementSelected].isSelected = true;
 			}
 		}
 
@@ -120,7 +120,7 @@ class GridList: GuiElement {
 	}
 
 	override void addChildGui(GuiElement widget) {
-		widget.isValidated = (_nbElements == 0u);
+		widget.isSelected = (_nbElements == 0u);
 
 		_nbElements ++;
 		_container.layout.size = Vec2f(size.x, _layoutLength * (_nbElements / _nbElementsPerLine));

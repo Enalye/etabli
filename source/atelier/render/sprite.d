@@ -34,7 +34,7 @@ import atelier.render.window;
 import atelier.render.texture;
 import atelier.render.drawable;
 
-struct Sprite {
+final class Sprite {
 	@property {
 		bool isValid() const { return texture !is null; }
 		Vec2f center() const { return anchor * size * scale; }
@@ -47,6 +47,8 @@ struct Sprite {
 	float angle = 0f;
     Color color = Color.white;
     Blend blend = Blend.AlphaBlending;
+
+    this() {}
 
 	this(Texture newTexture, Flip newFlip = Flip.NoFlip) {
 		texture = newTexture;

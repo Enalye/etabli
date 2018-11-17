@@ -26,6 +26,7 @@ module atelier.ui.inputfield;
 
 import std.utf;
 import std.conv: to;
+import std.string: indexOf;
 import atelier.core, atelier.render, atelier.common;
 import atelier.ui.gui_element, atelier.ui.label;
 
@@ -33,7 +34,7 @@ class InputField: GuiElementCanvas {
 	private {
 		Label _label;
 		Color _borderColor, _caretColor;
-		dstring _text;
+		dstring _text, _allowedCharacters;
 		Timer _time;
 		uint _caretIndex = 0U;
 		Vec2f _caretPosition = Vec2f.zero;
@@ -83,12 +84,17 @@ class InputField: GuiElementCanvas {
 			case KeyInput:
 				if(_caretIndex >= _limit)
 					break;
+                const auto textInput = to!dstring(event.str);
+                if(_allowedCharacters.length) {
+                    if(indexOf(_allowedCharacters, textInput) == -1)
+                        break;
+                }
 				if(_caretIndex == _text.length)
-					_text ~= to!dstring(event.str);
+					_text ~= textInput;
 				else if(_caretIndex == 0U)
-					_text = to!dstring(event.str) ~ _text;
+					_text = textInput ~ _text;
 				else
-					_text = _text[0U.._caretIndex] ~ to!dstring(event.str) ~ _text[_caretIndex..$];
+					_text = _text[0U.._caretIndex] ~ textInput ~ _text[_caretIndex..$];
 				_caretIndex ++;
 				_label.text = to!string(_text);
 				break;
@@ -161,4 +167,8 @@ class InputField: GuiElementCanvas {
 		_caretIndex = 0u;
 		_label.text = "";
 	}
+
+    void setAllowedCharacters(dstring allowedCharacters) {
+        _allowedCharacters = allowedCharacters;
+    }
 }

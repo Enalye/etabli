@@ -155,15 +155,15 @@ class Canvas {
 			pos.isBetween(renderPosition, renderPosition + cast(Vec2f)(_renderSize));
     }
 
-    void draw(Vec2f pos, Vec2f size, Vec4i srcRect, float angle, Flip flip = Flip.NoFlip, Vec2f anchor = Vec2f.half) const {
-		pos -= anchor * size;
+    void draw(Vec2f pos, Vec2f rsize, Vec4i srcRect, float angle, Flip flip = Flip.NoFlip, Vec2f anchor = Vec2f.half) const {
+		pos -= anchor * rsize;
 		
 		SDL_Rect srcSdlRect = srcRect.toSdlRect();
 		SDL_Rect destSdlRect = {
 			cast(uint)pos.x,
 			cast(uint)pos.y,
-			cast(uint)size.x,
-			cast(uint)size.y
+			cast(uint)rsize.x,
+			cast(uint)rsize.y
 		};
 
 		SDL_RendererFlip rendererFlip = (flip == Flip.BothFlip) ?

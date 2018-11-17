@@ -237,7 +237,7 @@ private class SpriteCache(T): ResourceCache!T {
 		foreach(string tag, JSONValue value; sheetJson.object) {
 			if((tag in _ids) !is null)
 				throw new Exception("Duplicate sprite defined \'" ~ tag ~ "\' in \'" ~ file ~ "\'");
-			T sprite = T(texture);
+			T sprite = new T(texture);
 
 			//Clip
 			sprite.clip.x = getJsonInt(value, "x");
@@ -308,26 +308,26 @@ private class TilesetCache(T): ResourceCache!T {
 		foreach(string tag, JSONValue value; sheetJson.object) {
 			if((tag in _ids) !is null)
 				throw new Exception("Duplicate tileset defined \'" ~ tag ~ "\' in \'" ~ file ~ "\'");
-            Vec2i grid, offset, tileSize;
-            int nbTiles;
+            Vec4i clip;
+            int columns, lines, maxtiles;
 
             //Max number of tiles the tileset cannot exceeds
-            nbTiles = getJsonInt(value, "tiles", -1);
+            maxtiles = getJsonInt(value, "tiles", -1);
 
             //Upper left border of the tileset
-            offset.x = getJsonInt(value, "x", 0);
-            offset.y = getJsonInt(value, "y", 0);
+            clip.x = getJsonInt(value, "x", 0);
+            clip.y = getJsonInt(value, "y", 0);
 
             //Tile size
-            tileSize.x = getJsonInt(value, "w");
-            tileSize.y = getJsonInt(value, "h");
+            clip.z = getJsonInt(value, "w");
+            clip.w = getJsonInt(value, "h");
 
-            grid.x = getJsonInt(value, "columns", 1);
-            grid.y = getJsonInt(value, "lines", 1);
+            columns = getJsonInt(value, "columns", 1);
+            lines = getJsonInt(value, "lines", 1);
 
             string type = getJsonStr(value, "type", ".");
 
-            T tileset = T(texture, offset, grid, tileSize, nbTiles);
+            T tileset = new T(texture, clip, columns, lines, maxtiles);
             tileset.scale = Vec2f(getJsonFloat(value, "scalex", 1f), getJsonFloat(value, "scaley", 1f));
 
             //Flip

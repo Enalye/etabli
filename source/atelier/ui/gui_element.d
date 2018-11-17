@@ -94,11 +94,6 @@ class GuiElement {
 		GuiElement _callbackGuiElement;
 		string _callbackId;
 
-        //Mouse control        
-		Vec2f _lastMousePos;
-		bool _isGrabbed = false, _isChildGrabbed = false, _isChildHovered = false;
-		uint _idChildGrabbed;
-
         //Iteration
         bool _isIterating, _isWarping = true;
         uint _idChildIterator;
@@ -332,7 +327,6 @@ class GuiElement {
 	}
 
 	void removeChildrenGuis() {
-        _isChildGrabbed = false;
 		_children.length = 0uL;
 	}
 
@@ -341,8 +335,6 @@ class GuiElement {
 	}
 
 	void removeChildGui(uint id) {
-        _isChildGrabbed = false;
-        _isChildHovered = false;
 		if(!_children.length)
 			return;
 		if(id + 1u == _children.length)

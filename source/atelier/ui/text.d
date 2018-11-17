@@ -53,7 +53,7 @@ class FontCache: ITextCache {
 		if(cachedSprite is null) {
 			auto texture = new Texture;
 			texture.loadFromSurface(TTF_RenderUTF8_Blended(_font.font, toUTFz!(const char*)([c].toUTF8), Color.white.toSDL()));
-			Sprite sprite = texture;
+			Sprite sprite = new Sprite(texture);
 			_cache[c] = sprite;
 			return sprite;
 		}
