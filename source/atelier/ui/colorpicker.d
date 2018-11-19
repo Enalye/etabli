@@ -29,7 +29,7 @@ import atelier.render;
 import atelier.common;
 
 import atelier.ui;
-
+/+
 class ColorViewer: GuiElement {
 	Color color;
 
@@ -42,7 +42,7 @@ class ColorViewer: GuiElement {
 	}
 }
 
-class ColorPicker: ModalWindow {
+class ColorPicker: GuiElement {
 	private {
 		DropDownList _blendList;
 		Slider _redSlider, _blueSlider, _greenSlider, _alphaSlider;
@@ -139,4 +139,4 @@ class ColorPicker: ModalWindow {
 		super.update(deltaTime);
 		_viewer.color = color();
 	}
-}
+}+/

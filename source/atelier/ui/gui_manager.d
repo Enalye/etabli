@@ -118,14 +118,14 @@ void updateGuiElements(GuiElement gui, GuiElement parent) {
             else if(gui.xalign == GuiAlignX.Right)
                 coords.x = parent.size.x - offset.x;
             else
-                coords.x = parent.size.x / 2f;
+                coords.x = parent.size.x / 2f + gui.currentState.offset.x;
 
             if(gui.yalign == GuiAlignY.Top)
                 coords.y = offset.y;
             else if(gui.yalign == GuiAlignY.Bottom)
                 coords.y = parent.size.y - offset.y;
             else
-                coords.y = parent.size.y / 2f;
+                coords.y = parent.size.y / 2f + gui.currentState.offset.y;
         }
         else {
             if(gui.xalign == GuiAlignX.Left)
@@ -133,14 +133,14 @@ void updateGuiElements(GuiElement gui, GuiElement parent) {
             else if(gui.xalign == GuiAlignX.Right)
                 coords.x = parent.origin.x + parent.size.x - offset.x;
             else
-                coords.x = parent.center.x;
+                coords.x = parent.center.x + gui.currentState.offset.x;
 
             if(gui.yalign == GuiAlignY.Top)
                 coords.y = parent.origin.y + offset.y;
             else if(gui.yalign == GuiAlignY.Bottom)
                 coords.y = parent.origin.y + parent.size.y - offset.y;
             else
-                coords.y = parent.center.y;
+                coords.y = parent.center.y + gui.currentState.offset.y;
         }
     }
     else {
@@ -149,14 +149,14 @@ void updateGuiElements(GuiElement gui, GuiElement parent) {
         else if(gui.xalign == GuiAlignX.Right)
             coords.x = screenWidth - offset.x;
         else
-            coords.x = centerScreen.x;
+            coords.x = centerScreen.x + gui.currentState.offset.x;
 
         if(gui.yalign == GuiAlignY.Top)
             coords.y = offset.y;
         else if(gui.yalign == GuiAlignY.Bottom)
             coords.y = screenHeight - offset.y;
         else
-            coords.y = centerScreen.y;
+            coords.y = centerScreen.y + gui.currentState.offset.y;
     }
     gui.setScreenCoords(coords);
     gui.update(_deltaTime);

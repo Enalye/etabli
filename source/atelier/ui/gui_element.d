@@ -25,7 +25,7 @@ it freely, subject to the following restrictions:
 module atelier.ui.gui_element;
 
 import atelier.render, atelier.core, atelier.common, atelier.render;
-import atelier.ui.gui_overlay, atelier.ui.modal;
+import atelier.ui.gui_overlay;
 
 enum GuiAlignX {
     Left, Center, Right
@@ -72,7 +72,13 @@ class GuiElement {
     }
 
     void setState(string stateName) {
-        //no timer
+        auto ptr = stateName in states;
+        if(!(ptr))
+            throw new Exception("No state " ~ stateName ~ " in GuiElement");
+        currentStateName = stateName;
+        initState = *ptr;
+        targetState = *ptr;
+        currentState = *ptr;
     }
 
     void setAlign(GuiAlignX x, GuiAlignY y) {

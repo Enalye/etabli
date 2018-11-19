@@ -28,12 +28,12 @@ import std.file;
 import std.path;
 import std.conv: to;
 import atelier.core, atelier.common;
-import atelier.ui.gui_element, atelier.ui.modal, atelier.ui.button, atelier.ui.list.vlist, atelier.ui.inputfield;
+import atelier.ui.gui_element, atelier.ui.gui_modal, atelier.ui.button, atelier.ui.list.vlist, atelier.ui.inputfield;
 
 private {
 	InStream _loadedStream = null;
 }
-
+/+
 void setSaveWindow(GuiElement callbackGuiElement, string callbackId, OutStream stream, string path, string extension) {
 	path = buildNormalizedPath(absolutePath(path));
 	if(!extension.length)
@@ -137,4 +137,4 @@ class LoadWindow: ModalWindow {
 		super.update(deltaTime);
 		applyBtn.isLocked = (_files.length == 0L);
 	}
-}
+}+/

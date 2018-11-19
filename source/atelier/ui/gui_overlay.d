@@ -31,7 +31,7 @@ import atelier.ui.gui_element, atelier.ui.label, atelier.ui.text, atelier.ui.gui
 private {
 	HintWindow _hintWindow;
 	Hint _displayedHint;
-	GuiElement[] _widgetsBackup;
+	GuiElement[] _backupGuis;
 	GuiElement[] _overlayGuiElements;
 	bool _isOverlay = false;
 }
@@ -62,42 +62,37 @@ bool isOverlay() {
 	return _isOverlay;
 }
 
-void setOverlay(GuiElement widget) {
+void setOverlay(GuiElement gui) {
 	if(!_isOverlay) {
 		_isOverlay = true;
-		_widgetsBackup = getRootGuis();
+		_backupGuis = getRootGuis();
 		removeRootGuis();
 	}
 
-	_overlayGuiElements ~= widget;
-	addRootGui(widget);
+	_overlayGuiElements ~= gui;
+	addRootGui(gui);
 }
 
 void stopOverlay() {
 	if(!_isOverlay)
 		throw new Exception("No overlay to stop");
 	_isOverlay = false;
-	setRootGuis(_widgetsBackup);
-	_widgetsBackup.length = 0L;
+	setRootGuis(_backupGuis);
+	_backupGuis.length = 0L;
 	_overlayGuiElements.length = 0L;
 }
 
 void processOverlayEvent(Event event) {
 	if(event.type == EventType.Quit) {
-		foreach(widget; _widgetsBackup)
-			widget.onEvent(event);
+		foreach(gui; _backupGuis)
+			gui.onEvent(event);
 	}
-	/*foreach(widget; _overlayGuiElements) {
-		widget.isHovered = true;
-		widget.hasFocus = true;
-		widget.onEvent(event);
-	}*/
 }
 
-void processOverlayBack(float deltaTime) {
-	foreach(widget; _widgetsBackup) {
-		updateGuiElements(widget, null);	
-		drawGuiElements(widget);
+void processOverlayBack() {
+	foreach(gui; _backupGuis) {
+		updateGuiElements(gui, null);	
+		drawGuiElements(gui);
 	}
 }
 

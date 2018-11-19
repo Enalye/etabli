@@ -26,9 +26,9 @@ module atelier.ui.info;
 
 import atelier.core;
 
-import atelier.ui.modal;
+import atelier.ui.gui_modal;
 import atelier.ui.label;
-
+/+
 void setInfoWindow(string title, string information) {
 	setModalWindow(new InfoWindow(title, information));
 }
@@ -49,4 +49,4 @@ class InfoWindow: ModalWindow {
 	this(string information) {
 		this("Information", information);
 	}
-}
+}+/

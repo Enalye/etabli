@@ -27,11 +27,11 @@ module atelier.ui.listwindow;
 import atelier.core;
 import atelier.common;
 
-import atelier.ui.modal;
+import atelier.ui.gui_modal;
 import atelier.ui.button;
 import atelier.ui.list.vlist;
 import atelier.ui.inputfield;
-
+/+
 void setListWindow(string title, string[] list) {
 	auto modal = new ListWindow(title, list);
 	setModalWindow(modal);
@@ -62,4 +62,4 @@ class ListWindow: ModalWindow {
 		}
 		layout.addChildGui(_list);
 	}
-}
+}+/
