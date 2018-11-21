@@ -50,12 +50,8 @@ class Hint {
 }
 
 void openHintWindow(Hint hint) {
-	_displayedHint = hint;
-}
-
-void initializeOverlay() {
 	_hintWindow = new HintWindow;
-	_displayedHint = null;
+	_displayedHint = hint;
 }
 
 bool isOverlay() {
@@ -97,6 +93,8 @@ void processOverlayBack() {
 }
 
 void processOverlayFront(float deltaTime) {
+    if(_hintWindow is null)
+        return;
 	_hintWindow.hint = _displayedHint;
 	_hintWindow.update(deltaTime);
 	_hintWindow.draw();

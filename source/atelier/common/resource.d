@@ -40,19 +40,6 @@ private {
 	string _dataFolder = "./";
 }
 
-void loadResources() {
-	//Path to 'data/'
-	auto path = buildNormalizedPath(absolutePath(_dataFolder));
-
-	auto fontCache = new DataCache!Font(path, getResourceSubFolder!Font, "*.{ttf}");
-	auto soundCache = new DataCache!Sound(path, getResourceSubFolder!Sound, "*.{wav,ogg}");
-	auto musicCache = new DataCache!Music(path, getResourceSubFolder!Music, "*.{wav,ogg,mp3}");
-
-	setResourceCache!Font(fontCache);
-	setResourceCache!Sound(soundCache);
-	setResourceCache!Music(musicCache);
-}
-
 void setResourceFolder(string dataFolder) {
 	_dataFolder = dataFolder;
 }

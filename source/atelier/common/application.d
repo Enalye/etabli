@@ -57,8 +57,6 @@ void createApplication(Vec2u size, string title = "Atelier") {
     _isInitialized = true;
     createWindow(size, title);
     initializeEvents();
-    loadResources();
-    initializeOverlay();
     _tickStartFrame = Clock.currStdTime();
 }
 
