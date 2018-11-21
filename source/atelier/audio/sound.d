@@ -44,7 +44,7 @@ class Sound {
 		Mix_Chunk* _chunk;
 		int _groupId = -1;
 		int _currentChannelId = -1;
-		bool _isLooped = false;
+		bool _isLooped, _ownData;
 		float _length = 0f;
 		float _volume = 0f;
 	}
@@ -74,6 +74,16 @@ class Sound {
 		int group(int newGroup) { return _groupId = newGroup; }
 	}
 
+    this(Sound sound) {
+        _chunk = sound._chunk;
+        _groupId = sound._groupId;
+        _currentChannelId = sound._currentChannelId;
+        _isLooped = sound._isLooped;
+        _length = sound._length;
+        _volume = sound._volume;
+        _ownData = false;
+    }
+
 	this(Mix_Chunk* chunk) {
 		load(chunk);
 	}
@@ -97,9 +107,12 @@ class Sound {
 		_chunk = chunk;
 		_length = (cast(float)_chunk.alen) / (44100f * 4f);
 		_volume = (cast(float)_chunk.volume) / MIX_MAX_VOLUME;
+        _ownData = true;
 	}
 
 	void unload() {
+        if(!_ownData)
+            return;
 		if(_chunk)
 			Mix_FreeChunk(_chunk);
 		_chunk = null;

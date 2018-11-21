@@ -116,9 +116,6 @@ void createWindow(const Vec2u windowSize, string title) {
 }
 
 void destroyWindow() {
-	if (_icon)
-		SDL_FreeSurface(_icon);
-
 	if (window)
 		SDL_DestroyWindow(window);
 
@@ -127,8 +124,6 @@ void destroyWindow() {
 
     if(_hasAudio)
 	    Mix_CloseAudio();
-	//TTF_Quit();
-	//SDL_Quit();
 }
 
 void enableAudio(bool enable) {
@@ -154,7 +149,7 @@ void setWindowIcon(string path) {
 		SDL_FreeSurface(_icon);
 		_icon = null;
 	}
-	_icon = SDL_LoadBMP(toStringz(path));
+	_icon = IMG_Load(toStringz(path));
 
 	SDL_SetWindowIcon(window, _icon);
 }

@@ -44,17 +44,11 @@ void loadResources() {
 	//Path to 'data/'
 	auto path = buildNormalizedPath(absolutePath(_dataFolder));
 
-	auto textureCache = new DataCache!Texture(path, getResourceSubFolder!Texture, "*.{png,bmp,jpg}");
 	auto fontCache = new DataCache!Font(path, getResourceSubFolder!Font, "*.{ttf}");
-	auto spriteCache = new SpriteCache!Sprite(path, getResourceSubFolder!Sprite, "*.{sprite}", textureCache);
-	auto tilesetCache = new TilesetCache!Tileset(path, getResourceSubFolder!Tileset, "*.{tileset}", textureCache);
 	auto soundCache = new DataCache!Sound(path, getResourceSubFolder!Sound, "*.{wav,ogg}");
 	auto musicCache = new DataCache!Music(path, getResourceSubFolder!Music, "*.{wav,ogg,mp3}");
 
-	setResourceCache!Texture(textureCache);
 	setResourceCache!Font(fontCache);
-	setResourceCache!Sprite(spriteCache);
-	setResourceCache!Tileset(tilesetCache);
 	setResourceCache!Sound(soundCache);
 	setResourceCache!Music(musicCache);
 }
@@ -131,14 +125,14 @@ Tuple!(T, string)[] fetchPackTuples(T)(string name = ".") {
 	return (cast(ResourceCache!T)*cache).getPackTuples(name);
 }
 
-private class ResourceCache(T) {
+class ResourceCache(T) {
 	protected {
 		Tuple!(T, string)[] _data;
 		uint[string] _ids;
 		uint[][string] _packs;
 	}
 
-	protected this() {}
+	this() {}
 
 	bool canGet(string name) {
 		return (buildNormalizedPath(name) in _ids) !is null;
@@ -154,7 +148,7 @@ private class ResourceCache(T) {
 		auto p = (name in _ids);
 		if(p is null)
 			throw new Exception("Resource: no \'" ~ name ~ "\' loaded");
-		return _data[*p][0];
+		return new T(_data[*p][0]);
 	}
 
 	T[] getPack(string pack = ".") {
@@ -166,7 +160,7 @@ private class ResourceCache(T) {
 
 		T[] result;
 		foreach(i; *p)
-			result ~= _data[i][0];
+			result ~= new T(_data[i][0]);
 		return result;
 	}
 
@@ -195,6 +189,14 @@ private class ResourceCache(T) {
 			result ~= _data[i];
 		return result;
 	}
+
+    void set(T value, string tag, string pack = "") {
+        uint id = cast(uint)_data.length;
+        if(pack.length)
+            _packs[pack] ~= id;
+        _ids[tag] = id;
+        _data ~= tuple(value, tag);
+    }
 }
 
 class DataCache(T): ResourceCache!T {

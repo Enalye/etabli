@@ -50,7 +50,7 @@ enum Blend {
 
 final class Texture {
 	private {
-		bool _isLoaded = false;
+		bool _isLoaded = false, _ownData;
 		SDL_Texture* _texture = null;
 		uint _width, _height;
 	}
@@ -61,8 +61,15 @@ final class Texture {
 		uint height() const { return _height; }
 	}
 
-	this() {
-	}
+	this() {}
+
+	this(Texture texture) {
+        _isLoaded = texture._isLoaded;
+		_texture = texture._texture;
+		_width = texture._width;
+        _height = texture._height;
+        _ownData = false;
+    }
 
 	this(SDL_Surface* surface) {
 		loadFromSurface(surface);
@@ -107,6 +114,7 @@ final class Texture {
 		_width = surface.w;
 		_height = surface.h;
 		_isLoaded = true;
+        _ownData = true;
 	}
 
 	void load(string path) {
@@ -124,9 +132,12 @@ final class Texture {
 		_width = surface.w;
 		_height = surface.h;
 		_isLoaded = true;
+        _ownData = true;
 	}
 
 	void unload() {
+        if(!_ownData)
+            return;
 		if (null != _texture)
 			SDL_DestroyTexture(_texture);
 		_isLoaded = false;

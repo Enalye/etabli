@@ -80,6 +80,18 @@ final class NinePatch: IDrawable {
     }
 
     this() {}
+
+    this(NinePatch ninePatch) {
+        _size = ninePatch._size;
+        _texture = ninePatch._texture;
+        _clip = ninePatch._clip;
+        _top = ninePatch._top;
+        _bottom = ninePatch._bottom;
+        _left = ninePatch._left;
+        _right = ninePatch._right;
+        _cache = new Canvas(_size);
+        _isDirty = true;
+    }
 	
     this(string _textureId, Vec4i newClip, int newTop, int newBottom, int newLeft, int newRight) {
         this(fetch!Texture(_textureId), newClip, newTop, newBottom, newLeft, newRight);

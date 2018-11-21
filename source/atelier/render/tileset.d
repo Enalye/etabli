@@ -62,6 +62,20 @@ final class Tileset {
 
     this() {}
 
+    this(Tileset tileset) {
+        _maxtiles = tileset._maxtiles;
+        clip = tileset.clip;
+        columns = tileset.columns;
+        texture = tileset.texture;
+        size = tileset.size;
+        scale = tileset.scale;
+        angle = tileset.angle;
+        flip = tileset.flip;
+        anchor = tileset.anchor;
+        color = tileset.color;
+        blend = tileset.blend;
+    }
+
 	this(Texture newTexture, Vec4i newClip, int newColumns, int newLines, int newMaxTiles = -1) {
 		texture = newTexture;
 		clip = newClip;

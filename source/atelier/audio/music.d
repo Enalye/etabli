@@ -32,7 +32,7 @@ import derelict.sdl2.mixer;
 class Music {
 	private {
 		Mix_Music* _chunk;
-		bool _isLooped = false;
+		bool _isLooped, _ownData;
 		float _length = 0f;
 		float _volume = 0f;
 	}
@@ -63,6 +63,14 @@ class Music {
 		}
 	}
 
+    this(Music music) {
+        _chunk = music._chunk;
+        _isLooped = music._isLooped;
+        _length = music._length;
+        _volume = music._volume;
+        _ownData = false;
+    }
+
 	this(Mix_Music* chunk) {
 		load(chunk);
 	}
@@ -85,9 +93,12 @@ class Music {
 	void load(Mix_Music* chunk) {
 		_chunk = chunk;
 		_volume = 1f;
+        _ownData = true;
 	}
 
 	void unload() {
+        if(!_ownData)
+            return;
 		if(_chunk)
 			Mix_FreeMusic(_chunk);
 		_chunk = null;

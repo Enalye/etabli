@@ -50,6 +50,18 @@ final class Sprite {
 
     this() {}
 
+    this(Sprite sprite) {
+        texture = sprite.texture;
+        flip = sprite.flip;
+        scale = sprite.scale;
+        size = sprite.size;
+        anchor = sprite.anchor;
+        clip = sprite.clip;
+        angle = sprite.angle;
+        color = sprite.color;
+        blend = sprite.blend;
+    }
+
 	this(Texture newTexture, Flip newFlip = Flip.NoFlip) {
 		texture = newTexture;
 		clip = Vec4i(0, 0, texture.width, texture.height);
