@@ -203,6 +203,7 @@ private void dispatchMouseDownEvent(GuiElement gui, Vec2f cursorPosition) {
     if(gui !is null) {
         if(gui.isInteractable && gui.isInside(cursorPosition)) {
             _clickedGuiElement = gui;
+            gui.isClicked = true;
 
             if(gui.hasCanvas && gui.canvas !is null) {
                 hasCanvas = true;
@@ -265,6 +266,8 @@ private void dispatchMouseUpEvent(GuiElement gui, Vec2f cursorPosition) {
         event.position = cursorPosition;
         gui.onEvent(event);
     }
+    if(_clickedGuiElement !is null)
+        _clickedGuiElement.isClicked = false;
 }
 
 private void dispatchMouseUpdateEvent(GuiElement gui, Vec2f cursorPosition) {

@@ -94,7 +94,7 @@ class GuiElement {
 	protected {
 		GuiElement[] _children;
 		Hint _hint;
-		bool _isLocked = false, _isMovable = false, _isHovered = false, _isSelected = false, _isValidated = false, _hasFocus = false, _isInteractable = true;
+		bool _isLocked, _isMovable, _isHovered, _isClicked, _isSelected, _hasFocus, _isInteractable = true;
 		Vec2f _position = Vec2f.zero, _size = Vec2f.zero, _anchor = Vec2f.half, _padding = Vec2f.zero, _center = Vec2f.zero, _origin = Vec2f.zero;
 		//float _angle = 0f;
 		GuiElement _callbackGuiElement;
@@ -145,6 +145,11 @@ class GuiElement {
             return _isHovered = newIsHovered;
         }
 
+        final bool isClicked() const { return _isClicked; }
+		final bool isClicked(bool newIsClicked) {
+            return _isClicked = newIsClicked;
+        }
+
 		final bool isSelected() const { return _isSelected; }
 		final bool isSelected(bool newIsSelected) {
             if(newIsSelected != _isSelected) {
@@ -173,16 +178,6 @@ class GuiElement {
                 return _isInteractable;
             }
             return _isInteractable = newIsInteractable;
-        }
-
-		final bool isValidated() const { return _isValidated; }
-		final bool isValidated(bool newIsValidated) {
-            if(newIsValidated != _isValidated) {
-                _isValidated = newIsValidated;
-                onValidate();
-                return _isValidated;
-            }
-            return _isValidated = newIsValidated;         
         }
 
 		final Vec2f position() { return _position; }
@@ -315,7 +310,6 @@ class GuiElement {
         void onSelect() {}
         void onFocus() {}
         void onInteractable() {}
-        void onValidate() {}
         void onDeltaPosition(Vec2f delta) {}
         void onPosition() {}
         void onDeltaSize(Vec2f delta) {}

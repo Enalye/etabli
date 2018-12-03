@@ -112,6 +112,13 @@ Tuple!(T, string)[] fetchPackTuples(T)(string name = ".") {
 	return (cast(ResourceCache!T)*cache).getPackTuples(name);
 }
 
+Tuple!(T, string)[] fetchAllTuples(T)() {
+	auto cache = T.stringof in _caches;
+	if(!cache)
+		throw new Exception("No cache of type \'" ~ T.stringof ~ "\' has been declared");
+	return (cast(ResourceCache!T)*cache).getAllTuples();
+}
+
 class ResourceCache(T) {
 	protected {
 		Tuple!(T, string)[] _data;
@@ -175,6 +182,10 @@ class ResourceCache(T) {
 		foreach(i; *p)
 			result ~= _data[i];
 		return result;
+	}
+
+    Tuple!(T, string)[] getAllTuples() {
+		return _data;
 	}
 
     void set(T value, string tag, string pack = "") {

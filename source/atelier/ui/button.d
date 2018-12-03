@@ -32,6 +32,8 @@ class Button: GuiElement {
 	void function() onClick;
 
     override void onSubmit() {
+        if(isLocked)
+            return;
         if(onClick !is null)
             onClick();
         triggerCallback();
@@ -80,7 +82,7 @@ class ListButton: Button {
 	}
 
 	override void draw() {
-		if(isValidated)
+		if(isSelected)
 			drawFilledRect(center - size / 2f, size, Color.white * 0.8f);
 		else if(isHovered)
 			drawFilledRect(center - size / 2f, size, Color.white * 0.25f);

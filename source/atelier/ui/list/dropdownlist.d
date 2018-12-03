@@ -157,4 +157,24 @@ class DropDownList: GuiElement {
 	GuiElement[] getList() {
 		return _list.getList();
 	}
+
+    string getSelectedName() {
+        auto list = cast(DropDownListSubElement[])getList();
+        if(selected() >= list.length)
+            return "";
+        return list[selected()].label.text;
+    }
+
+    void setSelectedName(string name) {
+        auto list = cast(DropDownListSubElement[])getList();
+        int i;
+        foreach(btn; list) {
+            if(btn.label.text == name) {
+                selected(i);
+                triggerCallback();
+                return;
+            }
+            i ++;
+        }
+    }
 }
