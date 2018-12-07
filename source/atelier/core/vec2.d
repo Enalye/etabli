@@ -137,13 +137,21 @@ struct Vec2(T) {
 		}
 	}
 
+    Vec2!T min(const Vec2!T v) const {
+        return Vec2!T(x < v.x ? x : v.x, y < v.y ? y : v.y);
+    }
+
+    Vec2!T max(const Vec2!T v) const {
+        return Vec2!T(x > v.x ? x : v.x, y > v.y ? y : v.y);
+    }
+
 	Vec2!T abs() const {
 		static if(__traits(isFloating, T))
 			return Vec2!T(x < .0 ? -x : x, y < .0 ? -y : y);
 		else static if(__traits(isUnsigned, T))
 			return Vec2!T(x < 0U ? -x : x, y < 0U ? -y : y);
 		else
-			return Vec2!T(x, y);
+			return Vec2!T(x < 0 ? -x : x, y < 0 ? -y : y);
 	}
 
 	Vec2!T floor() const {
