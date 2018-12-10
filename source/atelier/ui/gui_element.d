@@ -50,48 +50,7 @@ class GuiElement {
         bool _hasCanvas;
     }
 
-    string currentStateName = "default";
-    GuiState currentState, targetState, initState;
-    GuiState[string] states;
-    Timer timer;
-
-    GuiAlignX xalign = GuiAlignX.Left;
-    GuiAlignY yalign = GuiAlignY.Top;
-
-    //Transition
-    
-
-    void doTransitionState(string stateName) {
-        auto ptr = stateName in states;
-        if(!(ptr))
-            throw new Exception("No state " ~ stateName ~ " in GuiElement");
-        currentStateName = stateName;
-        initState = currentState;
-        targetState = *ptr;
-        timer.start(targetState.time);
-    }
-
-    void setState(string stateName) {
-        auto ptr = stateName in states;
-        if(!(ptr))
-            throw new Exception("No state " ~ stateName ~ " in GuiElement");
-        currentStateName = stateName;
-        initState = *ptr;
-        targetState = *ptr;
-        currentState = *ptr;
-    }
-
-    void setAlign(GuiAlignX x, GuiAlignY y) {
-        xalign = x;
-        yalign = y;
-    }
-
-    void setScreenCoords(Vec2f screenCoords) {
-        _center = screenCoords;
-        _origin = _center - _size / 2f;
-    }
-
-	protected {
+    package {
 		GuiElement[] _children;
 		Hint _hint;
 		bool _isLocked, _isMovable, _isHovered, _isClicked, _isSelected, _hasFocus, _isInteractable = true;
@@ -104,7 +63,29 @@ class GuiElement {
         bool _isIterating, _isWarping = true;
         uint _idChildIterator;
         Timer _iteratorTimer, _iteratorTimeOutTimer;
+
+        Vec2f _screenCoords;
+        GuiAlignX _alignX = GuiAlignX.Left;
+        GuiAlignY _alignY = GuiAlignY.Top;
+
+        //States
+        string _currentStateName = "default";
+        GuiState _currentState, _targetState, _initState;
+        GuiState[string] _states;
+        Timer _timer;
 	}
+
+    package void setScreenCoords(Vec2f screenCoords) {
+        _screenCoords = screenCoords;
+        if(_hasCanvas && _canvas !is null) {
+            _center = _size / 2f;
+            _origin = Vec2f.zero;
+        }
+        else {
+            _center = screenCoords;
+            _origin = _center - _size / 2f;
+        }
+    }
 
 	@property {
         final Canvas canvas() { return _canvas; }
@@ -237,7 +218,7 @@ class GuiElement {
             return _padding;
         }
 
-		final float angle() const { return currentState.angle; }
+		final float angle() const { return _currentState.angle; }
 		/*final float angle(float newAngle) {
             _angle = newAngle;
             onAngle();
@@ -257,10 +238,7 @@ class GuiElement {
     }
 
 	bool isInside(const Vec2f pos) const {
-        return (_center - pos).isBetween(-size / 2f, _size / 2f);
-
-		//Vec2f collision = _size + _padding;
-		//return (_position - pos).isBetween(-collision * (Vec2f.one - anchor), collision * _anchor);
+        return (_screenCoords - pos).isBetween(-_size / 2f, _size / 2f);
 	}
 
 	bool isOnInteractableGuiElement(Vec2f pos) const {
@@ -283,6 +261,35 @@ class GuiElement {
 			_callbackGuiElement.onCallback(_callbackId);
 		}
 	}
+
+    void doTransitionState(string stateName) {
+        auto ptr = stateName in _states;
+        if(!(ptr))
+            throw new Exception("No state " ~ stateName ~ " in GuiElement");
+        _currentStateName = stateName;
+        _initState = _currentState;
+        _targetState = *ptr;
+        _timer.start(_targetState.time);
+    }
+
+    void setState(string stateName) {
+        auto ptr = stateName in _states;
+        if(!(ptr))
+            throw new Exception("No state " ~ stateName ~ " in GuiElement");
+        _currentStateName = stateName;
+        _initState = *ptr;
+        _targetState = *ptr;
+        _currentState = *ptr;
+    }
+
+    void addState(string stateName, GuiState state) {
+        _states[stateName] = state;
+    }
+
+    void setAlign(GuiAlignX x, GuiAlignY y) {
+        _alignX = x;
+        _alignY = y;
+    }
 
     //Update and rendering
 	void update(float deltaTime) {}

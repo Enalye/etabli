@@ -46,7 +46,7 @@ class Image: GuiElement {
 	}
     
     override void update(float deltaTime) {
-        _sprite.angle = currentState.angle;
+        _sprite.angle = _currentState.angle;
         _sprite.size = size;
     }
 

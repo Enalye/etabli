@@ -94,27 +94,18 @@ class VList: GuiElement {
 		position(Vec2f.zero);
 	}
 
-	override void onEvent(Event event) {
-		super.onEvent(event);
-		if(event.type == EventType.MouseDown || event.type == EventType.MouseUp || event.type == EventType.MouseUpdate) {
-			if(_slider.isInside(event.position))
-				_slider.onEvent(event);
-			else if(event.type == EventType.MouseDown) {
-
-				auto widgets = _container.layout.children;
-				foreach(uint id, ref GuiElement gui; _container.layout.children) {
-					gui.isSelected = false;
-					if(gui.isHovered)
-						_idElementSelected = id;
-				}
-				if(_idElementSelected < widgets.length)
-					widgets[_idElementSelected].isSelected = true;
-			}
-		}
-
-		if(!isOnInteractableGuiElement(_lastMousePos) && event.type == EventType.MouseWheel)
-			_slider.onEvent(event);
-	}
+    override void onCallback(string id) {
+        if(id != "list")
+            return;
+        auto widgets = _container.layout.children;
+        foreach(uint elementId, ref GuiElement gui; _container.layout.children) {
+            gui.isSelected = false;
+            if(gui.isHovered)
+                _idElementSelected = elementId;
+        }
+        if(_idElementSelected < widgets.length)
+            widgets[_idElementSelected].isSelected = true;
+    }
     
     override void onSize() {
         _slider.size = Vec2f(10f, _size.y);
@@ -144,6 +135,7 @@ class VList: GuiElement {
         gui.position = Vec2f.zero;
         gui.setAlign(GuiAlignX.Right, GuiAlignY.Top);
 		gui.isSelected = (_nbElements == 0u);
+        gui.setCallback(this, "list");
 
 		_nbElements ++;
 		_container.layout.size = Vec2f(_container.size.x, _layoutLength * _nbElements);

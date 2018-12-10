@@ -66,6 +66,7 @@ final class Tileset {
         _maxtiles = tileset._maxtiles;
         clip = tileset.clip;
         columns = tileset.columns;
+        lines = tileset.lines;
         texture = tileset.texture;
         size = tileset.size;
         scale = tileset.scale;
