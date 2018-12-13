@@ -54,6 +54,7 @@ private {
     Canvas _canvas;
     Vec2f _clickedGuiElementEventPosition = Vec2f.zero;
     Vec2f _hoveredGuiElementEventPosition = Vec2f.zero;
+    GuiElement[] _hookedGuis;
 }
 
 void handleGuiElementEvent(Event event) {
@@ -77,6 +78,7 @@ void handleGuiElementEvent(Event event) {
         dispatchMouseUpEvent(null, event.position);
         break;
     case MouseUpdate:
+        _hookedGuis.length = 0;
         dispatchMouseUpdateEvent(null, event.position);
 
         if(_hasClicked && _hoveredGuiElement !is null) {
@@ -244,6 +246,12 @@ private void dispatchMouseDownEvent(GuiElement gui, Vec2f cursorPosition) {
 
             _clickedGuiElementEventPosition = cursorPosition;
             _hasClicked = true;
+
+            if(gui._hasEventHook) {
+                Event guiEvent = EventType.MouseDown;
+                guiEvent.position = cursorPosition;
+                gui.onEvent(guiEvent);
+            }
         }
         else
             return;
@@ -266,6 +274,12 @@ private void dispatchMouseUpEvent(GuiElement gui, Vec2f cursorPosition) {
                 hasCanvas = true;
                 pushCanvas(gui.canvas, false);
                 cursorPosition = transformCanvasSpace(cursorPosition, gui._screenCoords);
+            }
+
+            if(gui._hasEventHook) {
+                Event guiEvent = EventType.MouseUp;
+                guiEvent.position = cursorPosition;
+                gui.onEvent(guiEvent);
             }
         }
         else
@@ -318,9 +332,23 @@ private void dispatchMouseUpdateEvent(GuiElement gui, Vec2f cursorPosition) {
             _hoveredGuiElement = gui;
             _hoveredGuiElementEventPosition = cursorPosition;
             _hasClicked = true;
+
+            if(gui._hasEventHook) {
+                Event guiEvent = EventType.MouseUpdate;
+                guiEvent.position = cursorPosition;
+                gui.onEvent(guiEvent);
+                _hookedGuis ~= gui;
+            }
         }
-        else
+        else {
+            void unHoverGuiElements(GuiElement gui) {
+                gui.isHovered = false;
+                foreach(child; gui.children)
+                    unHoverGuiElements(child);
+            }
+            unHoverGuiElements(gui);
             return;
+        }
     }
     
     foreach(child; children)
@@ -333,6 +361,10 @@ private void dispatchMouseUpdateEvent(GuiElement gui, Vec2f cursorPosition) {
 private void dispatchMouseWheelEvent(Vec2f scroll) {
     Event scrollEvent = EventType.MouseWheel;
     scrollEvent.position = scroll;
+
+    foreach(gui; _hookedGuis) {
+        gui.onEvent(scrollEvent);
+    }
 
     if(_clickedGuiElement !is null) {
         if(_clickedGuiElement.isClicked) {

@@ -92,6 +92,8 @@ class VList: GuiElement {
 
 		size(newSize);
 		position(Vec2f.zero);
+
+        setEventHook(true);
 	}
 
     override void onCallback(string id) {
@@ -105,6 +107,11 @@ class VList: GuiElement {
         }
         if(_idElementSelected < widgets.length)
             widgets[_idElementSelected].isSelected = true;
+    }
+
+    override void onEvent(Event event) {
+        if(event.type == EventType.MouseWheel)
+            _slider.onEvent(event);
     }
     
     override void onSize() {

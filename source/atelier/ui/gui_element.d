@@ -53,7 +53,7 @@ class GuiElement {
     package {
 		GuiElement[] _children;
 		Hint _hint;
-		bool _isLocked, _isMovable, _isHovered, _isClicked, _isSelected, _hasFocus, _isInteractable = true;
+		bool _isLocked, _isMovable, _isHovered, _isClicked, _isSelected, _hasFocus, _isInteractable = true, _hasEventHook;
 		Vec2f _position = Vec2f.zero, _size = Vec2f.zero, _anchor = Vec2f.half, _padding = Vec2f.zero, _center = Vec2f.zero, _origin = Vec2f.zero;
 		//float _angle = 0f;
 		GuiElement _callbackGuiElement;
@@ -284,6 +284,10 @@ class GuiElement {
 
     void addState(string stateName, GuiState state) {
         _states[stateName] = state;
+    }
+
+    void setEventHook(bool hasHook) {
+        _hasEventHook = hasHook;
     }
 
     void setAlign(GuiAlignX x, GuiAlignY y) {
