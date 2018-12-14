@@ -96,6 +96,10 @@ final class Tileset {
 		return sprites;
 	}
 
+    void fit(Vec2f newSize) {
+		size = to!Vec2f(clip.zw).fit(newSize);
+	}
+
 	void drawRotated(Timer timer, const Vec2f position) {
 		float id = floor(lerp(0f, to!float(_maxtiles), timer.time));
 		drawRotated(to!uint(id), position);
