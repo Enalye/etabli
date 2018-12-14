@@ -65,8 +65,8 @@ void runApplication() {
 		throw new Exception("Cannot run the application.");
     while(processEvents()) {
         updateEvents(_deltaTime);
-        processOverlayBack();
         processModalBack();
+        processOverlayBack();
         updateGuiElements(_deltaTime);
         drawGuiElements();
         processOverlayFront(_deltaTime);
