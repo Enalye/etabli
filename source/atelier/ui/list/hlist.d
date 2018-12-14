@@ -51,16 +51,25 @@ class HList: GuiElement {
 		Slider _slider;
 		Vec2f _lastMousePos = Vec2f.zero;
 		float _layoutLength = 25f;
-		uint _nbElements = 0u;
-		uint _idElementSelected = 0u;
+		int _nbElements;
+		int _idElementSelected;
 	}
 
 	@property {
-		uint selected() const { return _idElementSelected; }
-		uint selected(uint id) {
-			if(id > _nbElements)
-				throw new Exception("HList: index out of bounds");
+		int selected() const { return _idElementSelected; }
+		int selected(int id) {
+			if(id >= _nbElements)
+				id = _nbElements - 1;
+            if(id < 0)
+                id = 0;
 			_idElementSelected = id;
+
+            //Update children
+            auto widgets = _container.layout.children;
+            foreach(GuiElement gui; _container.layout.children)
+                gui.isSelected = false;
+            if(_idElementSelected < widgets.length)
+                widgets[_idElementSelected].isSelected = true;
 			return _idElementSelected;
 		}
 

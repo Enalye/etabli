@@ -51,15 +51,17 @@ class VList: GuiElement {
 		Slider _slider;
 		Vec2f _lastMousePos = Vec2f.zero;
 		float _layoutLength = 25f;
-		uint _nbElements = 0u;
-		uint _idElementSelected = 0u;
+		int _nbElements;
+		int _idElementSelected;
 	}
 
 	@property {
-		uint selected() const { return _idElementSelected; }
-		uint selected(uint id) {
-			if(id > _nbElements)
-				throw new Exception("VList: index out of bounds");
+		int selected() const { return _idElementSelected; }
+		int selected(int id) {
+			if(id >= _nbElements)
+				id = _nbElements - 1;
+            if(id < 0)
+                id = 0;
 			_idElementSelected = id;
 
             //Update children
