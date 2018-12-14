@@ -153,15 +153,15 @@ struct Color {
     }
 
 	Color opBinary(string op)(const Color c) const {
-		return mixin("Color(_r " ~ op ~ " c._r, _g " ~ op ~ " c._g, _b " ~ op ~ " c._b)");
+		return mixin("Color(_r " ~ op ~ " c._r, _g " ~ op ~ " c._g, _b " ~ op ~ " c._b, _a " ~ op ~ " c._a)");
 	}
 
 	Color opBinary(string op)(float s) const {
-		return mixin("Color(_r " ~ op ~ " s, _g " ~ op ~ " s, _b " ~ op ~ " s)");
+		return mixin("Color(_r " ~ op ~ " s, _g " ~ op ~ " s, _b " ~ op ~ " s, _a " ~ op ~ " s)");
 	}
 
 	Color opBinaryRight(string op)(float s) const {
-		return mixin("Color(s " ~ op ~ " _r, s " ~ op ~ " _g, s " ~ op ~ " _b)");
+		return mixin("Color(s " ~ op ~ " _r, s " ~ op ~ " _g, s " ~ op ~ " _b, s " ~ op ~ " _a)");
 	}
 
 	Color opOpAssign(string op)(const Color c) {

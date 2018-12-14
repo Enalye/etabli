@@ -269,11 +269,9 @@ struct Vec2(T) {
 		}
 
 		Vec2!T fit(const Vec2!T v) const {
-			Vec2!T u = {v.x / x, v.y / y};
-			if(u.x < u.y)
-				return Vec2!T(v.x, v.x);
-			else
-				return Vec2!T(v.y, v.y);
+            return (x / y) < (v.x / v.y) ?
+                Vec2!T(x * v.y / y, v.y):
+                Vec2!T(v.x, y * v.x / x);
 		}
 	}
 

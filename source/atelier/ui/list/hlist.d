@@ -87,6 +87,8 @@ class HList: GuiElement {
 		position(Vec2f.zero);
         
         setEventHook(true);
+
+		_container.layout.size = Vec2f(0f, _container.size.y);
 	}
 
 	override void onCallback(string id) {

@@ -94,6 +94,8 @@ class VList: GuiElement {
 		position(Vec2f.zero);
 
         setEventHook(true);
+        
+		_container.layout.size = Vec2f(_container.size.x, 0f);
 	}
 
     override void onCallback(string id) {
