@@ -7,11 +7,7 @@
 		"Enalye"
 	],
 	"dependencies": {
-		"derelict-sdl2": "~>2.1.4",
-		"grimoire": {
-			"version": "~master",
-			"path": "../grimoire"
-		}
+		"derelict-sdl2": "~>2.1.4"
 	},
 	"targetName": "atelier",
 	"targetType": "library",
