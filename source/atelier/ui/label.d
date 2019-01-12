@@ -105,14 +105,6 @@ class Label: GuiElement {
 
 		if ((_text.length > 0)  && _font.isLoaded) {
 			_texture.loadFromSurface(TTF_RenderUTF8_Blended(_font.font, toStringz(_text), _color.toSDL()));
-
-			version(Windows) {
-			//Hack: On windows, TTF_Render functions for UTF8 strings
-			//will randomly fail and create a 0x0 texture,
-			//So we make sure that the texture is created again.
-				if(_texture.width == 0)
-					_texture.loadFromSurface(TTF_RenderUTF8_Blended(_font.font, toStringz(_text), _color.toSDL()));
-			}
 		}
 		_sprite = _texture;
 		_sprite.size *= _font.scale;

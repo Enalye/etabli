@@ -107,12 +107,13 @@ final class Texture {
 			SDL_DestroyTexture(_texture);
 
 		_texture = SDL_CreateTextureFromSurface(renderer, surface);
-		SDL_FreeSurface(surface);
 
 		enforce(null != _texture, "Error occurred while converting a surface to a texture format.");
 
 		_width = surface.w;
 		_height = surface.h;
+		SDL_FreeSurface(surface);
+
 		_isLoaded = true;
         _ownData = true;
 	}
@@ -124,13 +125,14 @@ final class Texture {
 		enforce(null != renderer, "The renderer does not exist.");
 
 		_texture = SDL_CreateTextureFromSurface(renderer, surface);
-		SDL_FreeSurface(surface);
 
 		if (null == _texture)
 			throw new Exception("Error occurred while converting \'" ~ path ~ "\' to a texture format.");
 
 		_width = surface.w;
 		_height = surface.h;
+		SDL_FreeSurface(surface);
+
 		_isLoaded = true;
         _ownData = true;
 	}
