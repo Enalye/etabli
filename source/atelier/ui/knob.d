@@ -8,13 +8,10 @@
 
 module atelier.ui.knob;
 
-import atelier.core;
-import atelier.render;
-import atelier.common;
+import atelier.core, atelier.render, atelier.common;
+import atelier.ui.gui_element;
 
-import atelier.ui.widget;
-
-class Knob: Widget {
+class Knob: GuiElement {
 	protected {
 		float _value = 0f, _step = 1f, _min = 0f, _max = 1f, _minAngle = 0f, _maxAngle = 360f, _angle = 0f, _lastValue = 0f;
 		Sprite _baseSprite, _btnSprite;
@@ -49,7 +46,7 @@ class Knob: Widget {
 
 	this() {
 		_btnSprite = fetch!Sprite("knob_btn");
-		_size = _btnSprite.size;
+		size = _btnSprite.size;
 	}
 
 	void setAngles(float minAngle, float maxAngle) {
@@ -71,9 +68,9 @@ class Knob: Widget {
 			break;
 		case MouseUp:
 		case MouseUpdate:
-			if(!_isSelected)
+			if(!isSelected)
 				break;
-			Vec2f delta = event.position - _position;
+			Vec2f delta = event.position - center;
 			Vec2f delta2 = event.position - _lastCursorPosition;
 			if(delta2.lengthSquared() > 0f)
 				delta2.normalize();
@@ -107,11 +104,11 @@ class Knob: Widget {
 	}
 
 	override void draw() {
-		_btnSprite.draw(_position);
+		_btnSprite.draw(center);
 	}
 
 	override bool isInside(const Vec2f pos) const {
-		float halfSize = _size.x / 2f;
-		return (_position - pos).lengthSquared() < halfSize * halfSize;
+		float halfSize = size.x / 2f;
+		return (pos - center).lengthSquared() < halfSize * halfSize;
 	}
 }

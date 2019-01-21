@@ -11,17 +11,12 @@ module atelier.ui.slider;
 import std.math;
 import std.algorithm.comparison;
 import std.conv: to;
+import atelier.core, atelier.render, atelier.common;
+import atelier.ui.button, atelier.ui.gui_element;
 
-import atelier.core;
-import atelier.render;
-import atelier.common;
-
-import atelier.ui.button;
-import atelier.ui.widget;
-
-class Slider: Widget {
+class Slider: GuiElement {
 	protected {	
-		float _value = 0f, _offset = 0f, _step = 1f, _min = 0f, _max = 1f, _length = 1f, _minimalSliderSize = 25f;
+		float _value = 0f, _offset = 0f, _step = 1f, _min = 0f, _max = 1f, _length = 1f, _minimalSliderSize = 25f, _scrollAngle = 0f;
 		bool _isGrabbed = false;
 	}
 
@@ -57,7 +52,7 @@ class Slider: Widget {
 	this() {}
 
 	override void update(float deltaTime) {
-		if(!_isSelected) {
+		if(!isSelected) {
 			_value = (_offset < 0f) ? 0f : ((_offset > 1f) ? 1f : _offset);	//Clamp the value.
 			if(_step > 0f)
 				_value = std.math.round(_value / _step) * _step;	//Snap the value.
@@ -77,7 +72,7 @@ class Slider: Widget {
 			break;
 		case MouseDown:
 		case MouseUp:
-			if(_isSelected)
+			if(isSelected)
 				break;
 			relocateSlider(event);
 			break;
@@ -90,7 +85,7 @@ class Slider: Widget {
 			if(getKeyDown("right"))
 				_offset = clamp(_offset + _step, 0f, 1f);
 		}+/
-		if(_isSelected)
+		if(isSelected)
 			relocateSlider(event);
 	}
 
@@ -100,8 +95,8 @@ class Slider: Widget {
 			_value = 0f;
 			return;
 		}
-		Vec2f direction = Vec2f.angled(_angle);
-		Vec2f origin = _position - direction * 0.5f * _length;
+		Vec2f direction = Vec2f.angled(_scrollAngle);
+		Vec2f origin = center - direction * 0.5f * _length;
 		float coef = direction.y / direction.x;
 		float b = origin.y - (coef * origin.x);
 
@@ -115,9 +110,9 @@ class Slider: Widget {
 
 	protected Vec2f getSliderPosition() {
 		if(_step == 0f)
-			return _position;
-		Vec2f direction = Vec2f.angled(_angle);
-		return _position + direction * (_length * (_offset - 0.5f));
+			return center;
+		Vec2f direction = Vec2f.angled(_scrollAngle);
+		return center + direction * (_length * (_offset - 0.5f));
 	}
 }
 
@@ -129,7 +124,7 @@ class VScrollbar: Slider {
 	Color backColor, frontColor;
 
 	this() {
-		_angle = 90f;
+		_scrollAngle = 90f;
 		_circleSprite = fetch!Sprite("gui_circle");
 		_barSprite = fetch!Sprite("gui_texel");
 
@@ -144,38 +139,38 @@ class VScrollbar: Slider {
 		float sliderLength = std.algorithm.max((_step > 0f ? _step : 1f) * _length, _minimalSliderSize);
 
 		//Resize the slider to fit in the rail.
-		if(sliderPosition.y - sliderLength / 2f < _position.y - _length / 2f) {
-			float origin = _position.y - _length / 2f;
+		if(sliderPosition.y - sliderLength / 2f < center.y - _length / 2f) {
+			float origin = center.y - _length / 2f;
 			float destination = sliderPosition.y + sliderLength / 2f;
 			sliderLength = destination - origin;
 			sliderPosition.y = origin + sliderLength / 2f;
 		}
-		else if(sliderPosition.y + sliderLength / 2f > _position.y + _length / 2f) {
+		else if(sliderPosition.y + sliderLength / 2f > center.y + _length / 2f) {
 			float origin = sliderPosition.y - sliderLength / 2f;
-			float destination = _position.y + _length / 2f;
+			float destination = center.y + _length / 2f;
 			sliderLength = destination - origin;
 			sliderPosition.y = origin + sliderLength / 2f;
 		}
 
-		sliderPosition.y = clamp(sliderPosition.y, _position.y - _length / 2f, _position.y + _length / 2f);
+		sliderPosition.y = clamp(sliderPosition.y, center.y - _length / 2f, center.y + _length / 2f);
 		if(sliderLength < 0f)
 			sliderLength = 0f;
 
-		_circleSprite.size = Vec2f(_size.x, _size.x);
+		_circleSprite.size = Vec2f(size.x, size.x);
 		_circleSprite.color = backColor;
-		_circleSprite.draw(_position - Vec2f(0f, _length / 2f));
-		_circleSprite.draw(_position + Vec2f(0f, _length / 2f));
+		_circleSprite.draw(center - Vec2f(0f, _length / 2f));
+		_circleSprite.draw(center + Vec2f(0f, _length / 2f));
 
 		_barSprite.color = backColor;
-		_barSprite.size = Vec2f(_size.x, _length);
-		_barSprite.draw(_position);
+		_barSprite.size = Vec2f(size.x, _length);
+		_barSprite.draw(center);
 
 		_circleSprite.color = frontColor;
 		_circleSprite.draw(sliderPosition - Vec2f(0f, sliderLength / 2f));
 		_circleSprite.draw(sliderPosition + Vec2f(0f, sliderLength / 2f));
 
 		_barSprite.color = frontColor;
-		_barSprite.size = Vec2f(_size.x, sliderLength);
+		_barSprite.size = Vec2f(size.x, sliderLength);
 		_barSprite.draw(sliderPosition);
 
 		_circleSprite.size = Vec2f.one;
@@ -183,7 +178,7 @@ class VScrollbar: Slider {
 	}
 
     override void onSize() {
-        _length = _size.y - _size.x;
+        _length = size.y - size.x;
     }
 }
 
@@ -195,7 +190,7 @@ class HScrollbar: Slider {
 	Color backColor, frontColor;
 
 	this() {
-		_angle = 0f;
+		_scrollAngle = 0f;
 		_circleSprite = fetch!Sprite("gui_circle");
 		_barSprite = fetch!Sprite("gui_texel");
 
@@ -210,38 +205,38 @@ class HScrollbar: Slider {
 		float sliderLength = std.algorithm.max((_step > 0f ? _step : 1f) * _length, _minimalSliderSize);
 
 		//Resize the slider to fit in the rail.
-		if(sliderPosition.x - sliderLength / 2f < _position.x - _length / 2f) {
-			float origin = _position.x - _length / 2f;
+		if(sliderPosition.x - sliderLength / 2f < center.x - _length / 2f) {
+			float origin = center.x - _length / 2f;
 			float destination = sliderPosition.x + sliderLength / 2f;
 			sliderLength = destination - origin;
 			sliderPosition.x = origin + sliderLength / 2f;
 		}
-		else if(sliderPosition.x + sliderLength / 2f > _position.x + _length / 2f) {
+		else if(sliderPosition.x + sliderLength / 2f > center.x + _length / 2f) {
 			float origin = sliderPosition.x - sliderLength / 2f;
-			float destination = _position.x + _length / 2f;
+			float destination = center.x + _length / 2f;
 			sliderLength = destination - origin;
 			sliderPosition.x = origin + sliderLength / 2f;
 		}
 
-		sliderPosition.x = clamp(sliderPosition.x, _position.x - _length / 2f, _position.x + _length / 2f);
+		sliderPosition.x = clamp(sliderPosition.x, center.x - _length / 2f, center.x + _length / 2f);
 		if(sliderLength < 0f)
 			sliderLength = 0f;
 
-		_circleSprite.size = Vec2f(_size.y, _size.y);
+		_circleSprite.size = Vec2f(size.y, size.y);
 		_circleSprite.color = backColor;
-		_circleSprite.draw(_position - Vec2f(_length / 2f, 0f));
-		_circleSprite.draw(_position + Vec2f(_length / 2f, 0f));
+		_circleSprite.draw(center - Vec2f(_length / 2f, 0f));
+		_circleSprite.draw(center + Vec2f(_length / 2f, 0f));
 
 		_barSprite.color = backColor;
-		_barSprite.size = Vec2f(_length, _size.y);
-		_barSprite.draw(_position);
+		_barSprite.size = Vec2f(_length, size.y);
+		_barSprite.draw(center);
 
 		_circleSprite.color = frontColor;
 		_circleSprite.draw(sliderPosition - Vec2f(sliderLength / 2f, 0f));
 		_circleSprite.draw(sliderPosition + Vec2f(sliderLength / 2f, 0f));
 
 		_barSprite.color = frontColor;
-		_barSprite.size = Vec2f(sliderLength, _size.y);
+		_barSprite.size = Vec2f(sliderLength, size.y);
 		_barSprite.draw(sliderPosition);
 
 		_circleSprite.size = Vec2f.one;
@@ -249,7 +244,7 @@ class HScrollbar: Slider {
 	}
 
     override void onSize() {
-        _length = _size.x - _size.y;
+        _length = size.x - size.y;
     }
 }
 
@@ -260,7 +255,7 @@ class VGauge: Slider {
 	}
 
 	this() {
-		_angle = 90f;
+		_scrollAngle = 90f;
 		_barSprite = fetch!Sprite("gui_bar");
 		_endSprite = fetch!Sprite("gui_bar_end");
 		_clipSizeY = _endSprite.clip.y;
@@ -271,50 +266,50 @@ class VGauge: Slider {
 		Vec2f sliderPosition = getSliderPosition();
 
 		//Base
-		_barSprite.size = _size - Vec2f(0f, 16f);
+		_barSprite.size = size - Vec2f(0f, 16f);
 		_endSprite.clip.y = _clipSizeY;
 		_endSprite.clip.w = _clipSizeH;
-		_endSprite.size = Vec2f(_size.x, _clipSizeH);
+		_endSprite.size = Vec2f(size.x, _clipSizeH);
 
 		_barSprite.color = Color.white * .25f;
 		_endSprite.color = Color.white * .25f;
 
-		_barSprite.draw(_position);
+		_barSprite.draw(center);
 		_endSprite.flip = Flip.NoFlip;
-		_endSprite.draw(_position - Vec2f(0f, _length / 2f - _endSprite.size.y / 2f));
+		_endSprite.draw(center - Vec2f(0f, _length / 2f - _endSprite.size.y / 2f));
 		_endSprite.flip = Flip.VerticalFlip;
-		_endSprite.draw(_position + Vec2f(0f, _length / 2f - _endSprite.size.y / 2f));
+		_endSprite.draw(center + Vec2f(0f, _length / 2f - _endSprite.size.y / 2f));
 
 		//Gauge
 		_barSprite.color = Color.white;
 		_endSprite.color = Color.white;
-		if(sliderPosition.y > (_position.y +_length / 2f - _endSprite.size.y)) {
-			_endSprite.size.y = _clipSizeH + (((_position.y +_length / 2f - _endSprite.size.y) - sliderPosition.y) * 2f);
+		if(sliderPosition.y > (center.y +_length / 2f - _endSprite.size.y)) {
+			_endSprite.size.y = _clipSizeH + (((center.y +_length / 2f - _endSprite.size.y) - sliderPosition.y) * 2f);
 			_endSprite.clip.w = to!int(_endSprite.size.y);
 			_endSprite.flip = Flip.VerticalFlip;
-			_endSprite.draw(_position + Vec2f(0f, _length / 2f - _endSprite.size.y / 2f));
+			_endSprite.draw(center + Vec2f(0f, _length / 2f - _endSprite.size.y / 2f));
 		}
-		else if(sliderPosition.y < (_position.y - _length / 2f + _endSprite.size.y)) {
+		else if(sliderPosition.y < (center.y - _length / 2f + _endSprite.size.y)) {
 			_endSprite.flip = Flip.VerticalFlip;
-			_endSprite.draw(_position + Vec2f(0f, _length / 2f - _endSprite.size.y / 2f));
+			_endSprite.draw(center + Vec2f(0f, _length / 2f - _endSprite.size.y / 2f));
 
-			_barSprite.size = _size - Vec2f(0f, 16f);
-			_barSprite.draw(_position);	
+			_barSprite.size = size - Vec2f(0f, 16f);
+			_barSprite.draw(center);	
 
-			_endSprite.size.y = (((_position.y - _length / 2f + _endSprite.size.y) - sliderPosition.y) * 2f);
+			_endSprite.size.y = (((center.y - _length / 2f + _endSprite.size.y) - sliderPosition.y) * 2f);
 			_endSprite.clip.y = to!int(_clipSizeY + _clipSizeH - _endSprite.size.y / 2f);
 			_endSprite.clip.w = to!int(_endSprite.size.y);
 			_endSprite.flip = Flip.NoFlip;
-			_endSprite.draw(_position - Vec2f(0f, _length / 2f - _clipSizeH / 2f - _clipSizeH / 2f));
+			_endSprite.draw(center - Vec2f(0f, _length / 2f - _clipSizeH / 2f - _clipSizeH / 2f));
 		}
 		else {
 			_endSprite.flip = Flip.VerticalFlip;
-			_endSprite.draw(_position + Vec2f(0f, _length / 2f - _endSprite.size.y / 2f));
+			_endSprite.draw(center + Vec2f(0f, _length / 2f - _endSprite.size.y / 2f));
 
 			float origin = sliderPosition.y;
-			float dest = _position.y + _barSprite.size.y / 2f;
-			_barSprite.size = Vec2f(_size.x, dest - origin + 1f);
-			_barSprite.draw(Vec2f(_position.x, origin + _barSprite.size.y / 2f));
+			float dest = center.y + _barSprite.size.y / 2f;
+			_barSprite.size = Vec2f(size.x, dest - origin + 1f);
+			_barSprite.draw(Vec2f(center.x, origin + _barSprite.size.y / 2f));
 		}
 
 		_endSprite.size = Vec2f.one;
@@ -322,7 +317,7 @@ class VGauge: Slider {
 	}
 
     override void onSize() {
-        _length = _size.y;
+        _length = size.y;
     }
 }
 
@@ -333,7 +328,7 @@ class HGauge: Slider {
 	}
 
 	this() {
-		_angle = 0f;
+		_scrollAngle = 0f;
 		_barSprite = fetch!Sprite("gui_bar");
 		_endSprite = fetch!Sprite("gui_bar_end");
 		_endSprite.angle = 90f;
@@ -343,20 +338,20 @@ class HGauge: Slider {
 	
 	override void draw() {
 		Vec2f sliderPosition = getSliderPosition();
-		Vec2f leftAnchor = _position - Vec2f(_length / 2f - _clipSizeH, 0f);
-		Vec2f rightAnchor = _position + Vec2f(_length / 2f - _clipSizeH, 0f);
-		Vec2f leftEnd = _position - Vec2f(_length / 2f - _clipSizeH / 2f, 0f);
-		Vec2f rightEnd = _position + Vec2f(_length / 2f - _clipSizeH / 2f, 0f);
+		Vec2f leftAnchor = center - Vec2f(_length / 2f - _clipSizeH, 0f);
+		Vec2f rightAnchor = center + Vec2f(_length / 2f - _clipSizeH, 0f);
+		Vec2f leftEnd = center - Vec2f(_length / 2f - _clipSizeH / 2f, 0f);
+		Vec2f rightEnd = center + Vec2f(_length / 2f - _clipSizeH / 2f, 0f);
 
 		//Base
 		_barSprite.anchor = Vec2f(0f, .5f);
-		_barSprite.size = Vec2f((rightAnchor.x - leftAnchor.x), _size.y);
+		_barSprite.size = Vec2f((rightAnchor.x - leftAnchor.x), size.y);
 		_barSprite.color = Color.white * .25f;
 		_barSprite.draw(leftAnchor);
 
 		_endSprite.clip.y = _clipSizeY;
 		_endSprite.clip.w = _clipSizeH;
-		_endSprite.size = Vec2f(_size.y, _clipSizeH);
+		_endSprite.size = Vec2f(size.y, _clipSizeH);
 		_endSprite.color = Color.white * .25f;
 
 		_endSprite.flip = Flip.VerticalFlip;
@@ -396,7 +391,7 @@ class HGauge: Slider {
 			_endSprite.draw(leftEnd);
 
 			//Resized bar
-			_barSprite.size = Vec2f(sliderPosition.x - leftAnchor.x, _size.y);
+			_barSprite.size = Vec2f(sliderPosition.x - leftAnchor.x, size.y);
 			_barSprite.draw(leftAnchor);
 		}
 
@@ -405,7 +400,7 @@ class HGauge: Slider {
 	}
 
     override void onSize() {
-        _length = _size.x;
+        _length = size.x;
     }
 }
 
@@ -416,7 +411,7 @@ class VSlider: Slider {
 	Color backColor, frontColor;
 
 	this() {
-		_angle = 90f;
+		_scrollAngle = 90f;
 		_barSprite = fetch!Sprite("gui_bar");
 		_circleSprite = fetch!Sprite("gui_circle");
 
@@ -429,23 +424,23 @@ class VSlider: Slider {
 	override void draw() {
 		Vec2f sliderPosition = getSliderPosition();
 
-		Vec2f upPos = _position - Vec2f(0f, _length / 2f);
-		Vec2f downPos = _position + Vec2f(0f, _length / 2f);
+		Vec2f upPos = center - Vec2f(0f, _length / 2f);
+		Vec2f downPos = center + Vec2f(0f, _length / 2f);
 
-		_circleSprite.size = Vec2f(_size.x, _size.x);
+		_circleSprite.size = Vec2f(size.x, size.x);
 		_circleSprite.color = backColor;
 		_circleSprite.draw(upPos);
 
 		_barSprite.color = backColor;
-		_barSprite.size = Vec2f(_size.x, _length);
-		_barSprite.draw(_position);
+		_barSprite.size = Vec2f(size.x, _length);
+		_barSprite.draw(center);
 
 		_circleSprite.color = frontColor;
 		_circleSprite.draw(downPos);
 		_circleSprite.draw(sliderPosition);
 
 		_barSprite.color = frontColor;
-		_barSprite.size = Vec2f(_size.x, downPos.y - sliderPosition.y);
+		_barSprite.size = Vec2f(size.x, downPos.y - sliderPosition.y);
 		_barSprite.draw(sliderPosition + Vec2f(0f, (downPos.y - sliderPosition.y) / 2f));
 
 		_circleSprite.size = Vec2f.one;
@@ -453,7 +448,7 @@ class VSlider: Slider {
 	}
 
     override void onSize() {
-        _length = _size.y - _size.x;
+        _length = size.y - size.x;
     }
 }
 
@@ -463,7 +458,7 @@ class HSlider: Slider {
 	Color backColor, frontColor;
 
 	this() {
-		_angle = 0f;
+		_scrollAngle = 0f;
 		_barSprite = fetch!Sprite("gui_bar");
 		_circleSprite = fetch!Sprite("gui_circle");
 
@@ -476,23 +471,23 @@ class HSlider: Slider {
 	override void draw() {
 		Vec2f sliderPosition = getSliderPosition();
 
-		Vec2f leftPos = _position - Vec2f(_length / 2f, 0f);
-		Vec2f rightPos = _position + Vec2f(_length / 2f, 0f);
+		Vec2f leftPos = center - Vec2f(_length / 2f, 0f);
+		Vec2f rightPos = center + Vec2f(_length / 2f, 0f);
 
-		_circleSprite.size = Vec2f(_size.y, _size.y);
+		_circleSprite.size = Vec2f(size.y, size.y);
 		_circleSprite.color = backColor;
 		_circleSprite.draw(rightPos);
 
 		_barSprite.color = backColor;
-		_barSprite.size = Vec2f(_length, _size.y);
-		_barSprite.draw(_position);
+		_barSprite.size = Vec2f(_length, size.y);
+		_barSprite.draw(center);
 
 		_circleSprite.color = frontColor;
 		_circleSprite.draw(leftPos);
 		_circleSprite.draw(sliderPosition);
 
 		_barSprite.color = frontColor;
-		_barSprite.size = Vec2f(sliderPosition.x - leftPos.x, _size.y);
+		_barSprite.size = Vec2f(sliderPosition.x - leftPos.x, size.y);
 		_barSprite.draw(leftPos + Vec2f((sliderPosition.x - leftPos.x) / 2f, 0f));
 
 		_circleSprite.size = Vec2f.one;
@@ -500,6 +495,6 @@ class HSlider: Slider {
 	}
 
     override void onSize() {
-        _length = _size.x - _size.y;
+        _length = size.x - size.y;
     }
 }

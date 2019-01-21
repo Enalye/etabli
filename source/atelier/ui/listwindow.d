@@ -11,11 +11,11 @@ module atelier.ui.listwindow;
 import atelier.core;
 import atelier.common;
 
-import atelier.ui.modal;
+import atelier.ui.gui_modal;
 import atelier.ui.button;
 import atelier.ui.list.vlist;
 import atelier.ui.inputfield;
-
+/+
 void setListWindow(string title, string[] list) {
 	auto modal = new ListWindow(title, list);
 	setModalWindow(modal);
@@ -42,8 +42,8 @@ class ListWindow: ModalWindow {
 		_list = new VList(layout.size);
 		foreach(element; _elements) {
 			auto btn = new TextButton(element);
-			_list.addChild(btn);
+			_list.addChildGui(btn);
 		}
-		layout.addChild(_list);
+		layout.addChildGui(_list);
 	}
-}
+}+/

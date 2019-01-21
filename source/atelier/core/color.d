@@ -30,9 +30,10 @@ struct Color {
 	static const Color magenta = Color(1f, 0f, 1f);
 	static const Color silver = Color(.75f, .75f, .75f);
 	static const Color gray = Color(.5f, .5f, .5f);
+	static const Color grey = Color(.5f, .5f, .5f);
 	static const Color maroon = Color(.5f, 0f, 0f);
 	static const Color olive = Color(.5f, .5f, 0f);
-	static const Color green = Color(0f, 5f, 0f);
+	static const Color green = Color(0f, .5f, 0f);
 	static const Color purple = Color(.5f, 0f, .5f);
 	static const Color teal = Color(.5f, 0f, .5f);
 	static const Color navy = Color(0f, 0f, .5f);
@@ -43,6 +44,23 @@ struct Color {
 			return Color(uniform01(), uniform01(), uniform01(), 1f);
 		}
 	}
+
+    static {
+        Color fromRGB(int rgbValue) {
+            return Color(
+                (rgbValue >> 16) & 0xFF,
+                (rgbValue >> 8) & 0xFF,
+                rgbValue & 0xFF);
+        }
+
+        Color fromRGBA(int rgbaValue) {
+            return Color(
+                (rgbaValue >> 24) & 0xFF,
+                (rgbaValue >> 16) & 0xFF,
+                (rgbaValue >> 8) & 0xFF,
+                rgbaValue & 0xFF);
+        }
+    }
 
 	@property {
 		float r() const { return _r; }
@@ -97,12 +115,26 @@ struct Color {
 		_a = clamp(v.w, 0f, 1f);
 	}
 
+    this(int red, int green, int blue, int alpha = 255) {
+        _r = clamp(red, 0, 255) / 255f;
+        _g = clamp(green, 0, 255) / 255f;
+        _b = clamp(blue, 0, 255) / 255f;
+        _a = clamp(alpha, 0, 255) / 255f;
+    }
+
 	void set(float red, float green, float blue, float alpha = 1f) {
 		_r = clamp(red, 0f, 1f);
 		_g = clamp(green, 0f, 1f);
 		_b = clamp(blue, 0f, 1f);
 		_a = clamp(alpha, 0f, 1f);
 	}
+
+    void set(int red, int green, int blue, int alpha = 255) {
+        _r = clamp(red, 0, 255) / 255f;
+        _g = clamp(green, 0, 255) / 255f;
+        _b = clamp(blue, 0, 255) / 255f;
+        _a = clamp(alpha, 0, 255) / 255f;
+    }
 
 	Color opBinary(string op)(const Color c) const {
 		return mixin("Color(_r " ~ op ~ " c._r, _g " ~ op ~ " c._g, _b " ~ op ~ " c._b, _a " ~ op ~ " c._a)");

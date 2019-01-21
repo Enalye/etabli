@@ -19,91 +19,109 @@ import atelier.render.texture;
 import atelier.render.sprite;
 import atelier.render.drawable;
 
-struct Tileset {
-	private {
-		Texture _texture;
-		Vec2i _grid, _tileSize, _offset;
-		int _nbTiles;
-	}
-
+final class Tileset {
 	@property {
-		Texture texture() const { return cast(Texture)_texture; }
-		bool isLoaded() const { return _texture.isLoaded; }
-		Vec2f tileSize() const { return cast(Vec2f)_tileSize; }
-		Vec2i grid() const { return _grid; }
-		Vec2i offset() const { return _offset; }
+		bool isLoaded() const { return texture.isLoaded; }
+        int maxtiles() const { return _maxtiles; }
+        int maxtiles(int newMaxTiles) {
+            _maxtiles = newMaxTiles;
+            if(_maxtiles <= 0 || _maxtiles > columns * lines)
+                _maxtiles = columns * lines;
+            return _maxtiles;
+        }
 	}
 
-	Vec2f scale = Vec2f.one;
+    private int _maxtiles;
+
+	Vec4i clip;
+	int columns = 1, lines = 1;
+    Texture texture;
+
+	Vec2f size = Vec2f.zero, scale = Vec2f.one;
 	float angle = 0f;
 	Flip flip = Flip.NoFlip;
 	Vec2f anchor = Vec2f.half;
     Color color = Color.white;
     Blend blend = Blend.AlphaBlending;
 
-	this(Texture newTexture, Vec2i newOffset, Vec2i newGrid, Vec2i newTileSize, int newNbTiles = -1) {
-		_texture = newTexture;
-		_offset = newOffset;
-		_grid = newGrid;
-		_tileSize = newTileSize;
-        if(newNbTiles != -1)
-            _nbTiles = newNbTiles;
-        else
-		    _nbTiles = _grid.x * _grid.y;
+    this() {}
+
+    this(Tileset tileset) {
+        _maxtiles = tileset._maxtiles;
+        clip = tileset.clip;
+        columns = tileset.columns;
+        lines = tileset.lines;
+        texture = tileset.texture;
+        size = tileset.size;
+        scale = tileset.scale;
+        angle = tileset.angle;
+        flip = tileset.flip;
+        anchor = tileset.anchor;
+        color = tileset.color;
+        blend = tileset.blend;
+    }
+
+	this(Texture newTexture, Vec4i newClip, int newColumns, int newLines, int newMaxTiles = -1) {
+		texture = newTexture;
+		clip = newClip;
+		columns = newColumns;
+		lines = newLines;
+        size = to!Vec2f(clip.zw);
+        maxtiles(newMaxTiles);
 	}
 
 	Sprite[] asSprites() {
 		Sprite[] sprites;
-		foreach(id; 0.. _nbTiles) {
-			Vec2i coord = Vec2i(id % _grid.x, id / _grid.x);
-			Vec4i clip = Vec4i(_offset.x + coord.x * _tileSize.x, _offset.y + coord.y * _tileSize.y, _tileSize.x, _tileSize.y);
-			sprites ~= Sprite(_texture, clip);
+		foreach(id; 0.. _maxtiles) {
+			Vec2i coord = Vec2i(id % columns, id / columns);
+			Vec4i spriteClip = Vec4i(clip.x + coord.x * clip.z, clip.y + coord.y * clip.w, clip.z, clip.w);
+			sprites ~= new Sprite(texture, spriteClip);
 		}
 		return sprites;
 	}
 
+    void fit(Vec2f newSize) {
+		size = to!Vec2f(clip.zw).fit(newSize);
+	}
+
 	void drawRotated(Timer timer, const Vec2f position) {
-		float id = floor(lerp(0f, to!float(_nbTiles), timer.time));
+		float id = floor(lerp(0f, to!float(_maxtiles), timer.time));
 		drawRotated(to!uint(id), position);
 	}
 
 	void drawRotated(uint id, const Vec2f position) {
-		if(id >= _nbTiles)
+		if(id >= _maxtiles)
 			return;
 
-		Vec2i coord = Vec2i(id % _grid.x, id / _grid.x);
-		if(coord.y > _grid.y)
+		Vec2i coord = Vec2i(id % columns, id / columns);
+		if(coord.y > lines)
 			throw new Exception("Tileset id out of bounds");
 
-		Vec2f finalSize = scale * cast(Vec2f)(_tileSize) * getViewScale();
-		Vec2f dist = (anchor - Vec2f.half).rotated(angle) * cast(Vec2f)(_tileSize) * scale;
+		Vec2f finalSize = scale * size * transformScale();
+		Vec2f dist = (anchor - Vec2f.half).rotated(angle) * size * scale;
 
-		Vec4i clip = Vec4i(_offset.x + coord.x * _tileSize.x, _offset.y + coord.y * _tileSize.y, _tileSize.x, _tileSize.y);
-		//if (isVisible(position, finalSize)) {
-            _texture.setColorMod(color, blend);
-			_texture.draw(getViewRenderPos(position - dist), finalSize, clip, angle, flip);
-            _texture.setColorMod(Color.white);
-		//}
+		Vec4i currentClip = Vec4i(clip.x + coord.x * clip.z, clip.y + coord.y * clip.w, clip.z, clip.w);
+        texture.setColorMod(color, blend);
+        texture.draw(transformRenderSpace(position - dist), finalSize, currentClip, angle, flip);
+        texture.setColorMod(Color.white);
 	}
 
 	void draw(Timer timer, const Vec2f position) {
-		float id = floor(lerp(0f, to!float(_nbTiles), timer.time));
+		float id = floor(lerp(0f, to!float(_maxtiles), timer.time));
 		draw(to!uint(id), position);
 	}
 
 	void draw(uint id, const Vec2f position) {
-		if(id >= _nbTiles)
+		if(id >= _maxtiles)
 			return;
 
-		Vec2f finalSize = scale * to!Vec2f(_tileSize) * getViewScale();
-		Vec2i coord = Vec2i(id % _grid.x, id / _grid.x);
-		if(coord.y > _grid.y)
+		Vec2f finalSize = scale * size * transformScale();
+		Vec2i coord = Vec2i(id % columns, id / columns);
+		if(coord.y > lines)
 			throw new Exception("Tileset id out of bounds");
-		Vec4i clip = Vec4i(_offset.x + coord.x * _tileSize.x, _offset.y + coord.y * _tileSize.y, _tileSize.x, _tileSize.y);
-		//if (isVisible(position, finalSize)) {
-            _texture.setColorMod(color, blend);
-			_texture.draw(getViewRenderPos(position), finalSize, clip, angle, flip, anchor);
-            _texture.setColorMod(Color.white);
-		//}
+		Vec4i currentClip = Vec4i(clip.x + coord.x * clip.z, clip.y + coord.y * clip.w, clip.z, clip.w);
+        texture.setColorMod(color, blend);
+        texture.draw(transformRenderSpace(position), finalSize, currentClip, angle, flip, anchor);
+        texture.setColorMod(Color.white);
 	}
 }

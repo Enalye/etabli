@@ -6,23 +6,17 @@
     Authors: Enalye
 */
 
-module atelier.ui.overlay;
+module atelier.ui.gui_overlay;
 
 import std.algorithm.comparison: max;
-
-import atelier.core;
-import atelier.render;
-import atelier.common;
-
-import atelier.ui.widget;
-import atelier.ui.label;
-import atelier.ui.text;
+import atelier.core, atelier.render, atelier.common;
+import atelier.ui.gui_element, atelier.ui.label, atelier.ui.text, atelier.ui.gui_manager;
 
 private {
 	HintWindow _hintWindow;
 	Hint _displayedHint;
-	Widget[] _widgetsBackup;
-	Widget[] _overlayWidgets;
+	GuiElement[] _backupGuis;
+	GuiElement[] _overlayGuiElements;
 	bool _isOverlay = false;
 }
 
@@ -40,58 +34,51 @@ class Hint {
 }
 
 void openHintWindow(Hint hint) {
-	_displayedHint = hint;
-}
-
-void initializeOverlay() {
 	_hintWindow = new HintWindow;
-	_displayedHint = null;
+	_displayedHint = hint;
 }
 
 bool isOverlay() {
 	return _isOverlay;
 }
 
-void setOverlay(Widget widget) {
+void setOverlay(GuiElement gui) {
 	if(!_isOverlay) {
 		_isOverlay = true;
-		_widgetsBackup = getWidgets();
-		removeWidgets();
+		_backupGuis = getRootGuis();
+		removeRootGuis();
 	}
 
-	_overlayWidgets ~= widget;
-	addWidget(widget);
+	_overlayGuiElements ~= gui;
+	addRootGui(gui);
 }
 
 void stopOverlay() {
 	if(!_isOverlay)
 		throw new Exception("No overlay to stop");
 	_isOverlay = false;
-	setWidgets(_widgetsBackup);
-	_widgetsBackup.length = 0L;
-	_overlayWidgets.length = 0L;
+	setRootGuis(_backupGuis);
+	_backupGuis.length = 0L;
+	_overlayGuiElements.length = 0L;
 }
 
 void processOverlayEvent(Event event) {
 	if(event.type == EventType.Quit) {
-		foreach(widget; _widgetsBackup)
-			widget.onEvent(event);
-	}
-	foreach(widget; _overlayWidgets) {
-		widget.isHovered = true;
-		widget.hasFocus = true;
-		widget.onEvent(event);
+		foreach(gui; _backupGuis)
+			gui.onEvent(event);
 	}
 }
 
-void processOverlayBack(float deltaTime) {
-	foreach(widget; _widgetsBackup) {
-		widget.update(deltaTime);	
-		widget.draw();
+void processOverlayBack() {
+	foreach(gui; _backupGuis) {
+		updateGuiElements(gui, null);	
+		drawGuiElements(gui);
 	}
 }
 
 void processOverlayFront(float deltaTime) {
+    if(_hintWindow is null)
+        return;
 	_hintWindow.hint = _displayedHint;
 	_hintWindow.update(deltaTime);
 	_hintWindow.draw();
@@ -101,7 +88,7 @@ void endOverlay() {
 	_displayedHint = null;
 }
 
-private class HintWindow: Widget {
+private class HintWindow: GuiElement {
 	private {
 		bool _isRendered;
 	}
@@ -121,22 +108,22 @@ private class HintWindow: Widget {
 		text = new Text;
 	}
 
-	override void onEvent(Event event) {}
-
 	override void update(float deltaTime) {
 		if(!_isRendered)
 			return;
-		_size = Vec2f(max(title.size.x, text.size.x) + 25f, title.size.y + text.size.y);
-		_position = getMousePos() + _size / 2f + Vec2f(20f, 10f);
-		title.position = _position + Vec2f(0f, (title.size.y - _size.y) / 2f);
-		text.position = _position + Vec2f(0f, title.size.y + (text.size.y - _size.y) / 2f);
+		size = Vec2f(max(title.size.x, text.size.x) + 25f, title.size.y + text.size.y);
+		
+        //They aren't processed buy the gui_manager, so we use setScreenCoords directly.
+        setScreenCoords(getMousePos() + size / 2f + Vec2f(20f, 10f));
+        title.setScreenCoords(center + Vec2f(0f, (title.size.y - size.y) / 2f));
+		text.setScreenCoords(center + Vec2f(0f, title.size.y + (text.size.y - size.y) / 2f));
 	}
 
 	override void draw() {
 		if(!_isRendered)
 			return;
-		drawFilledRect(_position - _size / 2f, _size, Color.white * .21f);
-		drawFilledRect(_position - _size / 2f, Vec2f(_size.x, title.size.y), Color.white * .11f);
+		drawFilledRect(origin, size, Color.white * .21f);
+		drawFilledRect(origin, Vec2f(size.x, title.size.y), Color.white * .11f);
 		title.draw();
 		text.draw();
 	}

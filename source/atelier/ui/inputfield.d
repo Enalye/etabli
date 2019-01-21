@@ -10,20 +10,15 @@ module atelier.ui.inputfield;
 
 import std.utf;
 import std.conv: to;
+import std.string: indexOf;
+import atelier.core, atelier.render, atelier.common;
+import atelier.ui.gui_element, atelier.ui.label;
 
-import atelier.core;
-import atelier.render;
-import atelier.common;
-
-import atelier.ui.widget;
-import atelier.ui.label;
-
-class InputField: Widget {
+class InputField: GuiElementCanvas {
 	private {
 		Label _label;
-		View _view;
 		Color _borderColor, _caretColor;
-		dstring _text;
+		dstring _text, _allowedCharacters;
 		Timer _time;
 		uint _caretIndex = 0U;
 		Vec2f _caretPosition = Vec2f.zero;
@@ -53,12 +48,11 @@ class InputField: Widget {
 	}
 
 	this(Vec2f newSize, string defaultText = "", bool startWithFocus = false) {
-		_size = newSize;
-		_view = new View(newSize);
-		_view.position = Vec2f.zero;
-		_view.setColorMod(Color.white, Blend.AlphaBlending);
+		size = newSize;
 		_label = new Label;
-		_hasFocus = startWithFocus;
+        _label.setAlign(GuiAlignX.Left, GuiAlignY.Center);
+        addChildGui(_label);
+		hasFocus = startWithFocus;
 		_text = to!dstring(defaultText);
 		_caretIndex = to!uint(_text.length);
 		_label.text = to!string(_text);
@@ -69,21 +63,22 @@ class InputField: Widget {
 	}
 
 	override void onEvent(Event event) {
-		pushView(_view, false);
-		if(_hasFocus) {
+		if(hasFocus) {
 			switch(event.type) with(EventType) {
-			case MouseDown:
-				hasFocus = true;
-				break;
 			case KeyInput:
 				if(_caretIndex >= _limit)
 					break;
+                const auto textInput = to!dstring(event.str);
+                if(_allowedCharacters.length) {
+                    if(indexOf(_allowedCharacters, textInput) == -1)
+                        break;
+                }
 				if(_caretIndex == _text.length)
-					_text ~= to!dstring(event.str);
+					_text ~= textInput;
 				else if(_caretIndex == 0U)
-					_text = to!dstring(event.str) ~ _text;
+					_text = textInput ~ _text;
 				else
-					_text = _text[0U.._caretIndex] ~ to!dstring(event.str) ~ _text[_caretIndex..$];
+					_text = _text[0U.._caretIndex] ~ textInput ~ _text[_caretIndex..$];
 				_caretIndex ++;
 				_label.text = to!string(_text);
 				break;
@@ -122,22 +117,18 @@ class InputField: Widget {
 				break;
 			}	
 		}
-		popView();
 	}
 
 	override void update(float deltaTime) {
-		_caretPosition = Vec2f(_label.position.x - _label.size.x / 2f + (_label.size.x / _text.length) * _caretIndex, _label.position.y - _label.size.y / 2f);
-		_label.position = Vec2f(10f + (_label.size.x - _view.size.x) / 2f, 0f);
+		_caretPosition = Vec2f(_label.position.x + (_label.size.x / _text.length) * _caretIndex, _label.origin.y);
+		_label.position = Vec2f(10f, 0f);
 
-		if(_caretPosition.x > _view.position.x + _view.size.x / 2f - 10f)
-			_view.position.x = _caretPosition.x - _view.size.x / 2f + 10f;
-		else if(_caretPosition.x < _view.position.x - _view.size.x / 2f + 10f)
-			_view.position.x = _caretPosition.x + _view.size.x / 2f - 10f;
+		if(_caretPosition.x > canvas.position.x + canvas.size.x / 2f - 10f)
+			canvas.position.x = _caretPosition.x - canvas.size.x / 2f + 10f;
+		else if(_caretPosition.x < canvas.position.x - canvas.size.x / 2f + 10f)
+			canvas.position.x = _caretPosition.x + canvas.size.x / 2f - 10f;
 
-		if(_caretIndex == 0U)
-			_view.position.x = 0f;
-
-		if(_hasFocus)
+		if(hasFocus)
 			_borderColor = lerp(_borderColor, Color.white, deltaTime * .25f);
 		else
 			_borderColor = lerp(_borderColor, Color.white * .21f, deltaTime * .1f);
@@ -147,18 +138,21 @@ class InputField: Widget {
 	}
 
 	override void draw() {
-		pushView(_view, true);
-		_label.draw();
-		if(_text.length && _hasFocus)
+		if(_text.length && hasFocus)
 			drawFilledRect(_caretPosition, Vec2f(2f, _label.size.y), _caretColor);
-		popView();
-		_view.draw(_position);
-		drawRect(_position - _size / 2f, _size, _borderColor);
 	}
+
+    override void drawOverlay() {
+		drawRect(origin, size, _borderColor);
+    }
 
 	void clear() {
 		_text.length = 0L;
 		_caretIndex = 0u;
 		_label.text = "";
 	}
+
+    void setAllowedCharacters(dstring allowedCharacters) {
+        _allowedCharacters = allowedCharacters;
+    }
 }

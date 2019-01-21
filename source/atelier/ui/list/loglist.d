@@ -9,57 +9,27 @@
 module atelier.ui.list.loglist;
 
 import std.conv: to;
+import atelier.core, atelier.render, atelier.common;
+import atelier.ui.gui_element, atelier.ui.layout, atelier.ui.slider;
 
-import atelier.core;
-import atelier.render;
-import atelier.common;
-
-import atelier.ui.widget;
-import atelier.ui.layout;
-import atelier.ui.slider;
-
-private class LogContainer: WidgetGroup {
+private class LogContainer: GuiElementCanvas {
 	public {
-		View view;
 		LogLayout layout;
 	}
 
-	this(Vec2f size) {
-		createGui(size);
-	}
-
-	override void onEvent(Event event) {
-		pushView(view, false);
-		super.onEvent(event);
-		popView();
-	}
-
-	override void update(float deltaTime) {
-		pushView(view, false);
-		super.update(deltaTime);
-		popView();
+	this(Vec2f newSize) {
+		isLocked = true;
+		layout = new LogLayout;
+		size(newSize);
+		addChildGui(layout);
 	}
 
 	override void draw() {
-		view.setColorMod(Color.white, Blend.AlphaBlending);
-		pushView(view, true);
 		layout.draw();
-		popView();
-		view.draw(_position);
-	}
-
-	protected void createGui(Vec2f newSize) {
-		_isFrame = true;
-		isLocked = true;
-		layout = new LogLayout;
-		view = new View(to!Vec2u(newSize));
-		view.position = Vec2f.zero;
-		size(newSize);
-		addChild(layout);
 	}
 }
 
-class LogList: WidgetGroup {
+class LogList: GuiElement {
 	protected {
 		LogContainer _container;
 		Slider _slider;
@@ -77,8 +47,8 @@ class LogList: WidgetGroup {
 		_slider.value01 = 1f;
 		_container = new LogContainer(newSize);
 
-		super.addChild(_slider);
-		super.addChild(_container);
+		super.addChildGui(_slider);
+		super.addChildGui(_container);
 
 		size(newSize);
 		position(Vec2f.zero);
@@ -92,65 +62,65 @@ class LogList: WidgetGroup {
 				_slider.onEvent(event);
 			else if(event.type == EventType.MouseDown) {
 				auto widgets = _container.layout.children;
-				foreach(uint id, const Widget widget; widgets) {
+				foreach(uint id, const GuiElement widget; widgets) {
 					if(widget.isHovered)
 						_idElementSelected = id;
 				}
 			}
 		}
-		if(!isOnInteractableWidget(_lastMousePos) && event.type == EventType.MouseWheel)
+		if(!isOnInteractableGuiElement(_lastMousePos) && event.type == EventType.MouseWheel)
 			_slider.onEvent(event);
 	}
 
     override void onPosition() {
-        _slider.position = _position - Vec2f((_size.x - _slider.size.x) / 2f, 0f);
-        _container.position = _position + Vec2f(_slider.size.x / 2f, 0f);
+        _slider.position = center - Vec2f((size.x - _slider.size.x) / 2f, 0f) + size / 2f;
+        _container.position = center + Vec2f(_slider.size.x / 2f, 0f) + size / 2f;
     }
 
     override void onSize() {
-        _slider.size = Vec2f(10f, _size.y);
-        _container.size = Vec2f(_size.x - _slider.size.x, _size.y);
-        _container.view.renderSize = _container.size.to!Vec2u;
+        _slider.size = Vec2f(10f, size.y);
+        _container.size = Vec2f(size.x - _slider.size.x, size.y);
+        _container.canvas.renderSize = _container.size.to!Vec2u;
         onPosition();
     }
 
 	override void update(float deltaTime) {
 		_slider.update(deltaTime);
-		float min = _container.view.size.y / 2f;
-		float max = _container.layout.size.y - _container.view.size.y / 2f;
-		float exceedingHeight = _container.layout.size.y - _container.view.size.y;
+		float min = _container.canvas.size.y / 2f;
+		float max = _container.layout.size.y - _container.canvas.size.y / 2f;
+		float exceedingHeight = _container.layout.size.y - _container.canvas.size.y;
 
 		if(exceedingHeight < 0f) {
 			_slider.max = 0;
 			_slider.step = 0;
 		}
 		else {
-			_slider.max = exceedingHeight / (_container.view.size.y / 50f);
+			_slider.max = exceedingHeight / (_container.canvas.size.y / 50f);
 			_slider.step = to!uint(_slider.max);
 		}
-		_container.view.position = Vec2f(0f, lerp(min, max, _slider.offset));
+		_container.canvas.position = Vec2f(0f, lerp(min, max, _slider.offset));
 	}
 
 	private void repositionContainer() {
 		_container.layout.position = Vec2f(5f + _container.layout.size.x / 2f - _container.size.x / 2f, _container.layout.size.y / 2f);
 	}
 
-	override void addChild(Widget widget) {
-		_container.layout.addChild(widget);
+	override void addChildGui(GuiElement widget) {
+		_container.layout.addChildGui(widget);
 		repositionContainer();
 	}
 
-	override void removeChildren() {
-		_container.layout.removeChildren();
+	override void removeChildrenGuis() {
+		_container.layout.removeChildrenGuis();
 		repositionContainer();
 	}
 
-	override void removeChild(uint id) {
-		_container.layout.removeChild(id);
+	override void removeChildGui(uint id) {
+		_container.layout.removeChildGui(id);
 		repositionContainer();
 	}
 
-	override int getChildrenCount() {
-		return _container.layout.getChildrenCount();
+	override int getChildrenGuisCount() {
+		return _container.layout.getChildrenGuisCount();
 	}
 }

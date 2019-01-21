@@ -9,20 +9,11 @@
 module atelier.ui.label;
 
 import std.string;
+import derelict.sdl2.sdl, derelict.sdl2.ttf;
+import atelier.core, atelier.common, atelier.render;
+import atelier.ui.gui_element;
 
-import derelict.sdl2.sdl;
-import derelict.sdl2.ttf;
-
-import atelier.core;
-import atelier.common;
-
-import atelier.render.texture;
-import atelier.render.sprite;
-import atelier.render.font;
-
-import atelier.ui.widget;
-
-class Label: Widget {
+class Label: GuiElement {
 	private {
 		string _text;
 		Font _font;
@@ -76,24 +67,20 @@ class Label: Widget {
 
 	this(string newText) {
 		this();
-		_isInteractable = false;
 		_text = newText;
 		reload();
 	}
 
-
 	this() {
+		isInteractable = false;
 		_texture = new Texture;
-		_sprite = _texture;
+		_sprite = new Sprite(_texture);
 		_font = fetch!Font("VeraMoBd");
 	}
 
-	override void onEvent(Event event) {}
-	override void update(float deltaTime) {}
-
 	override void draw() {
 		if(_text.length > 0)
-			_sprite.draw(_position);
+			_sprite.draw(center);
 	}
 
 	void reload() {
@@ -102,17 +89,9 @@ class Label: Widget {
 
 		if ((_text.length > 0)  && _font.isLoaded) {
 			_texture.loadFromSurface(TTF_RenderUTF8_Blended(_font.font, toStringz(_text), _color.toSDL()));
-
-			version(Windows) {
-			//Hack: On windows, TTF_Render functions for UTF8 strings
-			//will randomly fail and create a 0x0 texture,
-			//So we make sure that the texture is created again.
-				if(_texture.width == 0)
-					_texture.loadFromSurface(TTF_RenderUTF8_Blended(_font.font, toStringz(_text), _color.toSDL()));
-			}
 		}
 		_sprite = _texture;
 		_sprite.size *= _font.scale;
-		_size = _sprite.size;
+		size = _sprite.size;
 	}
 }

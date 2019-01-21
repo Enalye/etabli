@@ -9,17 +9,11 @@
 module atelier.ui.frame;
 
 import std.conv;
+import atelier.core, atelier.common, atelier.render;
+import atelier.ui.gui_element;
 
-import atelier.core;
-import atelier.common;
-import atelier.render.sprite;
-import atelier.render.view;
-import atelier.render.window;
-
-import atelier.ui.widget;
-
-class Frame: WidgetGroup {
-	protected View _view;
+class Frame: GuiElement {
+	/*protected View _view;
 	bool clearRenderer = true;
 	
 	@property {
@@ -29,7 +23,7 @@ class Frame: WidgetGroup {
 
 	this(Vec2u newSize) {
 		_view = new View(newSize);
-		_size = to!Vec2f(newSize);
+		size = to!Vec2f(newSize);
 		_isFrame = true;
 	}
 
@@ -48,14 +42,14 @@ class Frame: WidgetGroup {
 		pushView(_view, clearRenderer);
 		super.draw();
 		popView();
-		_view.draw(_position);
+		_view.draw(pivot);
 	}
 
     override void onPosition() {
-        _view.position = _position;
+        _view.position = pivot;
     }
 
     override void onSize() {
-        _view.position = _position;
-    }
+        _view.position = pivot;
+    }*/
 }

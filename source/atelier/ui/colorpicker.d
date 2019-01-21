@@ -13,8 +13,8 @@ import atelier.render;
 import atelier.common;
 
 import atelier.ui;
-
-class ColorViewer: Widget {
+/+
+class ColorViewer: GuiElement {
 	Color color;
 
 	this() {}
@@ -22,11 +22,11 @@ class ColorViewer: Widget {
 	override void onEvent(Event event) {}
 	override void update(float deltaTime) {}
 	override void draw() {
-		drawFilledRect(_position - _size / 2f, _size, color);
+		drawFilledRect(center - size / 2f, size, color);
 	}
 }
 
-class ColorPicker: ModalWindow {
+class ColorPicker: GuiElement {
 	private {
 		DropDownList _blendList;
 		Slider _redSlider, _blueSlider, _greenSlider, _alphaSlider;
@@ -65,9 +65,9 @@ class ColorPicker: ModalWindow {
 
 			auto hc = new HContainer;
 			hc.spacing = Vec2f(10f, 0f);
-			hc.addChild(new Label(title));
-			hc.addChild(slider);
-			container.addChild(hc);
+			hc.addChildGui(new Label(title));
+			hc.addChildGui(slider);
+			container.addChildGui(hc);
 			return slider;
 		}
 
@@ -82,8 +82,8 @@ class ColorPicker: ModalWindow {
 		foreach(mode; [
 			"Alpha Blending", "Additive Blending",
 			"Modular Blending", "No Blending"])
-			_blendList.addChild(new TextButton(mode));
-		container.addChild(_blendList);
+			_blendList.add(mode);
+		container.addChildGui(_blendList);
 
 		_redSlider.value01 = newColor.r;
 		_blueSlider.value01 = newColor.g;
@@ -95,11 +95,11 @@ class ColorPicker: ModalWindow {
 
 		auto hc2 = new HContainer;
 		hc2.spacing = Vec2f(20f, 5f);
-		hc2.addChild(container);
-		hc2.addChild(_viewer);
+		hc2.addChildGui(container);
+		hc2.addChildGui(_viewer);
 
 		super("Couleur", hc2.size);
-		layout.addChild(hc2);
+		layout.addChildGui(hc2);
 
 		switch(newBlend) with(Blend) {
 		case AlphaBlending:
@@ -123,4 +123,4 @@ class ColorPicker: ModalWindow {
 		super.update(deltaTime);
 		_viewer.color = color();
 	}
-}
+}+/

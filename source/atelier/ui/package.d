@@ -9,7 +9,10 @@
 module atelier.ui;
 
 public {
-	import atelier.ui.widget;
+	import atelier.ui.gui_manager;
+	import atelier.ui.gui_element;
+	import atelier.ui.gui_overlay;
+	import atelier.ui.gui_modal;
 	import atelier.ui.button;
 	import atelier.ui.checkbox;
 	import atelier.ui.image;
@@ -19,11 +22,9 @@ public {
 	import atelier.ui.frame;
 	import atelier.ui.layout;
 	import atelier.ui.panel;
-	import atelier.ui.modal;
 	import atelier.ui.inputfield;
 	import atelier.ui.save;
 	import atelier.ui.info;
-	import atelier.ui.overlay;
 	import atelier.ui.text;
 	import atelier.ui.colorpicker;
 	import atelier.ui.listwindow;

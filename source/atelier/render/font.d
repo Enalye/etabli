@@ -16,7 +16,7 @@ import derelict.sdl2.ttf;
 class Font {
 	private {
 		TTF_Font* _font;
-		bool _isLoaded;
+		bool _isLoaded, _ownData;
 		uint _size;
 	}
 
@@ -26,7 +26,13 @@ class Font {
 		float scale() const { return 16f / _size;}
 	}
 
-	this() {
+	this() {}
+
+    this(Font font) {
+        _font = font._font;
+		_isLoaded = font._isLoaded;
+		_size = font._size;
+        _ownData = false;
 	}
 
 	this(const string path, uint newSize = 16u) {
@@ -51,9 +57,12 @@ class Font {
 			throw new Exception("Cannot load \'" ~ path ~ "\' font.");
 
 		_isLoaded = true;
+        _ownData = true;
 	}
 
 	void unload() {
+        if(!_ownData)
+            return;
 		if (null != _font)
 			TTF_CloseFont(_font);
 

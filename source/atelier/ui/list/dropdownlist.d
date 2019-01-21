@@ -9,20 +9,35 @@
 module atelier.ui.list.dropdownlist;
 
 import std.conv: to;
+import atelier.core, atelier.render, atelier.common;
+import atelier.ui.gui_element, atelier.ui.gui_overlay, atelier.ui.list.vlist, atelier.ui.label, atelier.ui.button;
 
-import atelier.core;
-import atelier.render;
-import atelier.common;
+private class DropDownListCancelTrigger: GuiElement {
+    override void onSubmit() {
+        triggerCallback();
+    }
+}
 
-import atelier.ui.list.vlist;
-import atelier.ui.widget;
-import atelier.ui.overlay;
+private class DropDownListSubElement: Button {
+    Label label;
 
-class DropDownList: WidgetGroup {
+    this(string title) {
+        label = new Label(title);
+        label.setAlign(GuiAlignX.Center, GuiAlignY.Center);
+        addChildGui(label);
+    }
+
+    override void draw() {
+        drawFilledRect(origin, size, isHovered ? Color.gray : Color.black);
+    }
+}
+
+class DropDownList: GuiElement {
 	private {
 		VList _list;
-		Vec2f _originalSize, _originalPosition;
-		bool _isClicked = false;
+        Label _label;
+        DropDownListCancelTrigger _cancelTrigger;
+		bool _isUnrolled = false;
 		uint _maxListLength = 5;
 	}
 
@@ -33,84 +48,117 @@ class DropDownList: WidgetGroup {
 
 	this(Vec2f newSize, uint maxListLength = 5U) {
 		_maxListLength = maxListLength;
-		_originalSize = newSize;
-		_list = new VList(_originalSize * Vec2f(1f, _maxListLength));
-		_size = _originalSize;
+		size = newSize;
+
+		_list = new VList(size * Vec2f(1f, _maxListLength));
+        _list.setAlign(GuiAlignX.Left, GuiAlignY.Top);
+
+        _cancelTrigger = new DropDownListCancelTrigger;
+        _cancelTrigger.setAlign(GuiAlignX.Left, GuiAlignY.Top);
+        _cancelTrigger.size = size;
+        _cancelTrigger.setCallback(this, "cancel");
+
+        _label = new Label;
+        _label.setAlign(GuiAlignX.Center, GuiAlignY.Center);
+        super.addChildGui(_label);
 	}
 
-	override void onEvent(Event event) {
-		super.onEvent(event);
+	override void onSubmit() {
 		if(!isLocked) {
-			if(event.type == EventType.MouseUp) {
-				_isClicked = !_isClicked;
+            _isUnrolled = !_isUnrolled;
 
-				if(_isClicked) {
-					setOverlay(this);
-					setOverlay(_list);
-				}
-				else {
-					stopOverlay();
-					triggerCallback();
-				}
-			}
+            if(_isUnrolled) {
+                setOverlay(_cancelTrigger);
+                setOverlay(_list);
+            }
+            else {
+                stopOverlay();
+                triggerCallback();
+            }
 		}
-		if(_isClicked)
-			_list.onEvent(event);
 	}
 
-    override void onPosition() {
-        _originalPosition = _position;
+    override void onCallback(string id) {
+        if(id == "cancel") {
+            _isUnrolled = false;
+            stopOverlay();
+            triggerCallback();
+        }
     }
 
 	override void update(float deltaTime) {
-		if(_isClicked) {
-			Vec2f newSize = _originalSize * Vec2f(1f, _maxListLength + 1f);
-			_list.position = _originalPosition + Vec2f(0f, newSize.y / 2f);
+		if(_isUnrolled) {
+			Vec2f newSize = size * Vec2f(1f, _maxListLength + 1f);
+            _cancelTrigger.position = origin;
+			_list.position = origin + Vec2f(0f, _size.y);
 			_list.update(deltaTime);
+
+            int id;
+            foreach(gui; _list.getList()) {
+                if(gui.hasFocus) {
+                    _isUnrolled = false;
+                    selected = id;
+
+                    stopOverlay();
+					triggerCallback();
+                }
+                id ++;
+            }
 		}
 	}
 
 	override void draw() {
 		super.draw();
-		auto widgets = _list.getList();
-		if(widgets.length > _list.selected) {
-			auto widget = widgets[_list.selected];
-			auto wPos = widget.position;
-			auto wSize = widget.size;
-
-			widget.position = _originalPosition;
-			widget.size = _originalSize;
-			widget.draw();
-
-			widget.position = wPos;
-			widget.size = wSize;
+		auto guis = _list.getList();
+		if(guis.length > _list.selected) {
+			auto gui = cast(DropDownListSubElement)(guis[_list.selected]);
+            _label.text = gui.label.text;
 		}
-		drawRect(_originalPosition - _originalSize / 2f, _originalSize, Color.white);
+		drawRect(origin, size, Color.white);
 	}
 
-	override void drawOverlay() {
-		super.drawOverlay();
-		if(_isClicked)
-			_list.draw();
+	protected override void addChildGui(GuiElement gui) {
+		_list.addChildGui(gui);
 	}
 
-	override void addChild(Widget widget) {
-		_list.addChild(widget);
+    void add(string msg) {
+        auto gui = new DropDownListSubElement(msg);
+		addChildGui(gui);
 	}
 
-	override void removeChildren() {
-		_list.removeChildren();
+	override void removeChildrenGuis() {
+		_list.removeChildrenGuis();
 	}
 
-	override void removeChild(uint id) {
-		_list.removeChild(id);
+	override void removeChildGui(uint id) {
+		_list.removeChildGui(id);
 	}
 
-	override int getChildrenCount() {
-		return _list.getChildrenCount();
+	override int getChildrenGuisCount() {
+		return _list.getChildrenGuisCount();
 	}
 
-	Widget[] getList() {
+	GuiElement[] getList() {
 		return _list.getList();
 	}
+
+    string getSelectedName() {
+        auto list = cast(DropDownListSubElement[])getList();
+        if(selected() >= list.length)
+            return "";
+        return list[selected()].label.text;
+    }
+
+    void setSelectedName(string name) {
+        auto list = cast(DropDownListSubElement[])getList();
+        int i;
+        foreach(btn; list) {
+            if(btn.label.text == name) {
+                selected(i);
+                triggerCallback();
+                return;
+            }
+            i ++;
+        }
+    }
 }

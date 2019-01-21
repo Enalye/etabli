@@ -21,50 +21,50 @@ import atelier.render.texture;
 import atelier.render.drawable;
 import atelier.render.tileset;
 
-struct Animation {
-	private {
-		Tileset _tileset;
-		Timer _timer;
-	}
+final class Animation {
+    Tileset tileset;
+    Timer timer;
 
 	@property {
-		Vec2f scale() const { return _tileset.scale; }
-		Vec2f scale(Vec2f newScale) { return _tileset.scale = newScale; }
+		Vec2f scale() const { return tileset.scale; }
+		Vec2f scale(Vec2f newScale) { return tileset.scale = newScale; }
 
-		float angle() const { return _tileset.angle; }
-		float angle(float newAngle) { return _tileset.angle = newAngle; }
+		float angle() const { return tileset.angle; }
+		float angle(float newAngle) { return tileset.angle = newAngle; }
 
-		Flip flip() const { return _tileset.flip; }
-		Flip flip(Flip newFlip) { return _tileset.flip = newFlip; }
+		Flip flip() const { return tileset.flip; }
+		Flip flip(Flip newFlip) { return tileset.flip = newFlip; }
 
-		Vec2f anchor() const { return _tileset.anchor; }
-		Vec2f anchor(Vec2f newAnchor) { return _tileset.anchor = newAnchor; }
+		Vec2f anchor() const { return tileset.anchor; }
+		Vec2f anchor(Vec2f newAnchor) { return tileset.anchor = newAnchor; }
 
-		Vec2f tileSize() const { return _tileset.tileSize; }
+		Vec2i tileSize() const { return tileset.clip.zw; }
 
-		bool isRunning() const { return _timer.isRunning; }
-		float time() const { return _timer.time; }
+		bool isRunning() const { return timer.isRunning; }
+		float time() const { return timer.time; }
 
-		Color color(const Color newColor) { return _tileset.color = newColor; };
+		Color color(const Color newColor) { return tileset.color = newColor; };
 
-		alias duration = _timer.duration;
-		alias mode = _timer.mode;
+		alias duration = timer.duration;
+		alias mode = timer.mode;
 	}
 
+    this() {}
+
 	this(string tilesetName, TimeMode timeMode = TimeMode.Once) {
-		_tileset = fetch!Tileset(tilesetName);
+		tileset = fetch!Tileset(tilesetName);
 		start(1f, timeMode);
 	}
 
 	void start(float duration, TimeMode timeMode = TimeMode.Once) {
-		_timer.start(duration, timeMode);
+		timer.start(duration, timeMode);
 	}
 
 	void update(float deltaTime) {
-		_timer.update(deltaTime);
+		timer.update(deltaTime);
 	}
 	
 	void draw(const Vec2f position) {
-		_tileset.drawRotated(_timer, position);
+		tileset.drawRotated(timer, position);
 	}
 }

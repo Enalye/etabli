@@ -24,25 +24,6 @@ private {
 	string _dataFolder = "./";
 }
 
-void loadResources() {
-	//Path to 'data/'
-	auto path = buildNormalizedPath(absolutePath(_dataFolder));
-
-	auto textureCache = new DataCache!Texture(path, getResourceSubFolder!Texture, "*.{png,bmp,jpg}");
-	auto fontCache = new DataCache!Font(path, getResourceSubFolder!Font, "*.{ttf}");
-	auto spriteCache = new SpriteCache!Sprite(path, getResourceSubFolder!Sprite, "*.{sprite}", textureCache);
-	auto tilesetCache = new TilesetCache!Tileset(path, getResourceSubFolder!Tileset, "*.{tileset}", textureCache);
-	auto soundCache = new DataCache!Sound(path, getResourceSubFolder!Sound, "*.{wav,ogg}");
-	auto musicCache = new DataCache!Music(path, getResourceSubFolder!Music, "*.{wav,ogg,mp3}");
-
-	setResourceCache!Texture(textureCache);
-	setResourceCache!Font(fontCache);
-	setResourceCache!Sprite(spriteCache);
-	setResourceCache!Tileset(tilesetCache);
-	setResourceCache!Sound(soundCache);
-	setResourceCache!Music(musicCache);
-}
-
 void setResourceFolder(string dataFolder) {
 	_dataFolder = dataFolder;
 }
@@ -115,14 +96,21 @@ Tuple!(T, string)[] fetchPackTuples(T)(string name = ".") {
 	return (cast(ResourceCache!T)*cache).getPackTuples(name);
 }
 
-private class ResourceCache(T) {
+Tuple!(T, string)[] fetchAllTuples(T)() {
+	auto cache = T.stringof in _caches;
+	if(!cache)
+		throw new Exception("No cache of type \'" ~ T.stringof ~ "\' has been declared");
+	return (cast(ResourceCache!T)*cache).getAllTuples();
+}
+
+class ResourceCache(T) {
 	protected {
 		Tuple!(T, string)[] _data;
 		uint[string] _ids;
 		uint[][string] _packs;
 	}
 
-	protected this() {}
+	this() {}
 
 	bool canGet(string name) {
 		return (buildNormalizedPath(name) in _ids) !is null;
@@ -138,7 +126,7 @@ private class ResourceCache(T) {
 		auto p = (name in _ids);
 		if(p is null)
 			throw new Exception("Resource: no \'" ~ name ~ "\' loaded");
-		return _data[*p][0];
+		return new T(_data[*p][0]);
 	}
 
 	T[] getPack(string pack = ".") {
@@ -150,7 +138,7 @@ private class ResourceCache(T) {
 
 		T[] result;
 		foreach(i; *p)
-			result ~= _data[i][0];
+			result ~= new T(_data[i][0]);
 		return result;
 	}
 
@@ -179,6 +167,18 @@ private class ResourceCache(T) {
 			result ~= _data[i];
 		return result;
 	}
+
+    Tuple!(T, string)[] getAllTuples() {
+		return _data;
+	}
+
+    void set(T value, string tag, string pack = "") {
+        uint id = cast(uint)_data.length;
+        if(pack.length)
+            _packs[pack] ~= id;
+        _ids[tag] = id;
+        _data ~= tuple(value, tag);
+    }
 }
 
 class DataCache(T): ResourceCache!T {
@@ -221,7 +221,7 @@ private class SpriteCache(T): ResourceCache!T {
 		foreach(string tag, JSONValue value; sheetJson.object) {
 			if((tag in _ids) !is null)
 				throw new Exception("Duplicate sprite defined \'" ~ tag ~ "\' in \'" ~ file ~ "\'");
-			T sprite = T(texture);
+			T sprite = new T(texture);
 
 			//Clip
 			sprite.clip.x = getJsonInt(value, "x");
@@ -292,26 +292,26 @@ private class TilesetCache(T): ResourceCache!T {
 		foreach(string tag, JSONValue value; sheetJson.object) {
 			if((tag in _ids) !is null)
 				throw new Exception("Duplicate tileset defined \'" ~ tag ~ "\' in \'" ~ file ~ "\'");
-            Vec2i grid, offset, tileSize;
-            int nbTiles;
+            Vec4i clip;
+            int columns, lines, maxtiles;
 
             //Max number of tiles the tileset cannot exceeds
-            nbTiles = getJsonInt(value, "tiles", -1);
+            maxtiles = getJsonInt(value, "tiles", -1);
 
             //Upper left border of the tileset
-            offset.x = getJsonInt(value, "x", 0);
-            offset.y = getJsonInt(value, "y", 0);
+            clip.x = getJsonInt(value, "x", 0);
+            clip.y = getJsonInt(value, "y", 0);
 
             //Tile size
-            tileSize.x = getJsonInt(value, "w");
-            tileSize.y = getJsonInt(value, "h");
+            clip.z = getJsonInt(value, "w");
+            clip.w = getJsonInt(value, "h");
 
-            grid.x = getJsonInt(value, "columns", 1);
-            grid.y = getJsonInt(value, "lines", 1);
+            columns = getJsonInt(value, "columns", 1);
+            lines = getJsonInt(value, "lines", 1);
 
             string type = getJsonStr(value, "type", ".");
 
-            T tileset = T(texture, offset, grid, tileSize, nbTiles);
+            T tileset = new T(texture, clip, columns, lines, maxtiles);
             tileset.scale = Vec2f(getJsonFloat(value, "scalex", 1f), getJsonFloat(value, "scaley", 1f));
 
             //Flip

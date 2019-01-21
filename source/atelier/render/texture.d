@@ -32,9 +32,9 @@ enum Blend {
 	AlphaBlending
 }
 
-class Texture {
+final class Texture {
 	private {
-		bool _isLoaded = false;
+		bool _isLoaded = false, _ownData;
 		SDL_Texture* _texture = null;
 		uint _width, _height;
 	}
@@ -45,8 +45,15 @@ class Texture {
 		uint height() const { return _height; }
 	}
 
-	this() {
-	}
+	this() {}
+
+	this(Texture texture) {
+        _isLoaded = texture._isLoaded;
+		_texture = texture._texture;
+		_width = texture._width;
+        _height = texture._height;
+        _ownData = false;
+    }
 
 	this(SDL_Surface* surface) {
 		loadFromSurface(surface);
@@ -84,13 +91,15 @@ class Texture {
 			SDL_DestroyTexture(_texture);
 
 		_texture = SDL_CreateTextureFromSurface(renderer, surface);
-		SDL_FreeSurface(surface);
 
 		enforce(null != _texture, "Error occurred while converting a surface to a texture format.");
 
 		_width = surface.w;
 		_height = surface.h;
+		SDL_FreeSurface(surface);
+
 		_isLoaded = true;
+        _ownData = true;
 	}
 
 	void load(string path) {
@@ -100,17 +109,21 @@ class Texture {
 		enforce(null != renderer, "The renderer does not exist.");
 
 		_texture = SDL_CreateTextureFromSurface(renderer, surface);
-		SDL_FreeSurface(surface);
 
 		if (null == _texture)
 			throw new Exception("Error occurred while converting \'" ~ path ~ "\' to a texture format.");
 
 		_width = surface.w;
 		_height = surface.h;
+		SDL_FreeSurface(surface);
+
 		_isLoaded = true;
+        _ownData = true;
 	}
 
 	void unload() {
+        if(!_ownData)
+            return;
 		if (null != _texture)
 			SDL_DestroyTexture(_texture);
 		_isLoaded = false;

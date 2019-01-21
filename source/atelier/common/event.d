@@ -71,15 +71,15 @@ struct Event {
 		string str;
 		int ivalue;
 		string[] sarray;
-		Widget widget;
+		GuiElement widget;
 	}
 }
 
-struct WidgetCallback {
-	Widget widget;
+struct GuiElementCallback {
+	GuiElement widget;
 	string id;
 
-	void trigger(Widget w) {
+	void trigger(GuiElement w) {
 		Event event;
 		event.type = EventType.Callback;
 		event.id = id;
@@ -174,13 +174,13 @@ void updateEvents(float deltaTime) {
     updateControllers(deltaTime);
 }
 
-bool processEvents(IMainWidget mainWidget) {
+bool processEvents() {
 	Event event;
 	SDL_Event sdlEvent;
 
 	if(!_isRunning) {
 		event.type = EventType.Quit;
-		mainWidget.onEvent(event);
+		handleGuiElementEvent(event);
         destroyWindow();
 		return false;
 	}
@@ -193,7 +193,7 @@ bool processEvents(IMainWidget mainWidget) {
 		case SDL_QUIT:
 			_isRunning = false;
 			event.type = EventType.Quit;
-			mainWidget.onEvent(event);
+			handleGuiElementEvent(event);
 			destroyWindow();
 			//No operation involving the SDL after this.
 			return false;
@@ -204,36 +204,36 @@ bool processEvents(IMainWidget mainWidget) {
 			case SDL_SCANCODE_DELETE:
 				event.type = EventType.KeyDelete;
 				event.ivalue = 1;
-				mainWidget.onEvent(event);
+				handleGuiElementEvent(event);
 				break;
 			case SDL_SCANCODE_BACKSPACE:
 				event.type = EventType.KeyDelete;
 				event.ivalue = -1;
-				mainWidget.onEvent(event);
+				handleGuiElementEvent(event);
 				break;
 			case SDL_SCANCODE_RETURN:
 				event.type = EventType.KeyEnter;
-				mainWidget.onEvent(event);
+				handleGuiElementEvent(event);
 				break;
 			case SDL_SCANCODE_UP:
 				event.type = EventType.KeyDir;
 				event.position = Vec2f(0f, -1f);
-				mainWidget.onEvent(event);
+				handleGuiElementEvent(event);
 				break;
 			case SDL_SCANCODE_DOWN:
 				event.type = EventType.KeyDir;
 				event.position = Vec2f(0f, 1f);
-				mainWidget.onEvent(event);
+				handleGuiElementEvent(event);
 				break;
 			case SDL_SCANCODE_LEFT:
 				event.type = EventType.KeyDir;
 				event.position = Vec2f(-1f, 0f);
-				mainWidget.onEvent(event);
+				handleGuiElementEvent(event);
 				break;
 			case SDL_SCANCODE_RIGHT:
 				event.type = EventType.KeyDir;
 				event.position = Vec2f(1f, 0f);
-				mainWidget.onEvent(event);
+				handleGuiElementEvent(event);
 				break;
 			default:
 				break;
@@ -248,46 +248,46 @@ bool processEvents(IMainWidget mainWidget) {
 			text.length = stride(text);
 			event.type = EventType.KeyInput;
 			event.str = text;
-			mainWidget.onEvent(event);
+			handleGuiElementEvent(event);
 			break;
 		case SDL_MOUSEMOTION:
 			_mousePosition.set(cast(float)sdlEvent.motion.x, cast(float)sdlEvent.motion.y);
-			_mousePosition = getViewVirtualPos(_mousePosition);
+			_mousePosition = transformCanvasSpace(_mousePosition);
 
 			event.type = EventType.MouseUpdate;
 			event.position = _mousePosition;
 
-			mainWidget.onEvent(event);
+			handleGuiElementEvent(event);
 			break;
 		case SDL_MOUSEBUTTONDOWN:
 			_mousePosition.set(cast(float)sdlEvent.motion.x, cast(float)sdlEvent.motion.y);
-			_mousePosition = getViewVirtualPos(_mousePosition);
+			_mousePosition = transformCanvasSpace(_mousePosition);
 			_buttons[sdlEvent.button.button] = true;
 			
 			event.type = EventType.MouseDown;
 			event.position = _mousePosition;
 
-			mainWidget.onEvent(event);
+			handleGuiElementEvent(event);
 			break;
 		case SDL_MOUSEBUTTONUP:
 			_mousePosition.set(cast(float)sdlEvent.motion.x, cast(float)sdlEvent.motion.y);
-			_mousePosition = getViewVirtualPos(_mousePosition);
+			_mousePosition = transformCanvasSpace(_mousePosition);
 			_buttons[sdlEvent.button.button] = false;
 
 			event.type = EventType.MouseUp;
 			event.position = _mousePosition;
 
-			mainWidget.onEvent(event);
+			handleGuiElementEvent(event);
 			break;
 		case SDL_MOUSEWHEEL:
 			event.type = EventType.MouseWheel;
 			event.position = Vec2f(sdlEvent.wheel.x, sdlEvent.wheel.y);
-			mainWidget.onEvent(event);
+			handleGuiElementEvent(event);
 			break;
 		case SDL_WINDOWEVENT:
 			switch (sdlEvent.window.event) {
 				case SDL_WINDOWEVENT_RESIZED:
-					setWindowSize(Vec2u(sdlEvent.window.data1, sdlEvent.window.data2));
+					//setWindowSize(Vec2u(sdlEvent.window.data1, sdlEvent.window.data2));
 					break;
 				default:
 					break;
@@ -313,7 +313,7 @@ bool processEvents(IMainWidget mainWidget) {
 
 			event.type = EventType.DropFile;
 			event.str = path;
-			mainWidget.onEvent(event);
+			handleGuiElementEvent(event);
 
 			SDL_free(sdlEvent.drop.file);
 			break;
@@ -344,11 +344,11 @@ bool processEvents(IMainWidget mainWidget) {
 		switch(globalEvent.type) with(EventType) {
 			case Quit:
 				_isRunning = false;
-				mainWidget.onEvent(globalEvent);
+				handleGuiElementEvent(globalEvent);
                 destroyWindow();
 				return false;
 			default:
-				mainWidget.onEvent(globalEvent);
+				handleGuiElementEvent(globalEvent);
 				break;
 		}
 	}

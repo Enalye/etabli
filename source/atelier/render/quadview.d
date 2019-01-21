@@ -10,10 +10,10 @@ module atelier.render.quadview;
 
 import atelier.core;
 
-import atelier.render.view;
+import atelier.render.canvas;
 import atelier.render.texture;
 import atelier.render.window;
-
+/*
 class QuadView {
 	Vec2f correction = Vec2f(-.001f, -.001f);
 
@@ -114,4 +114,4 @@ class QuadView {
 		_views[2].draw(renderPosition + Vec2f(-quarterSize.x, quarterSize.y), scale);
 		_views[3].draw(renderPosition + quarterSize, scale);
 	}
-}
+}*/
