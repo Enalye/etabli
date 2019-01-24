@@ -68,14 +68,28 @@ final class Label: GuiElement {
 	this(Font font, string newText) {
         _font = font;
 		_text = newText;
-		this();
+		isInteractable = false;
+		_texture = new Texture;
+		_sprite = new Sprite(_texture);
+		reload();
+	}
+
+    this(string newText) {
+        _font = getDefaultFont();
+		_text = newText;
+		isInteractable = false;
+		_texture = new Texture;
+		_sprite = new Sprite(_texture);
 		reload();
 	}
 
 	this() {
+		_font = getDefaultFont();
+		_text = "";
 		isInteractable = false;
 		_texture = new Texture;
 		_sprite = new Sprite(_texture);
+		reload();
 	}
 
 	override void draw() {

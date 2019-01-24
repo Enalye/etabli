@@ -40,21 +40,19 @@ class ListButton: Button {
 		}
 	}
 
-	this(string text) {
-		label = new Label;
-		label.text = text;
+	this(Font font, string text) {
+		label = new Label(font, text);
 		size = label.size;
 	}
 
 	this(Sprite newSprite) {
-		label = new Label;
+		label = new Label(getDefaultFont(), "");
 		_sprite = newSprite;
 		reload();
 	}
 
-	this(string text, Sprite newSprite) {
-		label = new Label;
-		label.text = text;
+	this(Font font, string text, Sprite newSprite) {
+		label = new Label(font, text);
 		size = label.size;
 		_sprite = newSprite;
 		reload();
@@ -104,10 +102,9 @@ class TextButton: Button {
 		alias text = label.text;
 	}
 
-	this(string text) {
-		label = new Label;
+	this(Font font, string text) {
+		label = new Label(font, text);
         label.setAlign(GuiAlignX.Center, GuiAlignY.Center);
-		label.text = text;
 		size = label.size;
         addChildGui(label);
 	}
@@ -200,11 +197,11 @@ class ImgButton: Button {
 	}
 
 	this() {
-		label = new Label;
+		label = new Label(getDefaultFont(), "");
 	}
 
-	this(string text) {
-		label = new Label;
+	this(Font font, string text) {
+		label = new Label(font, text);
         label.setAlign(GuiAlignX.Center, GuiAlignY.Center);
 		label.text = text;
 		size = label.size;

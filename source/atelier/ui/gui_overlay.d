@@ -104,7 +104,7 @@ private class HintWindow: GuiElement {
 	}
 
 	this() {
-		title = new Label;
+		title = new Label(getDefaultFont(), "");
 		text = new Text;
 	}
 

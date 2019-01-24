@@ -13,6 +13,18 @@ import std.string;
 import derelict.sdl2.sdl;
 import derelict.sdl2.ttf;
 
+private {
+    Font _defaultFont;
+}
+
+void setDefaultFont(Font font) {
+    _defaultFont = font;
+}
+
+Font getDefaultFont() {
+    return _defaultFont;
+}
+
 class Font {
 	private {
 		TTF_Font* _font;

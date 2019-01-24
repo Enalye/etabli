@@ -49,7 +49,7 @@ class InputField: GuiElementCanvas {
 
 	this(Vec2f newSize, string defaultText = "", bool startWithFocus = false) {
 		size = newSize;
-		_label = new Label;
+		_label = new Label(getDefaultFont(), "");
         _label.setAlign(GuiAlignX.Left, GuiAlignY.Center);
         addChildGui(_label);
 		hasFocus = startWithFocus;

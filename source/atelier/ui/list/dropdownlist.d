@@ -22,7 +22,7 @@ private class DropDownListSubElement: Button {
     Label label;
 
     this(string title) {
-        label = new Label(title);
+        label = new Label(getDefaultFont(), title);
         label.setAlign(GuiAlignX.Center, GuiAlignY.Center);
         addChildGui(label);
     }
@@ -58,7 +58,7 @@ class DropDownList: GuiElement {
         _cancelTrigger.size = size;
         _cancelTrigger.setCallback(this, "cancel");
 
-        _label = new Label;
+        _label = new Label(getDefaultFont(), "");
         _label.setAlign(GuiAlignX.Center, GuiAlignY.Center);
         super.addChildGui(_label);
 	}
