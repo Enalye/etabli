@@ -13,7 +13,7 @@ import derelict.sdl2.sdl, derelict.sdl2.ttf;
 import atelier.core, atelier.common, atelier.render;
 import atelier.ui.gui_element;
 
-class Label: GuiElement {
+final class Label: GuiElement {
 	private {
 		string _text;
 		Font _font;
@@ -65,9 +65,10 @@ class Label: GuiElement {
 		}
 	}
 
-	this(string newText) {
-		this();
+	this(Font font, string newText) {
+        _font = font;
 		_text = newText;
+		this();
 		reload();
 	}
 
@@ -75,7 +76,6 @@ class Label: GuiElement {
 		isInteractable = false;
 		_texture = new Texture;
 		_sprite = new Sprite(_texture);
-		_font = fetch!Font("VeraMoBd");
 	}
 
 	override void draw() {
