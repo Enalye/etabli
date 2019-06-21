@@ -70,13 +70,28 @@ final class Tileset {
         maxtiles(newMaxTiles);
 	}
 
+    Sprite getSprite(Timer timer) {
+		const float id = floor(lerp(0f, to!float(_maxtiles), timer.time));
+        return getSprite(to!uint(id));
+    }
+
+    Sprite getSprite(uint id) {
+        Vec2i coord = Vec2i(id % columns, id / columns);
+        Vec4i spriteClip = Vec4i(clip.x + coord.x * clip.z, clip.y + coord.y * clip.w, clip.z, clip.w);
+        Sprite sprite = new Sprite(texture, spriteClip);
+        sprite.flip = flip;
+        sprite.blend = blend;
+        sprite.color = color;
+        sprite.anchor = anchor;
+        sprite.angle = angle;
+        sprite.size = size;
+        return sprite;
+    }
+
 	Sprite[] asSprites() {
 		Sprite[] sprites;
-		foreach(id; 0.. _maxtiles) {
-			Vec2i coord = Vec2i(id % columns, id / columns);
-			Vec4i spriteClip = Vec4i(clip.x + coord.x * clip.z, clip.y + coord.y * clip.w, clip.z, clip.w);
-			sprites ~= new Sprite(texture, spriteClip);
-		}
+		foreach(id; 0.. _maxtiles)
+			sprites ~= getSprite(id);
 		return sprites;
 	}
 
