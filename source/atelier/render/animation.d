@@ -16,10 +16,8 @@ import derelict.sdl2.image;
 import atelier.common;
 import atelier.core;
 
-import atelier.render.window;
-import atelier.render.texture;
-import atelier.render.drawable;
-import atelier.render.tileset;
+import atelier.render.window, atelier.render.texture, atelier.render.drawable;
+import atelier.render.tileset, atelier.render.sprite;
 
 final class Animation {
     Tileset tileset;
@@ -67,4 +65,8 @@ final class Animation {
 	void draw(const Vec2f position) {
 		tileset.drawRotated(timer, position);
 	}
+
+    Sprite getCurrentSprite() {
+        return tileset.getSprite(timer);
+    }
 }
