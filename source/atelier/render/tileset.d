@@ -72,10 +72,14 @@ final class Tileset {
 
     Sprite getSprite(Timer timer) {
 		const float id = floor(lerp(0f, to!float(_maxtiles), timer.time));
-        return getSprite(to!uint(id));
+        return getSprite(to!int(id));
     }
 
-    Sprite getSprite(uint id) {
+    Sprite getSprite(int id) {
+        if(id >= _maxtiles)
+			id = _maxtiles - 1;
+        if(id < 0)
+            id = 0;
         Vec2i coord = Vec2i(id % columns, id / columns);
         Vec4i spriteClip = Vec4i(clip.x + coord.x * clip.z, clip.y + coord.y * clip.w, clip.z, clip.w);
         Sprite sprite = new Sprite(texture, spriteClip);
@@ -101,12 +105,14 @@ final class Tileset {
 
 	void drawRotated(Timer timer, const Vec2f position) {
 		float id = floor(lerp(0f, to!float(_maxtiles), timer.time));
-		drawRotated(to!uint(id), position);
+		drawRotated(to!int(id), position);
 	}
 
-	void drawRotated(uint id, const Vec2f position) {
+	void drawRotated(int id, const Vec2f position) {
 		if(id >= _maxtiles)
-			return;
+			id = _maxtiles - 1;
+        if(id < 0)
+            id = 0;
 
 		Vec2i coord = Vec2i(id % columns, id / columns);
 		if(coord.y > lines)
@@ -123,12 +129,14 @@ final class Tileset {
 
 	void draw(Timer timer, const Vec2f position) {
 		float id = floor(lerp(0f, to!float(_maxtiles), timer.time));
-		draw(to!uint(id), position);
+		draw(to!int(id), position);
 	}
 
-	void draw(uint id, const Vec2f position) {
+	void draw(int id, const Vec2f position) {
 		if(id >= _maxtiles)
-			return;
+			id = _maxtiles - 1;
+        if(id < 0)
+            id = 0;
 
 		Vec2f finalSize = scale * size * transformScale();
 		Vec2i coord = Vec2i(id % columns, id / columns);
