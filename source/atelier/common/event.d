@@ -132,6 +132,12 @@ bool isButtonDown(ubyte button) {
 	return _buttons[button];
 }
 
+bool getButtonDown(ubyte button) {
+    bool value = _buttons[button];
+    _buttons[button] = false;
+	return value;
+}
+
 Vec2f getMousePos() {
 	return _mousePosition;
 }
