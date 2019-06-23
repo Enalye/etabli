@@ -188,4 +188,12 @@ else {
 	T opIndex(uint index) {
 		return _dataTable[_translationTable[index]];
 	}
+
+    bool has(uint index) {
+        if(index > _dataTop)
+            return false;
+        if(_translationTable[index] == -1)
+            return false;
+        return true;
+    }
 }
