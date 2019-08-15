@@ -88,10 +88,10 @@ class VList: GuiElement {
         if(id != "list")
             return;
         auto widgets = _container.layout.children;
-        foreach(uint elementId, ref GuiElement gui; _container.layout.children) {
+        foreach(size_t elementId, ref GuiElement gui; _container.layout.children) {
             gui.isSelected = false;
             if(gui.isHovered)
-                _idElementSelected = elementId;
+                _idElementSelected = cast(uint)elementId;
         }
         if(_idElementSelected < widgets.length)
             widgets[_idElementSelected].isSelected = true;

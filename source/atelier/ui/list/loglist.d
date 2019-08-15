@@ -62,9 +62,9 @@ class LogList: GuiElement {
 				_slider.onEvent(event);
 			else if(event.type == EventType.MouseDown) {
 				auto widgets = _container.layout.children;
-				foreach(uint id, const GuiElement widget; widgets) {
+				foreach(size_t id, const GuiElement widget; widgets) {
 					if(widget.isHovered)
-						_idElementSelected = id;
+						_idElementSelected = cast(uint)id;
 				}
 			}
 		}

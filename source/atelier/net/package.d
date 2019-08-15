@@ -13,5 +13,5 @@ public {
 	import atelier.net.tcpserver;
 	import atelier.net.client;
 	import atelier.net.server;
-	import atelier.net.event;
+	import atelier.net.netevent;
 }

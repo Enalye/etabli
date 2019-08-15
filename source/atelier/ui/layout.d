@@ -48,7 +48,7 @@ class VLayout: GuiElement {
 		if(!_children.length)
 			return;
 		const Vec2f childSize = Vec2f(size.x, size.y / (_capacity != 0u ? _capacity : _children.length));
-		foreach(uint id, GuiElement gui; _children) {
+		foreach(size_t id, GuiElement gui; _children) {
 			gui.position = origin + Vec2f(0f, childSize.y * to!float(id));
 			gui.size = childSize - _spacing;
 		}
@@ -89,7 +89,7 @@ class HLayout: GuiElement {
 		if(!_children.length)
 			return;
 		Vec2f childSize = Vec2f(size.x / (_capacity != 0u ? _capacity : _children.length), size.y);
-		foreach(uint id, GuiElement gui; _children) {
+		foreach(size_t id, GuiElement gui; _children) {
 			gui.position = Vec2f(childSize.x * to!float(id), 0f);
 			gui.size = childSize - _spacing;
 		}
@@ -135,8 +135,8 @@ class GridLayout: GuiElement {
 			yCapacity = (to!int(_children.length) / _capacity.x) + 1;
 
 		Vec2f childSize = Vec2f(size.x / _capacity.x, size.y / yCapacity);
-		foreach(uint id, GuiElement gui; _children) {
-			Vec2u coords = Vec2u(id % _capacity.x, id / _capacity.x);
+		foreach(size_t id, GuiElement gui; _children) {
+			Vec2u coords = Vec2u(id % _capacity.x, cast(uint)id / _capacity.x);
 			gui.position = Vec2f(childSize.x * coords.x, childSize.y * coords.y);
 			gui.size = childSize - _spacing;
 		}
@@ -314,7 +314,7 @@ class AnchoredLayout: GuiElement {
 	protected void resize() {
 		if(!_children.length)
 			return;
-		foreach(uint id, GuiElement gui; _children) {
+		foreach(size_t id, GuiElement gui; _children) {
 			gui.position = size * _childrenPositions[id];
 			gui.size = size * _childrenSizes[id];
 		}

@@ -6,7 +6,7 @@
     Authors: Enalye
 */
 
-module atelier.net.event;
+module atelier.net.netevent;
 
 import atelier.core;
 

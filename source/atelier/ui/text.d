@@ -219,7 +219,7 @@ class Text: GuiElement {
 	override void draw() {
 		Color currentColor = Color.white;
 		Vec2i currentPos = Vec2i.zero;
-		foreach(uint i, token; _tokens) {
+		foreach(size_t i, token; _tokens) {
 			switch(token.type) with(TextTokenType) {
 			case CharacterType:
 				token.charSprite.color = currentColor;

@@ -15,7 +15,7 @@ import core.time: dur;
 import atelier.core;
 import atelier.net.tcpclient;
 import atelier.net.server;
-import atelier.net.event;
+import atelier.net.netevent;
 
 shared ClientInfo[] localClientsInfo;
 shared bool hasLocalClientsInfoChanged;

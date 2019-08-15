@@ -18,7 +18,7 @@ import atelier.core;
 import atelier.common;
 
 import atelier.net.tcpserver;
-import atelier.net.event;
+import atelier.net.netevent;
 
 //Number of clients allowed (the server is not counted, so there is 'nbOfClientsAllowed + 1' players in total).
 static immutable uint nbOfClientsAllowed = 7u;
@@ -116,21 +116,21 @@ class Server: TcpServer {
 					break;
 				
 				//Read/write operations.
-				foreach(int i, Socket socket; clientsSockets) {
+				foreach(size_t i, Socket socket; clientsSockets) {
 					int id = clientsId[i];
 					if(errorSet.isSet(socket))
-						disconnectingClient = i;
+						disconnectingClient = cast(int)i;
 					else if(readSet.isSet(socket) && !serverReceiveBuffer.isFull) {
 						auto inStream = new InStream;
 						if(receive(socket, inStream))
 							serverReceiveBuffer.write(inStream);
 						else
-							disconnectingClient = i;
+							disconnectingClient = cast(int)i;
 					}
 					else if(writeSet.isSet(socket) && !serverSendBuffers[id].isEmpty) {
 						auto outStream = serverSendBuffers[id].read();
 						if(!send(socket, outStream))
-							disconnectingClient = i;
+							disconnectingClient = cast(int)i;
 					}
 				}
 

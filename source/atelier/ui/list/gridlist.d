@@ -58,10 +58,10 @@ class GridList: GuiElement {
 			else if(event.type == EventType.MouseDown) {
 
 				auto widgets = _container.layout.children;
-				foreach(uint id, ref GuiElement widget; _container.layout.children) {
+				foreach(size_t id, ref GuiElement widget; _container.layout.children) {
 					widget.isSelected = false;
 					if(widget.isHovered)
-						_idElementSelected = id;
+						_idElementSelected = cast(uint)id;
 				}
 				if(_idElementSelected < widgets.length)
 					widgets[_idElementSelected].isSelected = true;
