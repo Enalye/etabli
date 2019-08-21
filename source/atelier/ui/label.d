@@ -93,7 +93,7 @@ final class Label: GuiElement {
 	}
 
 	override void draw() {
-		if(_text.length > 0)
+		if(_text.length > 0 && _texture.isLoaded)
 			_sprite.draw(center);
 	}
 
