@@ -485,8 +485,8 @@ void setControllerButton(SDL_GameControllerButton button, bool state) {
     ///Is the Left button pressed.
     ///Returns true only if the button was not already tested.
     bool inputSingleLeft() {
-        auto state = _singleButtonRight;
-        _singleButtonRight = false;
+        auto state = _singleButtonLeft;
+        _singleButtonLeft = false;
         return state;
     }
 
