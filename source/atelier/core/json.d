@@ -10,11 +10,25 @@ module atelier.core.json;
 
 public import std.json;
 import std.conv;
+import std.regex, std.path;
+import std.stdio;
 
+///Transform your path in a system agnostic path.
+string convertPathToExport(string path) {
+	return replaceAll(path, regex(r"\\/|/|\\"), "/");
+}
+
+///Transform the path in your path system.
+string convertPathToImport(string path) {
+	return replaceAll(path, regex(r"\\/|/|\\"), dirSeparator);
+}
+
+///Does the node exist ?
 bool hasJson(JSONValue json, string tag) {
 	return ((tag in json.object) !is null);
 }
 
+///Get the node
 JSONValue getJson(JSONValue json, string tag) {
 	if((tag in json.object) is null)
 		throw new Exception("JSON: \'" ~ tag ~ "\'' does not exist in JSON.");
