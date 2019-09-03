@@ -10,6 +10,7 @@ module atelier.core.indexedarray;
 
 import std.parallelism;
 import std.range;
+import std.typecons;
 
 class IndexedArray(T, uint _capacity, bool _useParallelism = false) {
 	private uint _dataTop = 0u;
@@ -177,6 +178,19 @@ else {
 
 		foreach(i; 0u .. _dataTop) {
 			result = dlg(_dataTable[i], i);
+
+			if(result)
+				break;
+		}
+
+		return result;
+	}
+
+	int opApply(int delegate(const Tuple!(const uint, const T)) dlg) const {
+		int result;
+
+		foreach(i; 0u .. _dataTop) {
+			result = dlg(tuple!(const uint, const T)(_reverseTranslationTable[i], _dataTable[i]));
 
 			if(result)
 				break;
