@@ -185,6 +185,19 @@ else {
 		return result;
 	}
 
+	int opApply(int delegate(const Tuple!(uint, T)) dlg) const {
+		int result;
+
+		foreach(i; 0u .. _dataTop) {
+			result = dlg(tuple!(uint, T)(_reverseTranslationTable[i], _dataTable[i]));
+
+			if(result)
+				break;
+		}
+
+		return result;
+	}
+
 	T opIndex(uint index) {
 		return _dataTable[_translationTable[index]];
 	}
