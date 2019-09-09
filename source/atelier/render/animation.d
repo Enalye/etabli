@@ -42,6 +42,7 @@ final class Animation {
 		float time() const { return timer.time; }
 
 		Color color(const Color newColor) { return tileset.color = newColor; };
+		Color color() { return tileset.color; };
 
 		alias duration = timer.duration;
 		alias mode = timer.mode;
