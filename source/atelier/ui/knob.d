@@ -13,8 +13,7 @@ import atelier.ui.gui_element;
 
 class Knob: GuiElement {
 	protected {
-		float _value = 0f, _step = 1f, _min = 0f, _max = 1f, _minAngle = 0f, _maxAngle = 360f, _angle = 0f, _lastValue = 0f;
-		Sprite _baseSprite, _btnSprite;
+		float _value = 0f, _step = 1f, _min = 0f, _max = 1f, _minAngle = 0f, _maxAngle = 360f, _knobAngle = 0f, _lastValue = 0f;
 		bool _isGrabbed = false;
 		Vec2f _lastCursorPosition = Vec2f.zero;
 	}
@@ -42,11 +41,12 @@ class Knob: GuiElement {
 
 		float max() const { return _max; }
 		float max(float newMax) { return _max = newMax; }
+
+		float knobAngle() const { return _knobAngle; }
 	}
 
 	this() {
-		_btnSprite = fetch!Sprite("knob_btn");
-		size = _btnSprite.size;
+        setEventHook(true);
 	}
 
 	void setAngles(float minAngle, float maxAngle) {
@@ -94,8 +94,7 @@ class Knob: GuiElement {
 			_value = 0f;
 			return;
 		}
-		_angle = lerp(_minAngle, _maxAngle, _value);
-		_btnSprite.angle = lerp(_btnSprite.angle, _angle, deltaTime * .5f);
+		_knobAngle = lerp(_minAngle, _maxAngle, _value);
 
 		if(_lastValue != _value) {
 			triggerCallback();
@@ -104,11 +103,12 @@ class Knob: GuiElement {
 	}
 
 	override void draw() {
-		_btnSprite.draw(center);
+		drawRect(origin, size, Color.white);
+		drawLine(center, center + Vec2f(1f, 0f).rotated(_knobAngle) * 10f, Color.white);
 	}
 
 	override bool isInside(const Vec2f pos) const {
-		float halfSize = size.x / 2f;
+		const float halfSize = size.x / 2f;
 		return (pos - center).lengthSquared() < halfSize * halfSize;
 	}
 }
