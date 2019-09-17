@@ -275,6 +275,12 @@ void drawArrow(const Vec2f startPosition, const Vec2f endPosition, const Color c
 	SDL_RenderDrawLine(renderer, cast(int)pos2.x, cast(int)pos2.y, cast(int)pos4.x, cast(int)pos4.y);
 }
 
+void drawCross(const Vec2f center, float length, const Color color) {
+	const float halfLength = length / 2f;
+	drawLine(center + Vec2f(-halfLength, 0f), center + Vec2f(halfLength, 0f), color);
+	drawLine(center + Vec2f(0f, -halfLength), center + Vec2f(0f, halfLength), color);
+}
+
 void drawRect(const Vec2f origin, const Vec2f size, const Color color) {
 	Vec2f pos1 = transformRenderSpace(origin);
 	Vec2f pos2 = size * transformScale();
