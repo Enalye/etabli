@@ -135,38 +135,43 @@ void updateGuiElements(GuiElement gui, GuiElement parent) {
             gui._targetState.angle,
             t
         );
+        gui.onColor();
+        if(!gui._timer.isRunning) {
+            if(gui._targetState.callbackId.length)
+                gui.onCallback(gui._targetState.callbackId);
+        }
     }
 
     //Calculate gui location
-    const Vec2f offset = gui._position + (gui._size / 2f) + gui._currentState.offset;
+    const Vec2f offset = gui._position + (gui._size * gui._currentState.scale / 2f) + gui._currentState.offset;
     if(parent !is null) {
         if(parent.hasCanvas && parent.canvas !is null) {
             if(gui._alignX == GuiAlignX.Left)
                 coords.x = offset.x;
             else if(gui._alignX == GuiAlignX.Right)
-                coords.x = parent._size.x - offset.x;
+                coords.x = (parent._size.x * parent._currentState.scale.x) - offset.x;
             else
-                coords.x = parent._size.x / 2f + gui._currentState.offset.x;
+                coords.x = (parent._size.x * parent._currentState.scale.x) / 2f + gui._currentState.offset.x;
 
             if(gui._alignY == GuiAlignY.Top)
                 coords.y = offset.y;
             else if(gui._alignY == GuiAlignY.Bottom)
-                coords.y = parent._size.y - offset.y;
+                coords.y = (parent._size.y * parent._currentState.scale.y) - offset.y;
             else
-                coords.y = parent._size.y / 2f + gui._currentState.offset.y;
+                coords.y = (parent._size.y * parent._currentState.scale.y) / 2f + gui._currentState.offset.y;
         }
         else {
             if(gui._alignX == GuiAlignX.Left)
                 coords.x = parent.origin.x + offset.x;
             else if(gui._alignX == GuiAlignX.Right)
-                coords.x = parent.origin.x + parent._size.x - offset.x;
+                coords.x = parent.origin.x + (parent._size.x * parent._currentState.scale.x) - offset.x;
             else
                 coords.x = parent.center.x + gui._currentState.offset.x;
 
             if(gui._alignY == GuiAlignY.Top)
                 coords.y = parent.origin.y + offset.y;
             else if(gui._alignY == GuiAlignY.Bottom)
-                coords.y = parent.origin.y + parent._size.y - offset.y;
+                coords.y = parent.origin.y + (parent._size.y * parent._currentState.scale.y) - offset.y;
             else
                 coords.y = parent.center.y + gui._currentState.offset.y;
         }
@@ -207,7 +212,7 @@ void drawGuiElements(GuiElement gui) {
         canvas.draw(gui._screenCoords);
         const auto origin = gui._origin;
         const auto center = gui._center;
-        gui._origin = gui._screenCoords - gui._size / 2f;
+        gui._origin = gui._screenCoords - (gui._size * gui._currentState.scale) / 2f;
         gui._center = gui._screenCoords;
         gui.drawOverlay();
         gui._origin = origin;
@@ -225,7 +230,7 @@ void drawGuiElements(GuiElement gui) {
 			openHintWindow(gui.hint);
     }
     if(_isGuiElementDebug) {
-        drawRect(gui.center - gui._size / 2f, gui._size,
+        drawRect(gui.center - (gui._size * gui._currentState.scale) / 2f, gui._size * gui._currentState.scale,
             gui.children.length ? Color.blue : Color.green);
     }
 }

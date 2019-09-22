@@ -193,15 +193,15 @@ class VContainer: GuiElement {
 
 		Vec2f totalSize = Vec2f(_minimalWidth, 0f);
 		foreach(GuiElement gui; _children) {
-			totalSize.y += gui.size.y + _spacing.y;
-			totalSize.x = max(totalSize.x, gui.size.x);
+			totalSize.y += gui.scaledSize.y + _spacing.y;
+			totalSize.x = max(totalSize.x, gui.scaledSize.x);
 		}
 		size = totalSize + Vec2f(_spacing.x * 2f, _spacing.y);
 		Vec2f currentPosition = _spacing;
 		foreach(GuiElement gui; _children) {
             gui.setAlign(_childAlignX, GuiAlignY.Top);
 			gui.position = currentPosition;
-			currentPosition = currentPosition + Vec2f(0f, gui.size.y + _spacing.y);
+			currentPosition = currentPosition + Vec2f(0f, gui.scaledSize.y + _spacing.y);
 		}
         isResizeCalled = false;
 	}
@@ -257,15 +257,15 @@ class HContainer: GuiElement {
 
 		Vec2f totalSize = Vec2f(0f, _minimalHeight);
 		foreach(GuiElement gui; _children) {
-			totalSize.y = max(totalSize.y, gui.size.y);
-			totalSize.x += gui.size.x + _spacing.x;
+			totalSize.y = max(totalSize.y, gui.scaledSize.y);
+			totalSize.x += gui.scaledSize.x + _spacing.x;
 		}
 		size = totalSize + Vec2f(_spacing.x, _spacing.y * 2f);
 		Vec2f currentPosition = _spacing;
 		foreach(GuiElement gui; _children) {
             gui.setAlign(GuiAlignX.Left, _childAlignY);
 			gui.position = currentPosition;
-			currentPosition = currentPosition + Vec2f(gui.size.x + _spacing.x, 0f);
+			currentPosition = currentPosition + Vec2f(gui.scaledSize.x + _spacing.x, 0f);
 		}
         isResizeCalled = false;
 	}
@@ -347,14 +347,14 @@ class LogLayout: GuiElement {
 
 		Vec2f totalSize = Vec2f.zero;
 		foreach(GuiElement gui; _children) {
-			totalSize.y += gui.size.y;
-			totalSize.x = max(totalSize.x, gui.size.x);
+			totalSize.y += gui.scaledSize.y;
+			totalSize.x = max(totalSize.x, gui.scaledSize.x);
 		}
 		size = totalSize;
 		Vec2f currentPosition = origin;
 		foreach(GuiElement gui; _children) {
-			gui.position = currentPosition + gui.size / 2f;
-			currentPosition = currentPosition + Vec2f(0f, gui.size.y);
+			gui.position = currentPosition + gui.scaledSize / 2f;
+			currentPosition = currentPosition + Vec2f(0f, gui.scaledSize.y);
 		}
 
         isResizeCalled = false;

@@ -23,10 +23,10 @@ final class Label: GuiElement {
 	}
 
 	@property {
-		Vec2f scale() const {
+		Vec2f spriteScale() const {
 			return _sprite.scale;
 		}
-		Vec2f scale(Vec2f s) {
+		Vec2f spriteScale(Vec2f s) {
 			_sprite.scale = s;
 			return _sprite.scale;
 		}
@@ -51,13 +51,6 @@ final class Label: GuiElement {
 
 		Sprite sprite() {
 			return _sprite;
-		}
-
-		Color color() const { return _color; }
-		Color color(Color newColor) {
-			_color = newColor;
-			reload();
-			return _color;
 		}
 
 		bool isLoaded() const {
@@ -93,8 +86,11 @@ final class Label: GuiElement {
 	}
 
 	override void draw() {
-		if(_text.length > 0 && _texture.isLoaded)
+		if(_text.length > 0 && _texture.isLoaded) {
+			_sprite.color = color;
+			_sprite.scale = scale;
 			_sprite.draw(center);
+		}
 	}
 
 	void reload() {
@@ -102,7 +98,7 @@ final class Label: GuiElement {
 			return;
 
 		if ((_text.length > 0)  && _font.isLoaded) {
-			_texture.loadFromSurface(TTF_RenderUTF8_Blended(_font.font, toStringz(_text), _color.toSDL()));
+			_texture.loadFromSurface(TTF_RenderUTF8_Blended(_font.font, toStringz(_text), Color.white.toSDL()));
 		}
 		_sprite = _texture;
 		_sprite.size *= _font.scale;

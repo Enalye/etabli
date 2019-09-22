@@ -25,6 +25,7 @@ struct GuiState {
     Color color = Color.white;
     float angle = 0f;
     float time = .5f;
+    string callbackId;
     EasingFunction easingFunction = &easeLinear;
 }
 
@@ -155,6 +156,9 @@ class GuiElement {
             return _position;
         }
 
+		final Vec2f scale() const { return _currentState.scale; }
+		final Vec2f scaledSize() const { return _size * _currentState.scale; }
+
 		final Vec2f size() const { return _size; }
 		final Vec2f size(Vec2f newSize) {
             auto oldSize = _size;
@@ -200,6 +204,15 @@ class GuiElement {
 			size(_size);
             onPadding();
             return _padding;
+        }
+
+        final Color color() const { return _currentState.color; }
+		final Color color(Color newColor) {
+            if(newColor != _currentState.color) {
+                _currentState.color = newColor;
+                onColor();
+            }
+            return _currentState.color;
         }
 
 		final float angle() const { return _currentState.angle; }
@@ -313,6 +326,7 @@ class GuiElement {
         void onAnchor() {}
         void onCenter() {}
         void onPadding() {}
+        void onColor() {}
         //void onAngle() {}
         void onCallback(string id) {}
     }
