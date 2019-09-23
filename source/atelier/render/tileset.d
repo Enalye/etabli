@@ -34,6 +34,7 @@ final class Tileset {
     private int _maxtiles;
 
 	Vec4i clip;
+    Vec2i margin;
 	int columns = 1, lines = 1;
     Texture texture;
 
@@ -121,7 +122,7 @@ final class Tileset {
 		Vec2f finalSize = scale * size * transformScale();
 		Vec2f dist = (anchor - Vec2f.half).rotated(angle) * size * scale;
 
-		Vec4i currentClip = Vec4i(clip.x + coord.x * clip.z, clip.y + coord.y * clip.w, clip.z, clip.w);
+		Vec4i currentClip = Vec4i(clip.x + coord.x * (clip.z + margin.x), clip.y + coord.y * (clip.w + margin.y), clip.z, clip.w);
         texture.setColorMod(color, blend);
         texture.draw(transformRenderSpace(position - dist), finalSize, currentClip, angle, flip);
         texture.setColorMod(Color.white);
@@ -142,7 +143,7 @@ final class Tileset {
 		Vec2i coord = Vec2i(id % columns, id / columns);
 		if(coord.y > lines)
 			throw new Exception("Tileset id out of bounds");
-		Vec4i currentClip = Vec4i(clip.x + coord.x * clip.z, clip.y + coord.y * clip.w, clip.z, clip.w);
+		Vec4i currentClip = Vec4i(clip.x + coord.x * (clip.z + margin.x), clip.y + coord.y * (clip.w + margin.y), clip.z, clip.w);
         texture.setColorMod(color, blend);
         texture.draw(transformRenderSpace(position), finalSize, currentClip, angle, flip, anchor);
         texture.setColorMod(Color.white);
