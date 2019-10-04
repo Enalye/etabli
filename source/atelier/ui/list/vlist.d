@@ -18,14 +18,14 @@ import atelier.ui;
 
 private class ListContainer: GuiElementCanvas {
 	public {
-		VLayout layout;
+		VContainer container;
 	}
 
 	this(Vec2f newSize) {
 		isLocked = true;
-		layout = new VLayout;
+		container = new VContainer;
 		size(newSize);
-		addChildGui(layout);
+		addChildGui(container);
 	}
 }
 
@@ -49,8 +49,8 @@ class VList: GuiElement {
 			_idElementSelected = id;
 
             //Update children
-            auto widgets = _container.layout.children;
-            foreach(GuiElement gui; _container.layout.children)
+            auto widgets = _container.container.children;
+            foreach(GuiElement gui; _container.container.children)
                 gui.isSelected = false;
             if(_idElementSelected < widgets.length)
                 widgets[_idElementSelected].isSelected = true;
@@ -60,7 +60,7 @@ class VList: GuiElement {
 		float layoutLength() const { return _layoutLength; }
 		float layoutLength(float length) {
 			_layoutLength = length;
-			_container.layout.size = Vec2f(_container.size.x, _layoutLength * _nbElements);
+			_container.container.size = Vec2f(_container.size.x, _layoutLength * _nbElements);
 			return _layoutLength;
 		}
 	}
@@ -71,7 +71,7 @@ class VList: GuiElement {
         _slider.setAlign(GuiAlignX.Left, GuiAlignY.Center);
 		_container = new ListContainer(newSize);
         _container.setAlign(GuiAlignX.Right, GuiAlignY.Top);
-        _container.layout.setAlign(GuiAlignX.Right, GuiAlignY.Top);
+        _container.container.setAlign(GuiAlignX.Right, GuiAlignY.Top);
 
 		super.addChildGui(_slider);
 		super.addChildGui(_container);
@@ -81,14 +81,14 @@ class VList: GuiElement {
 
         setEventHook(true);
         
-		_container.layout.size = Vec2f(_container.size.x, 0f);
+		_container.container.size = Vec2f(_container.size.x, 0f);
 	}
 
     override void onCallback(string id) {
         if(id != "list")
             return;
-        auto widgets = _container.layout.children;
-        foreach(size_t elementId, ref GuiElement gui; _container.layout.children) {
+        auto widgets = _container.container.children;
+        foreach(size_t elementId, ref GuiElement gui; _container.container.children) {
             gui.isSelected = false;
             if(gui.isHovered)
                 _idElementSelected = cast(uint)elementId;
@@ -104,7 +104,7 @@ class VList: GuiElement {
     
     override void onSize() {
         _slider.size = Vec2f(10f, _size.y);
-        _container.layout.size = Vec2f(_container.size.x, _layoutLength * _nbElements);
+        _container.container.size = Vec2f(_container.size.x, _layoutLength * _nbElements);
         _container.size = Vec2f(size.x - _slider.size.x, size.y);
         _container.canvas.renderSize = _container.size.to!Vec2u;
     }
@@ -112,8 +112,8 @@ class VList: GuiElement {
 	override void update(float deltaTime) {
 		super.update(deltaTime);
 		float min = 0f;
-		float max = _container.layout.size.y - _container.size.y;
-		float exceedingHeight = _container.layout.size.y - _container.canvas.size.y;
+		float max = _container.container.size.y - _container.size.y;
+		float exceedingHeight = _container.container.size.y - _container.canvas.size.y;
 
 		if(exceedingHeight < 0f) {
 			_slider.max = 0;
@@ -133,32 +133,32 @@ class VList: GuiElement {
         gui.setCallback(this, "list");
 
 		_nbElements ++;
-		_container.layout.size = Vec2f(_container.size.x, _layoutLength * _nbElements);
-		_container.layout.position = Vec2f.zero;
-		_container.layout.addChildGui(gui);
+		_container.container.size = Vec2f(_container.size.x, _layoutLength * _nbElements);
+		_container.container.position = Vec2f.zero;
+		_container.container.addChildGui(gui);
 	}
 
 	override void removeChildrenGuis() {
 		_nbElements = 0u;
 		_idElementSelected = 0u;
-		_container.layout.size = Vec2f(_container.size.x, 0f);
-		_container.layout.position = Vec2f.zero;
-		_container.layout.removeChildrenGuis();
+		_container.container.size = Vec2f(_container.size.x, 0f);
+		_container.container.position = Vec2f.zero;
+		_container.container.removeChildrenGuis();
 	}
 
 	override void removeChildGui(uint id) {
-		_container.layout.removeChildGui(id);
-		_nbElements = _container.layout.getChildrenGuisCount();
+		_container.container.removeChildGui(id);
+		_nbElements = _container.container.getChildrenGuisCount();
 		_idElementSelected = 0u;
-		_container.layout.size = Vec2f(_container.size.x, _layoutLength * _nbElements);
-		_container.layout.position = Vec2f(0f, _container.layout.size.y / 2f);
+		_container.container.size = Vec2f(_container.size.x, _layoutLength * _nbElements);
+		_container.container.position = Vec2f(0f, _container.container.size.y / 2f);
 	}
 
 	override int getChildrenGuisCount() {
-		return _container.layout.getChildrenGuisCount();	
+		return _container.container.getChildrenGuisCount();	
 	}
 
 	GuiElement[] getList() {
-		return _container.layout.children;
+		return _container.container.children;
 	}
 }

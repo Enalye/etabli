@@ -9,6 +9,7 @@
 module atelier.ui.list.dropdownlist;
 
 import std.conv: to;
+import std.algorithm: min, max;
 import atelier.core, atelier.render, atelier.common;
 import atelier.ui.gui_element, atelier.ui.gui_overlay, atelier.ui.list.vlist, atelier.ui.label, atelier.ui.button;
 
@@ -21,9 +22,13 @@ private class DropDownListCancelTrigger: GuiElement {
 private class DropDownListSubElement: Button {
     Label label;
 
-    this(string title) {
+    this(string title, Vec2f sz) {
+        size = sz;
         label = new Label(getDefaultFont(), title);
         label.setAlign(GuiAlignX.Center, GuiAlignY.Center);
+        if((label.size.x + 20) > size.x) {
+            size = Vec2f(label.size.x + 20, size.y);
+        }
         addChildGui(label);
     }
 
@@ -32,13 +37,15 @@ private class DropDownListSubElement: Button {
     }
 }
 
-class DropDownList: GuiElement {
+class DropDownList: GuiElementCanvas {
 	private {
 		VList _list;
         Label _label;
         DropDownListCancelTrigger _cancelTrigger;
 		bool _isUnrolled = false;
 		uint _maxListLength = 5;
+        float _maxWidth = 5f;
+        Timer _timer;
 	}
 
 	@property {
@@ -49,8 +56,9 @@ class DropDownList: GuiElement {
 	this(Vec2f newSize, uint maxListLength = 5U) {
 		_maxListLength = maxListLength;
 		size = newSize;
+        _maxWidth = max(size.x, _maxWidth);
 
-		_list = new VList(size * Vec2f(1f, _maxListLength));
+		_list = new VList(Vec2f(_maxWidth, _maxListLength * size.x));
         _list.setAlign(GuiAlignX.Left, GuiAlignY.Top);
 
         _cancelTrigger = new DropDownListCancelTrigger;
@@ -60,6 +68,8 @@ class DropDownList: GuiElement {
 
         _label = new Label(getDefaultFont(), "");
         _label.setAlign(GuiAlignX.Center, GuiAlignY.Center);
+
+        _timer.start(2f, TimeMode.Bounce);
         super.addChildGui(_label);
 	}
 
@@ -87,11 +97,25 @@ class DropDownList: GuiElement {
     }
 
 	override void update(float deltaTime) {
-		if(_isUnrolled) {
-			Vec2f newSize = size * Vec2f(1f, _maxListLength + 1f);
+        _timer.update(deltaTime);
+        if(_label.size.x > size.x) {
+            _label.setAlign(GuiAlignX.Left, GuiAlignY.Center);
+            _label.position = Vec2f(lerp(-(_label.size.x - size.x), 0f, easeInOutSine(_timer.time)), 0f);
+        }
+        else {
+            _label.setAlign(GuiAlignX.Center, GuiAlignY.Center);
+            _label.position = Vec2f.zero;
+        }
+
+        if(_isUnrolled) {
+			_list.update(deltaTime);
+        }
+	}
+
+    override void drawOverlay() {
+        if(_isUnrolled) {
             _cancelTrigger.position = origin;
 			_list.position = origin + Vec2f(0f, _size.y);
-			_list.update(deltaTime);
 
             int id;
             foreach(gui; _list.getList()) {
@@ -105,7 +129,7 @@ class DropDownList: GuiElement {
                 id ++;
             }
 		}
-	}
+    }
 
 	override void draw() {
 		super.draw();
@@ -118,11 +142,20 @@ class DropDownList: GuiElement {
 	}
 
 	protected override void addChildGui(GuiElement gui) {
+        float width = size.x;
 		_list.addChildGui(gui);
+        auto guis = _list.getList();
+        foreach(child; guis) {
+            width = max(child.size.x, width);
+        }
+        foreach(child; guis) {
+            child.size = Vec2f(width, child.size.y);
+        }
+        _list.size = Vec2f(width, min(_maxListLength, guis.length) * size.y);
 	}
 
     void add(string msg) {
-        auto gui = new DropDownListSubElement(msg);
+        auto gui = new DropDownListSubElement(msg, size);
 		addChildGui(gui);
 	}
 
