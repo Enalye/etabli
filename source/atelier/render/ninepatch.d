@@ -1,3 +1,11 @@
+/**
+    NintePatch
+
+    Copyright: (c) Enalye 2019
+    License: Zlib
+    Authors: Enalye
+*/
+
 module atelier.render.ninepatch;
 
 import std.conv: to;
@@ -5,9 +13,13 @@ import std.algorithm.comparison: min;
 import atelier.common, atelier.core;
 import atelier.render.drawable, atelier.render.canvas, atelier.render.texture, atelier.render.window;
 
+/// Render a resizable repeated sprite with borders. (ex: bubble speech).
 final class NinePatch: IDrawable {
     @property {
+        /// Size of the render zone. \
+        /// Changing the value allocate a new Canvas (don't do it too often).
         Vec2f size() { return _size; }
+        /// Ditto
         Vec2f size(const Vec2f newSize) {
             _size = newSize;
             _cache = new Canvas(_size);
@@ -15,7 +27,9 @@ final class NinePatch: IDrawable {
             return _size;
         }
 
+        /// Texture's region used.
         Vec4i clip() { return _clip; }
+        /// Ditto
         Vec4i clip(const Vec4i newClip) {
             if(_clip == newClip)
                 return _clip;
@@ -24,7 +38,9 @@ final class NinePatch: IDrawable {
             return _clip;
         }
 
+        /// The top border offset.
         int top() const { return _top; }
+        /// Ditto
         int top(int newTop) {
             if(_top == newTop)
                 return _top;
@@ -33,7 +49,9 @@ final class NinePatch: IDrawable {
             return _top;
         }
 
+        /// The bottom border offset.
         int bottom() const { return _bottom; }
+        /// Ditto
         int bottom(int newBottom) {
             if(_bottom == newBottom)
                 return _bottom;
@@ -42,7 +60,9 @@ final class NinePatch: IDrawable {
             return _bottom;
         }
 
+        /// The left border offset.
         int left() const { return _left; }
+        /// Ditto
         int left(int newLeft) {
             if(_left == newLeft)
                 return _left;
@@ -51,7 +71,9 @@ final class NinePatch: IDrawable {
             return _left;
         }
 
+        /// The right border offset.
         int right() const { return _right; }
+        /// Ditto
         int right(int newRight) {
             if(_right == newRight)
                 return _right;
@@ -60,7 +82,9 @@ final class NinePatch: IDrawable {
             return _right;
         }
 
+        /// The texture used to render.
         Texture texture() { return _texture; }
+        /// Ditto
         Texture texture(Texture newTexture) {
             if(_texture == newTexture)
                 return _texture;
@@ -79,8 +103,10 @@ final class NinePatch: IDrawable {
         bool _isDirty = true;
     }
 
+    /// Default ctor
     this() {}
 
+    /// Copy ctor
     this(NinePatch ninePatch) {
         _size = ninePatch._size;
         _texture = ninePatch._texture;
@@ -93,12 +119,12 @@ final class NinePatch: IDrawable {
         _isDirty = true;
     }
 	
-    this(string _textureId, Vec4i newClip, int newTop, int newBottom, int newLeft, int newRight) {
-        this(fetch!Texture(_textureId), newClip, newTop, newBottom, newLeft, newRight);
+    this(string textureId, Vec4i newClip, int newTop, int newBottom, int newLeft, int newRight) {
+        this(fetch!Texture(textureId), newClip, newTop, newBottom, newLeft, newRight);
     }
 
-    this(Texture newTexture, Vec4i newClip, int newTop, int newBottom, int newLeft, int newRight) {
-        _texture = newTexture;
+    this(Texture tex, Vec4i newClip, int newTop, int newBottom, int newLeft, int newRight) {
+        _texture = tex;
         _clip = newClip;
         _top = newTop;
         _bottom = newBottom;
@@ -109,11 +135,13 @@ final class NinePatch: IDrawable {
         _isDirty = true;
     }
 
-    void fit(Vec2f newSize) {
-		_size = to!Vec2f(_clip.zw).fit(newSize);
+	/// Set the ninepatch's size to fit inside the specified size.
+    void fit(Vec2f sz) {
+		_size = to!Vec2f(_clip.zw).fit(sz);
         _isDirty = true;
 	}
 
+    /// Render to the canvas.
     private void renderToCache() {
         _isDirty = false;
         if(_texture is null
@@ -211,28 +239,28 @@ final class NinePatch: IDrawable {
 
         //Corners
 
-        //Top _left corner
+        //Top left corner
         if(_top > 0 && _left > 0) {
             localSize = Vec2i(_left, _top);
             localClip = Vec4i(_clip.xy, localSize);
             _texture.draw(Vec2f.zero, to!Vec2f(localSize), localClip, 0f, Flip.NoFlip, Vec2f.zero);
         }
 
-        //Top _right corner
+        //Top right corner
         if(_top > 0 && _right > 0) {
             localSize = Vec2i(_right, _top);
             localClip = Vec4i(_clip.x + _clip.z - _right, _clip.y, localSize.x, localSize.y);
             _texture.draw(Vec2f(to!int(_size.x) - _right, 0f), to!Vec2f(localSize), localClip, 0f, Flip.NoFlip, Vec2f.zero);
         }
 
-        //Bottom _left corner
+        //Bottom left corner
         if(_bottom > 0 && _left > 0) {
             localSize = Vec2i(_left, _top);
             localClip = Vec4i(_clip.x, _clip.y + _clip.w - _bottom, localSize.x, localSize.y);
             _texture.draw(Vec2f(0f, to!int(_size.y) - _bottom), to!Vec2f(localSize), localClip, 0f, Flip.NoFlip, Vec2f.zero);
         }
 
-        //Bottom _right corner
+        //Bottom right corner
         if(_bottom > 0 && _right > 0) {
             localSize = Vec2i(_right, _top);
             localClip = Vec4i(_clip.x + _clip.z - _right, _clip.y + _clip.w - _bottom, localSize.x, localSize.y);
@@ -242,6 +270,7 @@ final class NinePatch: IDrawable {
         popCanvas();
     }
 
+    /// Render the NinePatch in this position.
     void draw(const Vec2f position) {
         if(_isDirty)
             renderToCache();

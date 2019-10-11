@@ -41,7 +41,7 @@ private {
         _singleButtonLeft, _singleButtonRight, _singleButtonUp, _singleButtonDown;
 }
 
-///Open all the connected controllers
+/// Open all the connected controllers
 void initializeControllers() {
     const(char)[] dbPath = buildPath(getResourceFolder(), "gamecontrollerdb.txt");
     if(!exists(dbPath)) {
@@ -57,14 +57,14 @@ void initializeControllers() {
     SDL_GameControllerEventState(SDL_ENABLE);
 }
 
-///Close all the connected controllers
+/// Close all the connected controllers
 void destroyControllers() {
     foreach(ref controller; _controllers) {
         SDL_GameControllerClose(controller.sdlController);
     }
 }
 
-///Update the state of the controllers
+/// Update the state of the controllers
 void updateControllers(float deltaTime) {
     foreach(axisIndex; 0.. 4) {
         _analogTimers[axisIndex].update(deltaTime);
@@ -72,7 +72,7 @@ void updateControllers(float deltaTime) {
     }
 }
 
-///Attempt to connect a new controller
+/// Attempt to connect a new controller
 void addController(int index) {
     writeln("Detected device at index ", index, ".");
 
@@ -114,7 +114,7 @@ void addController(int index) {
     writeln("The game controller is now connected.");      
 }
 
-///Remove a connected controller
+/// Remove a connected controller
 void removeController(int joystickId) {
     writeln("Controller disconnected: ", joystickId);
     
@@ -142,12 +142,12 @@ void removeController(int joystickId) {
         _controllers = _controllers[0.. index] ~ _controllers[(index + 1) .. $];
 }
 
-///Called upon remapping
+/// Called upon remapping
 void remapController(int joystickId) {
     writeln("Controller remapped: ", joystickId);
 }
 
-///Change the value of a controller axis.
+/// Change the value of a controller axis.
 void setControllerAxis(SDL_GameControllerAxis axis, short value) {
     auto v = rlerp(-32_768, 32_767, cast(float)value) * 2f - 1f;  
     switch(axis) {
@@ -174,7 +174,7 @@ void setControllerAxis(SDL_GameControllerAxis axis, short value) {
     }
 }
 
-///Handle the timing of the axis
+/// Handle the timing of the axis
 private bool updateAnalogTimer(int axisIndex, float x, float y) {
     if(axisIndex == -1)
         return false;
@@ -193,7 +193,7 @@ private bool updateAnalogTimer(int axisIndex, float x, float y) {
     return true;
 }
 
-///Change the value of a controller button.
+/// Change the value of a controller button.
 void setControllerButton(SDL_GameControllerButton button, bool state) {
     switch(button) {
     case SDL_CONTROLLER_BUTTON_A:
@@ -262,285 +262,285 @@ void setControllerButton(SDL_GameControllerButton button, bool state) {
 }
 
 @property {
-    ///Left analog stick
-    Vec2f inputLAnalog() {
+    /// Left analog stick
+    Vec2f getControllerInputLAnalog() {
         return _left;
     }
 
-    ///Right analog stick
-    Vec2f inputRAnalog() {
+    /// Right analog stick
+    Vec2f getControllerInputRAnalog() {
         return _right;
     }
 
     //Continuous buttons
 
-    ///Is the A button pressed.
-    bool inputA() {
+    /// Is the A button pressed.
+    bool getControllerInputA() {
         _singleButtonA = false;
         return _buttonA;
     }
 
-    ///Is the B button pressed.
-    bool inputB() {
+    /// Is the B button pressed.
+    bool getControllerInputB() {
         _singleButtonB = false;
         return _buttonB;
     }
 
-    ///Is the X button pressed.
-    bool inputX() {
+    /// Is the X button pressed.
+    bool getControllerInputX() {
         _singleButtonX = false;
         return _buttonX;
     }
 
-    ///Is the Y button pressed.
-    bool inputY() {
+    /// Is the Y button pressed.
+    bool getControllerInputY() {
         _singleButtonY = false;
         return _buttonY;
     }
 
-    ///Is the Select button pressed.
-    bool inputSelect() {
+    /// Is the Select button pressed.
+    bool getControllerInputSelect() {
         _singleButtonSelect = false;
         return _buttonSelect;
     }
 
-    ///Is the Mode button pressed.
-    bool inputMode() {
+    /// Is the Mode button pressed.
+    bool getControllerInputMode() {
         _singleButtonMode = false;
         return _buttonMode;
     }
 
-    ///Is the Start button pressed.
-    bool inputStart() {
+    /// Is the Start button pressed.
+    bool getControllerInputStart() {
         _singleButtonStart = false;
         return _buttonStart;
     }
 
-    ///Is the L1 button pressed.
-    bool inputL1() {
+    /// Is the L1 button pressed.
+    bool getControllerInputL1() {
         _singleButtonL1 = false;
         return _buttonL1;
     }
 
-    ///Is the R1 button pressed.
-    bool inputR1() {
+    /// Is the R1 button pressed.
+    bool getControllerInputR1() {
         _singleButtonR1 = false;
         return _buttonR1;
     }
 
-    ///Is the L2 button pressed.
-    bool inputL2() {
+    /// Is the L2 button pressed.
+    bool getControllerInputL2() {
         _singleButtonL2 = false;
         return _buttonL2;
     }
 
-    ///Is the R2 button pressed.
-    bool inputR2() {
+    /// Is the R2 button pressed.
+    bool getControllerInputR2() {
         _singleButtonR2 = false;
         return _buttonR2;
     }
 
-    ///Is the L3 button pressed.
-    bool inputL3() {
+    /// Is the L3 button pressed.
+    bool getControllerInputL3() {
         _singleButtonL3 = false;
         return _buttonL3;
     }
 
-    ///Is the R3 button pressed.
-    bool inputR3() {
+    /// Is the R3 button pressed.
+    bool getControllerInputR3() {
         _singleButtonR3 = false;
         return _buttonR3;
     }
 
-    ///Is the Left button pressed.
-    bool inputLeft() {
+    /// Is the Left button pressed.
+    bool getControllerInputLeft() {
         _singleButtonLeft = false;
         return _buttonLeft;
     }
 
-    ///Is the Right button pressed.
-    bool inputRight() {
+    /// Is the Right button pressed.
+    bool getControllerInputRight() {
         _singleButtonRight = false;
         return _buttonRight;
     }
 
-    ///Is the Up button pressed.
-    bool inputUp() {
+    /// Is the Up button pressed.
+    bool getControllerInputUp() {
         _singleButtonUp = false;
         return _buttonUp;
     }
 
-    ///Is the Down button pressed.
-    bool inputDown() {
+    /// Is the Down button pressed.
+    bool getControllerInputDown() {
         _singleButtonDown = false;
         return _buttonDown;
     }
 
     //Single action buttons
 
-    ///Is the A button pressed.
-    ///Returns true only if the button was not already tested.
-    bool inputSingleA() {
+    /// Is the A button pressed.
+    /// Returns true only if the button was not already tested.
+    bool getControllerInputSingleA() {
         auto state = _singleButtonA;
         _singleButtonA = false;
         return state;
     }
 
-    ///Is the B button pressed.
-    ///Returns true only if the button was not already tested.
-    bool inputSingleB() {
+    /// Is the B button pressed.
+    /// Returns true only if the button was not already tested.
+    bool getControllerInputSingleB() {
         auto state = _singleButtonB;
         _singleButtonB = false;
         return state;
     }
 
-    ///Is the X button pressed.
-    ///Returns true only if the button was not already tested.
-    bool inputSingleX() {
+    /// Is the X button pressed.
+    /// Returns true only if the button was not already tested.
+    bool getControllerInputSingleX() {
         auto state = _singleButtonX;
         _singleButtonX = false;
         return state;
     }
 
-    ///Is the Y button pressed.
-    ///Returns true only if the button was not already tested.
-    bool inputSingleY() {
+    /// Is the Y button pressed.
+    /// Returns true only if the button was not already tested.
+    bool getControllerInputSingleY() {
         auto state = _singleButtonY;
         _singleButtonY = false;
         return state;
     }
 
-    ///Is the Select button pressed.
-    ///Returns true only if the button was not already tested.
-    bool inputSingleSelect() {
+    /// Is the Select button pressed.
+    /// Returns true only if the button was not already tested.
+    bool getControllerInputSingleSelect() {
         auto state = _singleButtonSelect;
         _singleButtonSelect = false;
         return state;
     }
 
-    ///Is the Mode button pressed.
-    ///Returns true only if the button was not already tested.
-    bool inputSingleMode() {
+    /// Is the Mode button pressed.
+    /// Returns true only if the button was not already tested.
+    bool getControllerInputSingleMode() {
         auto state = _singleButtonMode;
         _singleButtonMode = false;
         return state;
     }
 
-    ///Is the Start button pressed.
-    ///Returns true only if the button was not already tested.
-    bool inputSingleStart() {
+    /// Is the Start button pressed.
+    /// Returns true only if the button was not already tested.
+    bool getControllerInputSingleStart() {
         auto state = _singleButtonStart;
         _singleButtonStart = false;
         return state;
     }
 
-    ///Is the L1 button pressed.
-    ///Returns true only if the button was not already tested.
-    bool inputSingleL1() {
+    /// Is the L1 button pressed.
+    /// Returns true only if the button was not already tested.
+    bool getControllerInputSingleL1() {
         auto state = _singleButtonL1;
         _singleButtonL1 = false;
         return state;
     }
 
-    ///Is the R1 button pressed.
-    ///Returns true only if the button was not already tested.
-    bool inputSingleR1() {
+    /// Is the R1 button pressed.
+    /// Returns true only if the button was not already tested.
+    bool getControllerInputSingleR1() {
         auto state = _singleButtonR1;
         _singleButtonR1 = false;
         return state;
     }
 
-    ///Is the L2 button pressed.
-    ///Returns true only if the button was not already tested.
-    bool inputSingleL2() {
+    /// Is the L2 button pressed.
+    /// Returns true only if the button was not already tested.
+    bool getControllerInputSingleL2() {
         auto state = _singleButtonL2;
         _singleButtonL2 = false;
         return state;
     }
 
-    ///Is the R2 button pressed.
-    ///Returns true only if the button was not already tested.
-    bool inputSingleR2() {
+    /// Is the R2 button pressed.
+    /// Returns true only if the button was not already tested.
+    bool getControllerInputSingleR2() {
         auto state = _singleButtonR2;
         _singleButtonR2 = false;
         return state;
     }
 
-    ///Is the L3 button pressed.
-    ///Returns true only if the button was not already tested.
-    bool inputSingleL3() {
+    /// Is the L3 button pressed.
+    /// Returns true only if the button was not already tested.
+    bool getControllerInputSingleL3() {
         auto state = _singleButtonL3;
         _singleButtonL3 = false;
         return state;
     }
 
-    ///Is the R3 button pressed.
-    ///Returns true only if the button was not already tested.
-    bool inputSingleR3() {
+    /// Is the R3 button pressed.
+    /// Returns true only if the button was not already tested.
+    bool getControllerInputSingleR3() {
         auto state = _singleButtonR3;
         _singleButtonR3 = false;
         return state;
     }
 
-    ///Is the Left button pressed.
-    ///Returns true only if the button was not already tested.
-    bool inputSingleLeft() {
+    /// Is the Left button pressed.
+    /// Returns true only if the button was not already tested.
+    bool getControllerInputSingleLeft() {
         auto state = _singleButtonLeft;
         _singleButtonLeft = false;
         return state;
     }
 
-    ///Is the Right button pressed.
-    ///Returns true only if the button was not already tested.
-    bool inputSingleRight() {
+    /// Is the Right button pressed.
+    /// Returns true only if the button was not already tested.
+    bool getControllerInputSingleRight() {
         auto state = _singleButtonRight;
         _singleButtonRight = false;
         return state;
     }
 
-    ///Is the Up button pressed.
-    ///Returns true only if the button was not already tested.
-    bool inputSingleUp() {
+    /// Is the Up button pressed.
+    /// Returns true only if the button was not already tested.
+    bool getControllerInputSingleUp() {
         auto state = _singleButtonUp;
         _singleButtonUp = false;
         return state;
     }
 
-    ///Is the Down button pressed.
-    ///Returns true only if the button was not already tested.
-    bool inputSingleDown() {
+    /// Is the Down button pressed.
+    /// Returns true only if the button was not already tested.
+    bool getControllerInputSingleDown() {
         auto state = _singleButtonDown;
         _singleButtonDown = false;
         return state;
     }
 
-    ///Returns the left stick x-axis as a button.
-    bool inputSingleLeftX() {
+    /// Returns the left stick x-axis as a button.
+    bool getControllerInputSingleLeftX() {
         return updateAnalogTimer(0, _left.x, 0f);
     }
 
-    ///Returns the left stick y-axis as a button.
-    bool inputSingleLeftY() {
+    /// Returns the left stick y-axis as a button.
+    bool getControllerInputSingleLeftY() {
         return updateAnalogTimer(1, 0f, _left.y);        
     }
 
-    ///Returns the left stick x and y axis as a button.
-    bool inputSingleLeftXY() {
+    /// Returns the left stick x and y axis as a button.
+    bool getControllerInputSingleLeftXY() {
         return updateAnalogTimer(2, _left.x, _left.y);        
     }
 
-    ///Returns the right stick x-axis as a button.
-    bool inputSingleRightX() {
+    /// Returns the right stick x-axis as a button.
+    bool getControllerInputSingleRightX() {
         return updateAnalogTimer(3, _right.x, 0f);
     }
 
-    ///Returns the right stick y-axis as a button.
-    bool inputSingleRightY() {
+    /// Returns the right stick y-axis as a button.
+    bool getControllerInputSingleRightY() {
         return updateAnalogTimer(4, 0f, _right.y);        
     }
 
-    ///Returns the right stick x and y axis as a button.
-    bool inputSingleRightXY() {
+    /// Returns the right stick x and y axis as a button.
+    bool getControllerInputSingleRightXY() {
         return updateAnalogTimer(5, _right.x, _right.y);        
     }
 }

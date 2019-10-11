@@ -29,6 +29,7 @@ private class ListContainer: GuiElementCanvas {
 	}
 }
 
+/// Horizontal list of elements with a slider.
 class HList: GuiElement {
 	protected {
 		ListContainer _container;

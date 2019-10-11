@@ -1,5 +1,5 @@
 /**
-    View
+    Canvas
 
     Copyright: (c) Enalye 2017
     License: Zlib
@@ -16,33 +16,46 @@ import atelier.core;
 import atelier.render.window;
 import atelier.render.texture;
 
+/// Behave like Texture but you can render onto it.
+/// Use pushCanvas/popCanvas to start the drawing region on it.
 class Canvas {
 	private {
 		SDL_Texture* _renderTexture;
 		Vec2u _renderSize;
 	}
 
-    bool isTarget;
+	package(atelier.render) {
+		bool _isTargetOnStack;
+	}
 
 	@property {
 		package(atelier) const(SDL_Texture*) target() const { return _renderTexture; }
 
+		/// The size (in texels) of the surface to be rendered on.
+		/// Changing that value allocate a new texture, so don't do it everytime.
 		Vec2u renderSize() const { return _renderSize; }
+		/// Ditto
 		Vec2u renderSize(Vec2u newRenderSize) {
-            if(isTarget)
+            if(_isTargetOnStack)
                 throw new Exception("Attempt to resize canvas while being rendered.");
 			if(newRenderSize.x >= 2048u || newRenderSize.y >= 2048u)
 				throw new Exception("Canvas render size exceeds limits.");
 			_renderSize = newRenderSize;
 			if(_renderTexture !is null)
 				SDL_DestroyTexture(_renderTexture);
-			_renderTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _renderSize.x, _renderSize.y);
+			_renderTexture = SDL_CreateTexture(_sdlRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _renderSize.x, _renderSize.y);
 			return _renderSize;
 		}
 	}
 
-	Vec2f position = Vec2f.zero, size = Vec2f.zero;
+	/// The view position inside the canvas.
+	Vec2f position = Vec2f.zero,
+	/// The size of the view inside of the canvas.
+		size = Vec2f.zero;
+	/// Is the Canvas rendered from its center or from the top left corner ? \
+	/// (only change the render position, not the view).
 	bool isCentered = true;
+	/// The base color when nothing is rendered.
 	Color clearColor = Color.clear;
 
 	this(Vec2f newRenderSize) {
@@ -57,7 +70,7 @@ class Canvas {
 		if(newRenderSize.x >= 2048u || newRenderSize.y >= 2048u)
 			throw new Exception("Canvas render size exceeds limits.");
 		_renderSize = newRenderSize;
-		_renderTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _renderSize.x, _renderSize.y);
+		_renderTexture = SDL_CreateTexture(_sdlRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _renderSize.x, _renderSize.y);
         setColorMod(Color.white, Blend.AlphaBlending);
 
 		size = cast(Vec2f)_renderSize;
@@ -69,7 +82,7 @@ class Canvas {
 		size = canvas.size;
 		position = canvas.position;
         isCentered = canvas.isCentered;
-		_renderTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _renderSize.x, _renderSize.y);
+		_renderTexture = SDL_CreateTexture(_sdlRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _renderSize.x, _renderSize.y);
 	}
 
 	~this() {
@@ -85,10 +98,11 @@ class Canvas {
 
 		if(_renderTexture !is null)
 			SDL_DestroyTexture(_renderTexture);
-		_renderTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _renderSize.x, _renderSize.y);
+		_renderTexture = SDL_CreateTexture(_sdlRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _renderSize.x, _renderSize.y);
 		return this;
 	}
 
+	/// Apply a color filter or change its blending algorithm.
 	void setColorMod(const Color color, Blend blend = Blend.AlphaBlending) {
 		SDL_SetTextureBlendMode(_renderTexture,
 			((blend == Blend.AlphaBlending) ? SDL_BLENDMODE_BLEND :
@@ -101,10 +115,12 @@ class Canvas {
 		SDL_SetTextureAlphaMod(_renderTexture, sdlColor.a);
 	}
 
+	/// Transparency (1 = visible, 0 = hidden).
     void setAlpha(float alpha) {
 		SDL_SetTextureAlphaMod(_renderTexture, cast(ubyte)(clamp(alpha, 0f, 1f) * 255f));
 	}
 
+	/// Draw the texture at the specified location.
 	void draw(const Vec2f renderPosition) const {
 		Vec2f pos = transformRenderSpace(renderPosition);
 		Vec2f scale = transformScale();
@@ -116,9 +132,10 @@ class Canvas {
 			cast(uint)(_renderSize.y * scale.y)
 		};
 
-		SDL_RenderCopy(renderer, cast(SDL_Texture*)_renderTexture, null, &destRect);
+		SDL_RenderCopy(_sdlRenderer, cast(SDL_Texture*)_renderTexture, null, &destRect);
 	}
 
+	/// Draw the texture at the specified location while scaling it.
 	void draw(const Vec2f renderPosition, const Vec2f scale) const {
 		Vec2f pos = transformRenderSpace(renderPosition);
 		Vec2f rscale = transformScale() * scale;
@@ -130,15 +147,18 @@ class Canvas {
 			cast(uint)(_renderSize.y * rscale.y)
 		};
 
-		SDL_RenderCopy(renderer, cast(SDL_Texture*)_renderTexture, null, &destRect);
+		SDL_RenderCopy(_sdlRenderer, cast(SDL_Texture*)_renderTexture, null, &destRect);
 	}
 
+	/// Check if a (outside) position is on the canvas rendering area. \
+	/// It needs to know where the canvas will be rendered.
 	bool isInside(const Vec2f pos, const Vec2f renderPosition) const {
 		return (isCentered) ?
 			pos.isBetween(renderPosition - cast(Vec2f)(_renderSize) * 0.5f, renderPosition + cast(Vec2f)(_renderSize) * 0.5f):
 			pos.isBetween(renderPosition, renderPosition + cast(Vec2f)(_renderSize));
     }
 
+	/// Draw the part of the texture at the specified location.
     void draw(Vec2f pos, Vec2f rsize, Vec4i srcRect, float angle, Flip flip = Flip.NoFlip, Vec2f anchor = Vec2f.half) const {
 		pos -= anchor * rsize;
 		
@@ -156,6 +176,6 @@ class Canvas {
 				(flip == Flip.VerticalFlip ? SDL_FLIP_VERTICAL :
 					SDL_FLIP_NONE));
 
-		SDL_RenderCopyEx(cast(SDL_Renderer*)renderer, cast(SDL_Texture*)_renderTexture, &srcSdlRect, &destSdlRect, angle, null, rendererFlip);
+		SDL_RenderCopyEx(cast(SDL_Renderer*)_sdlRenderer, cast(SDL_Texture*)_renderTexture, &srcSdlRect, &destSdlRect, angle, null, rendererFlip);
 	}
 }

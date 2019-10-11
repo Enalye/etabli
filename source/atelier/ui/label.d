@@ -13,6 +13,7 @@ import derelict.sdl2.sdl, derelict.sdl2.ttf;
 import atelier.core, atelier.common, atelier.render;
 import atelier.ui.gui_element;
 
+/// A single line of text.
 final class Label: GuiElement {
 	private {
 		string _text;

@@ -14,7 +14,7 @@ import std.conv: to;
 import atelier.core, atelier.render, atelier.common;
 import atelier.ui.button, atelier.ui.gui_element;
 
-///Base abstract class for any vertical or horizontal slider/scrollbar.
+/// Base abstract class for any vertical or horizontal slider/scrollbar.
 abstract class Slider: GuiElement {
 	protected {	
 		float _value = 0f, _offset = 0f, _step = 1f, _min = 0f, _max = 1f, _scrollLength = 1f, _minimalSliderSize = 25f, _scrollAngle = 0f;
@@ -22,16 +22,30 @@ abstract class Slider: GuiElement {
 	}
 
 	@property {
+		/// Slider's value between 0 and 1.
 		float value01() const { return _value; }
+		/// Ditto
 		float value01(float newValue) { return _value = _offset = newValue; }
 
+		/// Rounded value between the min and max values specified.
 		int ivalue() const { return cast(int)lerp(_min, _max, _value); }
+		/// Ditto
 		int ivalue(int newValue) { return cast(int)(_value = _offset = rlerp(_min, _max, newValue)); }
+
+		/// Value between the min and max values specified.
 		float fvalue() const { return lerp(_min, _max, _value); }
+		/// Ditto
 		float fvalue(float newValue) { return _value = _offset = rlerp(_min, _max, newValue); }
+
+		/// Value (from 0 to 1) before being processed/clamped/etc. \
+		/// Useful for rendering, not for getting its value as data.
 		float offset() const { return _offset; }
 
+		/// The number of steps of the slider. \
+		/// 1 = The slider jumps directly from start to finish. \
+		/// More = The slider has more intermediate values.
 		uint step() const { return (_step > 0f) ? cast(uint)(1f / _step) : 0u; }
+		/// Ditto
 		uint step(uint newStep) {
 			if(newStep < 1u)
 				_step = 0f;
@@ -40,13 +54,22 @@ abstract class Slider: GuiElement {
 			return newStep;
 		}
 
+		/// Minimal value possible for the slider. \
+		/// Used by ivalue() and fvalue().
 		float min() const { return _min; }
+		/// Ditto
 		float min(float newMin) { return _min = newMin; }
 
+		/// Maximal value possible for the slider. \
+		/// Used by ivalue() and fvalue().
 		float max() const { return _max; }
+		/// Ditto
 		float max(float newMax) { return _max = newMax; }
 	}
 
+	/// Sets the angle of the slider. \
+	/// 90 = Vertical. \
+	/// 0 = Horizontal.
 	this(float scrollAngle) {
 		_scrollAngle = scrollAngle;
 	}
@@ -89,6 +112,7 @@ abstract class Slider: GuiElement {
 			relocateSlider(event);
 	}
 
+	/// Process the slider position.
 	protected void relocateSlider(Event event) {
 		if(_step == 0f) {
 			_offset = 0f;
@@ -108,7 +132,7 @@ abstract class Slider: GuiElement {
 		_offset = (_offset < 0f) ? 0f : ((_offset > 1f) ? 1f : _offset);	//Clamp the value.
 	}
 
-	///Current coordinate of the slider.
+	/// Current coordinate of the slider.
 	protected Vec2f getSliderPosition() {
 		if(_step == 0f)
 			return center;
@@ -117,7 +141,7 @@ abstract class Slider: GuiElement {
 	}
 }
 
-///Simple vertical scrollbar with basic rendering.
+/// Simple vertical scrollbar with basic rendering.
 class VScrollbar: Slider {
 	this() {
 		super(90f);
@@ -155,7 +179,7 @@ class VScrollbar: Slider {
     }
 }
 
-///Simple horizontal scrollbar with basic rendering.
+/// Simple horizontal scrollbar with basic rendering.
 class HScrollbar: Slider {
 	this() {
 		super(0f);
@@ -193,7 +217,7 @@ class HScrollbar: Slider {
     }
 }
 
-///Simple vertical slider with basic rendering.
+/// Simple vertical slider with basic rendering.
 class VSlider: Slider {
 	this() {
 		super(90f);
@@ -214,7 +238,7 @@ class VSlider: Slider {
     }
 }
 
-///Simple horizontal slider with basic rendering.
+/// Simple horizontal slider with basic rendering.
 class HSlider: Slider {
 	this() {
 		super(0f);

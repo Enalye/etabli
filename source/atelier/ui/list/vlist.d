@@ -29,6 +29,7 @@ private class ListContainer: GuiElementCanvas {
 	}
 }
 
+/// Vertical list of elements with a slider.
 class VList: GuiElement {
 	protected {
 		ListContainer _container;

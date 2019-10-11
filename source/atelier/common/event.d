@@ -37,6 +37,7 @@ static private {
 
 private bool _isRunning = false;
 
+/// Type of event
 enum EventType: uint {
 	KeyUp,
 	KeyDown,
@@ -58,6 +59,7 @@ enum EventType: uint {
 	Callback
 }
 
+/// Event structure passed on onEvent() methods.
 struct Event {
 	this(EventType _type) {
 		type = _type;
@@ -75,6 +77,7 @@ struct Event {
 	}
 }
 
+/// Deprecated, don't use this.
 struct GuiElementCallback {
 	GuiElement widget;
 	string id;
@@ -104,10 +107,13 @@ struct GuiElementCallback {
 	}
 }
 
+/// Associate an ID with a key.
 void bindKey(string keyName, uint keyId) {
 	_keysMap[keyName] = keyId;
 }
 
+/// Check whether the key associated with the ID is pressed. \
+/// Do not reset the value.
 bool isKeyDown(string keyName) {
 	auto keyPtr = keyName in _keysMap;
 
@@ -117,6 +123,8 @@ bool isKeyDown(string keyName) {
 	return _keys[*keyPtr];
 }
 
+/// Check whether the key associated with the ID is pressed. \
+/// This function resets the value to false.
 bool getKeyDown(string keyName) {
 	auto keyPtr = keyName in _keysMap;
 
@@ -128,42 +136,53 @@ bool getKeyDown(string keyName) {
 	return value;
 }
 
+/// Check whether the mouse button associated with the ID is pressed. \
+/// Do not reset the value.
 bool isButtonDown(ubyte button) {
 	return _buttons[button];
 }
 
+/// Check whether the mouse button associated with the ID is pressed. \
+/// This function resets the value to false.
 bool getButtonDown(ubyte button) {
     bool value = _buttons[button];
     _buttons[button] = false;
 	return value;
 }
 
+/// Returns the position of the mouse relative to the window.
 Vec2f getMousePos() {
 	return _mousePosition;
 }
 
+/// Tells the application to finish.
 void stopApplication() {
 	_isRunning = false;
 }
 
+/// Check if the application's still running.
 bool isRunning() {
 	return _isRunning;
 }
 
+/// Dispatch an event to GUIs.
 void sendEvent(EventType eventType) {
 	Event event = Event(eventType);
 	_globalEvents ~= event;
 }
 
+/// Dispatch an event to GUIs.
 void sendEvent(Event event) {
 	_globalEvents ~= event;
 }
 
 version(linux)
+/// Capture interruptions.
 extern(C) void signalHandler(int sig) nothrow @nogc @system {
 	_isRunning = false;
 }
 
+/// Initialize everything mouse, keyboard or controller related.
 void initializeEvents() {
 	version(linux)
 		signal(SIGINT, &signalHandler);
@@ -172,14 +191,17 @@ void initializeEvents() {
     initializeControllers();
 }
 
+/// Closes everything mouse, keyboard or controller related.
 void destroyEvents() {
     destroyControllers();
 }
 
+/// Updates everything mouse, keyboard or controller related.
 void updateEvents(float deltaTime) {
     updateControllers(deltaTime);
 }
 
+/// Process and dispatch window, input, etc events.
 bool processEvents() {
 	Event event;
 	SDL_Event sdlEvent;

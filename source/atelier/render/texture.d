@@ -18,6 +18,7 @@ import derelict.sdl2.image;
 import atelier.core;
 import atelier.render.window;
 
+/// Indicate if something is mirrored.
 enum Flip {
 	NoFlip,
 	HorizontalFlip,
@@ -25,6 +26,11 @@ enum Flip {
 	BothFlip
 }
 
+/// Blending algorithm \
+/// NoBlending: Paste everything without transparency \
+/// ModularBlending: Multiply color value with the destination \
+/// AdditiveBlending: Add color value with the destination \
+/// AlphaBlending: Paste everything with transparency (Default one)
 enum Blend {
 	NoBlending,
 	ModularBlending,
@@ -32,6 +38,7 @@ enum Blend {
 	AlphaBlending
 }
 
+/// Base rendering class.
 final class Texture {
 	private {
 		bool _isLoaded = false, _ownData;
@@ -85,12 +92,12 @@ final class Texture {
 
 	void loadFromSurface(SDL_Surface* surface) {
 		enforce(null != surface, "Invalid surface.");
-		enforce(null != renderer, "The renderer does not exist.");
+		enforce(null != _sdlRenderer, "The _sdlRenderer does not exist.");
 
 		if (null != _texture)
 			SDL_DestroyTexture(_texture);
 
-		_texture = SDL_CreateTextureFromSurface(renderer, surface);
+		_texture = SDL_CreateTextureFromSurface(_sdlRenderer, surface);
 
 		enforce(null != _texture, "Error occurred while converting a surface to a texture format.");
 
@@ -106,9 +113,9 @@ final class Texture {
 		SDL_Surface* surface = IMG_Load(toStringz(path));
 			
 		enforce(null != surface, "Cannot load image file \'" ~ path ~ "\'.");
-		enforce(null != renderer, "The renderer does not exist.");
+		enforce(null != _sdlRenderer, "The _sdlRenderer does not exist.");
 
-		_texture = SDL_CreateTextureFromSurface(renderer, surface);
+		_texture = SDL_CreateTextureFromSurface(_sdlRenderer, surface);
 
 		if (null == _texture)
 			throw new Exception("Error occurred while converting \'" ~ path ~ "\' to a texture format.");
@@ -140,7 +147,7 @@ final class Texture {
 			_height
 		};
 
-		SDL_RenderCopy(cast(SDL_Renderer*)renderer, cast(SDL_Texture*)_texture, null, &destRect);
+		SDL_RenderCopy(cast(SDL_Renderer*)_sdlRenderer, cast(SDL_Texture*)_texture, null, &destRect);
 	}
 
 	void draw(Vec2f pos, Vec4i srcRect, Vec2f anchor = Vec2f.half) const {
@@ -154,7 +161,7 @@ final class Texture {
 			srcSdlRect.h
 		};
 
-		SDL_RenderCopy(cast(SDL_Renderer*)renderer, cast(SDL_Texture*)_texture, &srcSdlRect, &destSdlRect);
+		SDL_RenderCopy(cast(SDL_Renderer*)_sdlRenderer, cast(SDL_Texture*)_texture, &srcSdlRect, &destSdlRect);
 	}
 
 	void draw(Vec2f pos, Vec2f size, Vec2f anchor = Vec2f.half) const {
@@ -168,7 +175,7 @@ final class Texture {
 			cast(uint)size.y
 		};
 
-		SDL_RenderCopy(cast(SDL_Renderer*)renderer, cast(SDL_Texture*)_texture, null, &destSdlRect);
+		SDL_RenderCopy(cast(SDL_Renderer*)_sdlRenderer, cast(SDL_Texture*)_texture, null, &destSdlRect);
 	}
 
 	void draw(Vec2f pos, Vec2f size, Vec4i srcRect, Vec2f anchor = Vec2f.half) const {
@@ -183,7 +190,7 @@ final class Texture {
 			cast(uint)size.y
 		};
 
-		SDL_RenderCopy(cast(SDL_Renderer*)renderer, cast(SDL_Texture*)_texture, &srcSdlRect, &destSdlRect);
+		SDL_RenderCopy(cast(SDL_Renderer*)_sdlRenderer, cast(SDL_Texture*)_texture, &srcSdlRect, &destSdlRect);
 	}
 
 	void draw(Vec2f pos, Vec2f size, Vec4i srcRect, float angle, Flip flip = Flip.NoFlip, Vec2f anchor = Vec2f.half) const {
@@ -204,6 +211,6 @@ final class Texture {
 				(flip == Flip.VerticalFlip ? SDL_FLIP_VERTICAL :
 					SDL_FLIP_NONE));
 
-		SDL_RenderCopyEx(cast(SDL_Renderer*)renderer, cast(SDL_Texture*)_texture, &srcSdlRect, &destSdlRect, angle, null, rendererFlip);
+		SDL_RenderCopyEx(cast(SDL_Renderer*)_sdlRenderer, cast(SDL_Texture*)_texture, &srcSdlRect, &destSdlRect, angle, null, rendererFlip);
 	}
 }

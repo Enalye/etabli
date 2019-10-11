@@ -13,6 +13,11 @@ import std.math;
 import atelier.common;
 import atelier.core.util;
 
+/// Change the way Timer behave. \
+/// Stopped: It will do nothing and isRunning will be false. \
+/// Once: Will run from 0 to 1 in one duration then stop. \
+/// Loop: Will run from 0 to 1 in one duration then restart from 0 again, etc. \
+/// Bounce: Will run from 0 to 1 in one duration then from 1 to 0, etc. \
 enum TimeMode {
 	Stopped,
 	Once,
@@ -20,18 +25,25 @@ enum TimeMode {
 	Bounce
 }
 
+/**
+	Simple updatable timer. \
+	Start with start(Duration, TimeMode) and update with update(Deltatime). \
+	Returns a value between 0 and 1.
+*/
 struct Timer {
 	private {
 		float _time = 0f, _speed = 0f;
 		bool _isReversed = false;
+		TimeMode _mode = TimeMode.Stopped;
 	}
 
-	TimeMode mode = TimeMode.Stopped;
-
 	@property {
+		/// The relative time elapsed between 0 and 1.
 		float time() const { return _time; }
 
+		/// Duration in seconds from witch the timer goes from 0 to 1 (framerate dependent).
 		float duration() const { return _speed * nominalFps; }
+		/// Ditto
 		float duration(float newDuration) {
 			if(newDuration <= 0f) {
 				_speed = 0f;
@@ -42,32 +54,44 @@ struct Timer {
 			return newDuration;
 		}
 
-		bool isRunning() const { return (mode != TimeMode.Stopped); }
+		/// Is the timer currently running ?
+		bool isRunning() const { return (_mode != TimeMode.Stopped); }
 
+		/// Is the timer behaving backwards ?
 		bool isReversed() const { return _isReversed; }
+		/// Ditto
 		bool isReversed(bool newIsReversed) { return _isReversed = newIsReversed; }
+
+		/// Current behavior of the timer.
+		TimeMode mode() const { return _mode; }
 	}
 	
+	/// Immediatly starts the timer with the specified behavior and running time. \
+	/// Note that Loop and Bounce will never stop until you tell him to.
 	void start(float newDuration, TimeMode newTimeMode = TimeMode.Once) {
 		_time = 0f;
 		_isReversed = false;
 		duration(newDuration);
-		mode = newTimeMode;
+		_mode = newTimeMode;
 	}
 
+	/// Same as start() but goes in reverse (from 1 to 0).
 	void startReverse(float newDuration, TimeMode newTimeMode = TimeMode.Once) {
 		_time = 1f;
 		_isReversed = true;
 		duration(newDuration);
-		mode = newTimeMode;
+		_mode = newTimeMode;
 	}
 
+	/// Immediatly stops the timer.
     void stop() {
-        mode = TimeMode.Stopped;
+        _mode = TimeMode.Stopped;
     }
 
+	/// Update with the current deltatime (~1)
+	/// If you don't call update, the timer won't advance.
 	void update(float deltaTime) {
-		switch(mode) with(TimeMode) {
+		final switch(_mode) with(TimeMode) {
 		case Stopped:
 			break;
 		case Once:
@@ -76,7 +100,7 @@ struct Timer {
 					_time -= _speed * deltaTime;
 				if(_time < 0f) {
 					_time = 0f;
-					mode = TimeMode.Stopped;
+					_mode = TimeMode.Stopped;
 				}
 			}
 			else {
@@ -84,7 +108,7 @@ struct Timer {
 					_time += _speed * deltaTime;
 				if(_time > 1f) {
 					_time = 1f;
-					mode = TimeMode.Stopped;
+					_mode = TimeMode.Stopped;
 				}
 			}
 			break;
@@ -112,14 +136,13 @@ struct Timer {
 				}
 			}
 			break;
-		default:
-			throw new Exception("Invalid time mode");
 		}
 	}
 }
 
 alias EasingFunction = float function(float);
 
+/// Returns an easing function.
 EasingFunction getEasingFunction(string name) {
     switch(name) {
     case "linear": return &easeLinear;
@@ -158,12 +181,12 @@ EasingFunction getEasingFunction(string name) {
     }
 }
 
-//Linear
+/// Linear 
 float easeLinear(float t) {
 	return t;
 }
 
-//Sine
+/// Sine
 float easeInSine(float t) {
 	return sin((t - 1f) * PI_2) + 1f;
 }

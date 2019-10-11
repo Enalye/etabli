@@ -1,5 +1,5 @@
 /**
-    Overlay
+    Gui Overlay
 
     Copyright: (c) Enalye 2017
     License: Zlib
@@ -20,28 +20,36 @@ private {
 	bool _isOverlay = false;
 }
 
+/// Create a Hint for a gui element.
 Hint makeHint(string title, string text) {
 	return new Hint(title, text);
 }
 
+/// Displays text next to the cursor when hovering over a gui.
 class Hint {
+	/// The title is rendered above the text.
 	string title, text;
 
+	/// Ctor
 	this(string newTitle, string newText) {
 		title = newTitle;
 		text = newText;
 	}
 }
 
-void openHintWindow(Hint hint) {
+/// Create the hint gui.
+package void openHintWindow(Hint hint) {
 	_hintWindow = new HintWindow;
 	_displayedHint = hint;
 }
 
+/// Is there a gui running as an overlay ?
 bool isOverlay() {
 	return _isOverlay;
 }
 
+/// Add the gui as an overlay (rendered above all other guis). \
+/// Doesn't take away events from the other guis (unlike modal).
 void setOverlay(GuiElement gui) {
 	if(!_isOverlay) {
 		_isOverlay = true;
@@ -53,6 +61,7 @@ void setOverlay(GuiElement gui) {
 	addRootGui(gui);
 }
 
+/// Remove the current overlay gui.
 void stopOverlay() {
 	if(!_isOverlay)
 		throw new Exception("No overlay to stop");
@@ -62,21 +71,24 @@ void stopOverlay() {
 	_overlayGuiElements.length = 0L;
 }
 
-void processOverlayEvent(Event event) {
+/// Process events from the guis that aren't overlay.
+package void processOverlayEvent(Event event) {
 	if(event.type == EventType.Quit) {
 		foreach(gui; _backupGuis)
 			gui.onEvent(event);
 	}
 }
 
-void processOverlayBack() {
+/// Updates and renders guis that are behind.
+package(atelier) void processOverlayBack() {
 	foreach(gui; _backupGuis) {
 		updateGuiElements(gui, null);	
 		drawGuiElements(gui);
 	}
 }
 
-void processOverlayFront(float deltaTime) {
+/// Updates and renders guis that are in front (like the hint).
+package(atelier) void processOverlayFront(float deltaTime) {
     if(_hintWindow is null)
         return;
 	_hintWindow.hint = _displayedHint;
@@ -84,11 +96,13 @@ void processOverlayFront(float deltaTime) {
 	_hintWindow.draw();
 }
 
+/// Stops overlay gui.
 void endOverlay() {
 	_displayedHint = null;
 }
 
-private class HintWindow: GuiElement {
+/// The gui that renders the hint.
+private final class HintWindow: GuiElement {
 	private {
 		bool _isRendered;
 	}

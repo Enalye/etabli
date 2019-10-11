@@ -1,3 +1,11 @@
+/**
+    Gui Manager
+
+    Copyright: (c) Enalye 2019
+    License: Zlib
+    Authors: Enalye
+*/
+
 module atelier.ui.gui_manager;
 
 import std.conv: to;
@@ -10,37 +18,46 @@ private {
     float _deltaTime;
 }
 
-//Public
+//-- Public ---
+
+/// Add a gui as a top gui (not a child of anything).
 void addRootGui(GuiElement widget) {
 	_rootGuis ~= widget;
 }
 
+/// Remove all the top gui (that aren't a child of anything).
 void removeRootGuis() {
 	//_isChildGrabbed = false;
 	_rootGuis.length = 0uL;
 }
 
+/// Set those gui as the top guis (replacing the previous ones).
 void setRootGuis(GuiElement[] widgets) {
 	_rootGuis = widgets;
 }
 
+/// Get all the top guis.
 GuiElement[] getRootGuis() {
     return _rootGuis;
 }
 
+/// Show every gui as boxes.
 void setDebugGui(bool isDebug) {
 	_isGuiElementDebug = isDebug;
 }
 
-//Internal
-void updateGuiElements(float deltaTime) {
+//-- Internal ---
+
+/// Update all the guis from the root.
+private void updateGuiElements(float deltaTime) {
     _deltaTime = deltaTime;
     foreach(GuiElement widget; _rootGuis) {
         updateGuiElements(widget, null);
     }
 }
 
-void drawGuiElements() {
+/// Draw all the guis from the root.
+private void drawGuiElements() {
     foreach_reverse(GuiElement widget; _rootGuis) {
         drawGuiElements(widget);
     }
@@ -57,7 +74,9 @@ private {
     GuiElement[] _hookedGuis;
 }
 
-void handleGuiElementEvent(Event event) {
+/// Dispatch global events on the guis from the root. \
+/// Called by the main event loop.
+package(atelier) void handleGuiElementEvent(Event event) {
     if(isOverlay()) {
         processOverlayEvent(event);
     }
@@ -105,7 +124,9 @@ void handleGuiElementEvent(Event event) {
     }    
 }
 
-void updateGuiElements(GuiElement gui, GuiElement parent) {
+/// Update all children of a gui. \
+/// Called by the application itself.
+package(atelier) void updateGuiElements(GuiElement gui, GuiElement parent) {
     Vec2f coords = Vec2f.zero;
 
     //Calculate transitions
@@ -199,6 +220,7 @@ void updateGuiElements(GuiElement gui, GuiElement parent) {
     }
 }
 
+/// Renders a gui and all its children.
 void drawGuiElements(GuiElement gui) {
     if(gui.hasCanvas && gui.canvas !is null) {
         auto canvas = gui.canvas;
@@ -235,6 +257,7 @@ void drawGuiElements(GuiElement gui) {
     }
 }
 
+/// Process a mouse down event down the tree.
 private void dispatchMouseDownEvent(GuiElement gui, Vec2f cursorPosition) {
     auto children = (gui is null) ? _rootGuis : gui.children;
     bool hasCanvas;
@@ -269,6 +292,7 @@ private void dispatchMouseDownEvent(GuiElement gui, Vec2f cursorPosition) {
         popCanvas();
 }
 
+/// Process a mouse up event down the tree.
 private void dispatchMouseUpEvent(GuiElement gui, Vec2f cursorPosition) {
     auto children = (gui is null) ? _rootGuis : gui.children;
     bool hasCanvas;
@@ -318,6 +342,7 @@ private void dispatchMouseUpEvent(GuiElement gui, Vec2f cursorPosition) {
         _clickedGuiElement.isClicked = false;
 }
 
+/// Process a mouse update event down the tree.
 private void dispatchMouseUpdateEvent(GuiElement gui, Vec2f cursorPosition) {
     auto children = (gui is null) ? _rootGuis : gui.children;
     bool hasCanvas, wasHovered;
@@ -363,6 +388,7 @@ private void dispatchMouseUpdateEvent(GuiElement gui, Vec2f cursorPosition) {
         popCanvas();
 }
 
+/// Process a mouse wheel event down the tree.
 private void dispatchMouseWheelEvent(Vec2f scroll) {
     Event scrollEvent = EventType.MouseWheel;
     scrollEvent.position = scroll;
@@ -383,6 +409,7 @@ private void dispatchMouseWheelEvent(Vec2f scroll) {
     }
 }
 
+/// Notify every gui in the tree that we are leaving.
 private void dispatchQuitEvent(GuiElement gui) {
     if(gui !is null) {
         foreach(GuiElement child; gui.children)
@@ -395,6 +422,7 @@ private void dispatchQuitEvent(GuiElement gui) {
     }
 }
 
+/// Every other event that doesn't have a specific behavior like mouse events.
 private void dispatchGenericEvents(GuiElement gui, Event event) {
     if(gui !is null) {
         gui.onEvent(event);

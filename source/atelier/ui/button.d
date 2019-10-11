@@ -12,6 +12,7 @@ import std.conv: to;
 import atelier.core, atelier.render, atelier.common;
 import atelier.ui.gui_element, atelier.ui.label;
 
+/// Simple GUI that trigger its callback when onSubmit() is fired (like when you click on it).
 class Button: GuiElement {
 	void function() onClick;
 

@@ -29,12 +29,27 @@ private {
     bool _isChildGrabbed;
     uint _idChildGrabbed;
     GuiElement[] _children;
-}
-private {
-    bool _isInitialized;
-}
-uint nominalFps = 60u;
 
+    bool _isInitialized;
+    uint _nominalFps = 60u;
+}
+
+@property {
+    /// Maximum framerate of the application.
+    /// The deltatime is equal to 1 if the framerate is exactly that.
+    uint nominalFps() { return _nominalFps; }
+    /// Ditto
+    uint nominalFps(uint v) { return _nominalFps = v; }
+
+    /// Actual framerate divided by the nominal framerate
+    /// 1 if the same, less if the application slow down,
+    /// more if the application runs too quickly.
+    float deltaTime() { return _deltaTime; }
+    /// Actual framerate of the application.
+    float currentFps() { return _currentFps; }
+}
+
+/// Application startup
 void createApplication(Vec2u size, string title = "Atelier") {
     if(_isInitialized)
 		throw new Exception("The application cannot be run twice.");
@@ -44,9 +59,11 @@ void createApplication(Vec2u size, string title = "Atelier") {
     _tickStartFrame = Clock.currStdTime();
 }
 
+/// Main application loop
 void runApplication() {
 	if(!_isInitialized)
 		throw new Exception("Cannot run the application.");
+    
     while(processEvents()) {
         updateEvents(_deltaTime);
         processModalBack();
@@ -58,22 +75,18 @@ void runApplication() {
         endOverlay();
         
         long deltaTicks = Clock.currStdTime() - _tickStartFrame;
-        if(deltaTicks < (10_000_000 / nominalFps))
-            Thread.sleep(dur!("hnsecs")((10_000_000 / nominalFps) - deltaTicks));
+        if(deltaTicks < (10_000_000 / _nominalFps))
+            Thread.sleep(dur!("hnsecs")((10_000_000 / _nominalFps) - deltaTicks));
 
         deltaTicks = Clock.currStdTime() - _tickStartFrame;
-        _deltaTime = (cast(float)(deltaTicks) / 10_000_000f) * nominalFps;
+        _deltaTime = (cast(float)(deltaTicks) / 10_000_000f) * _nominalFps;
         _currentFps = (_deltaTime == .0f) ? .0f : (10_000_000f / cast(float)(deltaTicks));
         _tickStartFrame = Clock.currStdTime();
     }
 }
 
+/// Cleanup and kill the application
 void destroyApplication() {
     destroyEvents();
 	destroyWindow();
-}
-
-@property {
-    float deltaTime() { return _deltaTime; }
-    float currentFps() { return _currentFps; }
 }

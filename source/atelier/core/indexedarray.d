@@ -12,6 +12,9 @@ import std.parallelism;
 import std.range;
 import std.typecons;
 
+/**
+	Special Array that remove fragmentation while keeping indexes valid.
+*/
 class IndexedArray(T, uint _capacity, bool _useParallelism = false) {
 	private uint _dataTop = 0u;
 	private uint _availableIndexesTop = 0u;

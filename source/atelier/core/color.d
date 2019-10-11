@@ -18,6 +18,7 @@ import derelict.sdl2.sdl;
 import atelier.core.stream;
 import atelier.core.vec4;
 
+/// An RGBA color structure.
 struct Color {
 	static const Color clear = Color(0f, 0f, 0f, 0f);
 	static const Color red = Color(1f, 0f, 0f);
@@ -40,6 +41,7 @@ struct Color {
 	static const Color pink = Color(1f, .75f, .8f);
 
 	static @property {
+		/// Random RGB color.
 		Color random() {
 			return Color(uniform01(), uniform01(), uniform01(), 1f);
 		}
@@ -183,6 +185,7 @@ struct Color {
 	}
 }
 
+/// Mix 50% of one color with 50% of another.
 Color mix(Color c1, Color c2) {
 	return Color((c1._r + c2._r) / 2f, (c1._g + c2._g) / 2f, (c1._b + c2._b) / 2f, (c1._a + c2._a) / 2f);
 }

@@ -23,9 +23,11 @@ import atelier.render.quadview;
 import atelier.render.sprite;
 
 static {
-	SDL_Window* window;
-	SDL_Renderer* renderer;
-	Color windowClearColor;
+	package(atelier) {
+		SDL_Window* _sdlWindow;
+		SDL_Renderer* _sdlRenderer;
+		Color windowClearColor;
+	}
 
 	private {
 		SDL_Surface* _icon;
@@ -61,6 +63,7 @@ enum Fullscreen {
 	NoFullscreen
 }
 
+/// Create the application window.
 void createWindow(const Vec2u windowSize, string title) {
 	DerelictSDL2.load(SharedLibVersion(2, 0, 2));
 	DerelictSDL2Image.load();
@@ -81,10 +84,10 @@ void createWindow(const Vec2u windowSize, string title) {
 			throw new Exception("Could not allocate audio channels.");
 	}
 
-	if(-1 == SDL_CreateWindowAndRenderer(windowSize.x, windowSize.y, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_WINDOW_RESIZABLE, &window, &renderer))
+	if(-1 == SDL_CreateWindowAndRenderer(windowSize.x, windowSize.y, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_WINDOW_RESIZABLE, &_sdlWindow, &_sdlRenderer))
 		throw new Exception("Window initialization failed.");
 
-    SDL_RenderSetLogicalSize(renderer, windowSize.x, windowSize.y);
+    SDL_RenderSetLogicalSize(_sdlRenderer, windowSize.x, windowSize.y);
 	CanvasReference canvasRef;
 	canvasRef.target = null;
 	canvasRef.position = cast(Vec2f)(windowSize) / 2;
@@ -99,35 +102,41 @@ void createWindow(const Vec2u windowSize, string title) {
 	setWindowTitle(title);
 }
 
+/// Cleanup the application window.
 void destroyWindow() {
-	if (window)
-		SDL_DestroyWindow(window);
+	if (_sdlWindow)
+		SDL_DestroyWindow(_sdlWindow);
 
-	if (renderer)
-		SDL_DestroyRenderer(renderer);
+	if (_sdlRenderer)
+		SDL_DestroyRenderer(_sdlRenderer);
 
     if(_hasAudio)
-	    Mix_CloseAudio();
+		Mix_CloseAudio();
 }
 
+/// Enable/Disable audio (Call before creating the window). \
+/// Enabled by default.
 void enableAudio(bool enable) {
 	_hasAudio = enable;
 }
 
+/// Change the actual window title.
 void setWindowTitle(string title) {
-	SDL_SetWindowTitle(window, toStringz(title));
+	SDL_SetWindowTitle(_sdlWindow, toStringz(title));
 }
 
+/// Update the window size.
 void setWindowSize(const Vec2u windowSize) {
-	//_windowSize = windowSize;
-	//_screenSize = cast(Vec2f)(windowSize);
-	//_centerScreen = _screenSize / 2f;
+	_windowSize = windowSize;
+	_screenSize = cast(Vec2f)(windowSize);
+	_centerScreen = _screenSize / 2f;
 	
 	if (_canvases.length)
 		_canvases[0].renderSize = cast(Vec2f)windowSize;
-	SDL_SetWindowSize(window, windowSize.x, windowSize.y);
+	SDL_SetWindowSize(_sdlWindow, windowSize.x, windowSize.y);
 }
 
+/// Change the icon displayed.
 void setWindowIcon(string path) {
 	if (_icon) {
 		SDL_FreeSurface(_icon);
@@ -135,52 +144,63 @@ void setWindowIcon(string path) {
 	}
 	_icon = IMG_Load(toStringz(path));
 
-	SDL_SetWindowIcon(window, _icon);
+	SDL_SetWindowIcon(_sdlWindow, _icon);
 }
 
+/// Change the cursor to a custom one and disable the default one.
 void setWindowCursor(Sprite cursorSprite) {
-  _customCursorSprite = cursorSprite;
-  _hasCustomCursor = true;
-  SDL_ShowCursor(false);
+	_customCursorSprite = cursorSprite;
+	_hasCustomCursor = true;
+	SDL_ShowCursor(false);
 }
 
+/// Enable/Disable the cursor. \
+/// Enabled by default.
 void showWindowCursor(bool show) {
 	_showCursor = show;
 	if(!_hasCustomCursor)
 		SDL_ShowCursor(show);
 }
 
+/// Change the fullscreen property between windowed, desktop fullscreen and fullscreen.
 void setWindowFullScreen(Fullscreen fullscreen) {
-	SDL_SetWindowFullscreen(window,
+	SDL_SetWindowFullscreen(_sdlWindow,
 		(Fullscreen.RealFullscreen == fullscreen ? SDL_WINDOW_FULLSCREEN :
 			(Fullscreen.DesktopFullscreen == fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP :
 				0)));
 }
 
+/// Enable/Disable the borders.
 void setWindowBordered(bool bordered) {
-	SDL_SetWindowBordered(window, bordered ? SDL_TRUE : SDL_FALSE);
+	SDL_SetWindowBordered(_sdlWindow, bordered ? SDL_TRUE : SDL_FALSE);
 }
 
+/// Show/Hide the window. \
+/// Shown by default obviously.
 void showWindow(bool show) {
 	if (show)
-		SDL_ShowWindow(window);
+		SDL_ShowWindow(_sdlWindow);
 	else
-		SDL_HideWindow(window);
+		SDL_HideWindow(_sdlWindow);
 }
 
+/// Render everything on screen.
 void renderWindow() {
 	Vec2f mousePos = getMousePos();
 	if(_hasCustomCursor && _showCursor && mousePos.isBetween(Vec2f.one, screenSize - Vec2f.one)) {
 		_customCursorSprite.color = Color.white;
 		_customCursorSprite.draw(mousePos + _customCursorSprite.size / 2f);
 	}
-	SDL_RenderPresent(renderer);
+	SDL_RenderPresent(_sdlRenderer);
 	setRenderColor(windowClearColor);
-	SDL_RenderClear(renderer);
+	SDL_RenderClear(_sdlRenderer);
 }
 
+/// Push a render canvas on the stack.
+/// Everything after that and before the next popCanvas will be rendered onto this.
+/// You **must** call popCanvas after that.
 void pushCanvas(Canvas canvas, bool clear = true) {
-    canvas.isTarget = true;
+    canvas._isTargetOnStack = true;
 	CanvasReference canvasRef;
 	canvasRef.target = canvas.target;
 	canvasRef.position = canvas.position;
@@ -189,10 +209,10 @@ void pushCanvas(Canvas canvas, bool clear = true) {
     canvasRef.canvas = canvas;
 	_canvases ~= canvasRef;
 
-	SDL_SetRenderTarget(renderer, cast(SDL_Texture*)canvasRef.target);
+	SDL_SetRenderTarget(_sdlRenderer, cast(SDL_Texture*)canvasRef.target);
 	setRenderColor(canvas.clearColor);
 	if(clear)
-		SDL_RenderClear(renderer);
+		SDL_RenderClear(_sdlRenderer);
 }
 /*
 void pushCanvas(QuadView quadView, bool clear = true) {
@@ -201,36 +221,43 @@ void pushCanvas(QuadView quadView, bool clear = true) {
 		quadView.advance();
 }*/
 
+/// Called after pushCanvas to remove the render canvas from the stack.
+/// When there is no canvas on the stack, everything is displayed directly on screen.
 void popCanvas() {
 	if (_canvases.length <= 1)
 		throw new Exception("Attempt to pop the main canvas.");
 
-    _canvases[$ - 1].canvas.isTarget = false;
+    _canvases[$ - 1].canvas._isTargetOnStack = false;
 	_canvases.length --;
-	SDL_SetRenderTarget(renderer, cast(SDL_Texture*)_canvases[$ - 1].target);
+	SDL_SetRenderTarget(_sdlRenderer, cast(SDL_Texture*)_canvases[$ - 1].target);
 	setRenderColor(windowClearColor);
 }
 
+/// Change coordinate system from inside to outside the canvas.
 Vec2f transformRenderSpace(const Vec2f pos) {
 	const CanvasReference* canvasRef = &_canvases[$ - 1];
 	return (pos - canvasRef.position) * (canvasRef.renderSize / canvasRef.size) + canvasRef.renderSize * 0.5f;
 }
 
+/// Change coordinate system from outside to inside the canvas.
 Vec2f transformCanvasSpace(const Vec2f pos, const Vec2f renderPos) {
 	const CanvasReference* canvasRef = &_canvases[$ - 1];
 	return (pos - renderPos) * (canvasRef.size / canvasRef.renderSize) + canvasRef.position;
 }
 
+/// Change coordinate system from outside to insside the canvas.
 Vec2f transformCanvasSpace(const Vec2f pos) {
 	const CanvasReference* canvasRef = &_canvases[$ - 1];
 	return pos * (canvasRef.size / canvasRef.renderSize);
 }
 
+/// Change the scale from outside to inside the canvas.
 Vec2f transformScale() {
 	const CanvasReference* canvasRef = &_canvases[$ - 1];
 	return canvasRef.renderSize / canvasRef.size;
 }
 
+/// Check if something is inside the actual canvas rendering area.
 bool isVisible(const Vec2f targetPosition, const Vec2f targetSize) {
 	const CanvasReference* canvasRef = &_canvases[$ - 1];
 	return (((canvasRef.position.x - canvasRef.size.x * .5f) < (targetPosition.x + targetSize.x * .5f))
@@ -239,53 +266,59 @@ bool isVisible(const Vec2f targetPosition, const Vec2f targetSize) {
 		&& ((canvasRef.position.y + canvasRef.size.y * .5f) > (targetPosition.y - targetSize.y * .5f)));
 }
 
+/// Change the draw color, used internally. Don't bother use it.
 void setRenderColor(const Color color) {
-	auto sdlColor = color.toSDL();
-	SDL_SetRenderDrawColor(renderer, sdlColor.r, sdlColor.g, sdlColor.b, sdlColor.a);
+	const auto sdlColor = color.toSDL();
+	SDL_SetRenderDrawColor(_sdlRenderer, sdlColor.r, sdlColor.g, sdlColor.b, sdlColor.a);
 }
 
+/// Draw a single point.
 void drawPoint(const Vec2f position, const Color color) {
 	if (isVisible(position, Vec2f(.0f, .0f))) {
-		Vec2f rpos = transformRenderSpace(position);
+		const Vec2f rpos = transformRenderSpace(position);
 
 		setRenderColor(color);
-		SDL_RenderDrawPoint(renderer, cast(int)rpos.x, cast(int)rpos.y);
+		SDL_RenderDrawPoint(_sdlRenderer, cast(int)rpos.x, cast(int)rpos.y);
 	}
 }
 
+/// Draw a line between the two positions.
 void drawLine(const Vec2f startPosition, const Vec2f endPosition, const Color color) {
-	Vec2f pos1 = transformRenderSpace(startPosition);
-	Vec2f pos2 = transformRenderSpace(endPosition);
+	const Vec2f pos1 = transformRenderSpace(startPosition);
+	const Vec2f pos2 = transformRenderSpace(endPosition);
 
 	setRenderColor(color);
-	SDL_RenderDrawLine(renderer, cast(int)pos1.x, cast(int)pos1.y, cast(int)pos2.x, cast(int)pos2.y);
+	SDL_RenderDrawLine(_sdlRenderer, cast(int)pos1.x, cast(int)pos1.y, cast(int)pos2.x, cast(int)pos2.y);
 }
 
+/// Draw an arrow with its head pointing at the end position.
 void drawArrow(const Vec2f startPosition, const Vec2f endPosition, const Color color) {
-	Vec2f pos1 = transformRenderSpace(startPosition);
-	Vec2f pos2 = transformRenderSpace(endPosition);
-	Vec2f dir = (pos2 - pos1).normalized;
-	Vec2f arrowBase = pos2 - dir * 25f;
-	Vec2f pos3 = arrowBase + dir.normal * 20f;
-	Vec2f pos4 = arrowBase - dir.normal * 20f;
+	const Vec2f pos1 = transformRenderSpace(startPosition);
+	const Vec2f pos2 = transformRenderSpace(endPosition);
+	const Vec2f dir = (pos2 - pos1).normalized;
+	const Vec2f arrowBase = pos2 - dir * 25f;
+	const Vec2f pos3 = arrowBase + dir.normal * 20f;
+	const Vec2f pos4 = arrowBase - dir.normal * 20f;
 
 	setRenderColor(color);
-	SDL_RenderDrawLine(renderer, cast(int)pos1.x, cast(int)pos1.y, cast(int)pos2.x, cast(int)pos2.y);
-	SDL_RenderDrawLine(renderer, cast(int)pos2.x, cast(int)pos2.y, cast(int)pos3.x, cast(int)pos3.y);
-	SDL_RenderDrawLine(renderer, cast(int)pos2.x, cast(int)pos2.y, cast(int)pos4.x, cast(int)pos4.y);
+	SDL_RenderDrawLine(_sdlRenderer, cast(int)pos1.x, cast(int)pos1.y, cast(int)pos2.x, cast(int)pos2.y);
+	SDL_RenderDrawLine(_sdlRenderer, cast(int)pos2.x, cast(int)pos2.y, cast(int)pos3.x, cast(int)pos3.y);
+	SDL_RenderDrawLine(_sdlRenderer, cast(int)pos2.x, cast(int)pos2.y, cast(int)pos4.x, cast(int)pos4.y);
 }
 
+/// Draw a vertical cross (like this: +) with the indicated size.
 void drawCross(const Vec2f center, float length, const Color color) {
 	const float halfLength = length / 2f;
 	drawLine(center + Vec2f(-halfLength, 0f), center + Vec2f(halfLength, 0f), color);
 	drawLine(center + Vec2f(0f, -halfLength), center + Vec2f(0f, halfLength), color);
 }
 
+/// Draw a rectangle border.
 void drawRect(const Vec2f origin, const Vec2f size, const Color color) {
-	Vec2f pos1 = transformRenderSpace(origin);
-	Vec2f pos2 = size * transformScale();
+	const Vec2f pos1 = transformRenderSpace(origin);
+	const Vec2f pos2 = size * transformScale();
 
-	SDL_Rect rect = {
+	const SDL_Rect rect = {
 		cast(int)pos1.x,
 		cast(int)pos1.y,
 		cast(int)pos2.x,
@@ -293,14 +326,15 @@ void drawRect(const Vec2f origin, const Vec2f size, const Color color) {
 	};
 
 	setRenderColor(color);
-	SDL_RenderDrawRect(renderer, &rect);
+	SDL_RenderDrawRect(_sdlRenderer, &rect);
 }
 
+/// Draw a fully filled rectangle.
 void drawFilledRect(const Vec2f origin, const Vec2f size, const Color color) {
-	Vec2f pos1 = transformRenderSpace(origin);
-	Vec2f pos2 = size * transformScale();
+	const Vec2f pos1 = transformRenderSpace(origin);
+	const Vec2f pos2 = size * transformScale();
 
-	SDL_Rect rect = {
+	const SDL_Rect rect = {
 		cast(int)pos1.x,
 		cast(int)pos1.y,
 		cast(int)pos2.x,
@@ -308,18 +342,19 @@ void drawFilledRect(const Vec2f origin, const Vec2f size, const Color color) {
 	};
 
 	setRenderColor(color);
-	SDL_RenderFillRect(renderer, &rect);
+	SDL_RenderFillRect(_sdlRenderer, &rect);
 }
 
+/// Draw a rectangle with a size of 1.
 void drawPixel(const Vec2f position, const Color color) {
-	Vec2f pos = transformRenderSpace(position);
+	const Vec2f pos = transformRenderSpace(position);
 
-	SDL_Rect rect = {
+	const SDL_Rect rect = {
 		cast(int)pos.x,
 		cast(int)pos.y,
 		1, 1
 	};
 
 	setRenderColor(color);
-	SDL_RenderFillRect(renderer, &rect);
+	SDL_RenderFillRect(_sdlRenderer, &rect);
 }

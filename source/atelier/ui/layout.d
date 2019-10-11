@@ -143,6 +143,9 @@ class GridLayout: GuiElement {
 	}
 }
 
+/// Vertical container. \
+/// Align its children vertically without changing their size. \
+/// Resized automatically to fits its children.
 class VContainer: GuiElement {
 	protected {
 		Vec2f _spacing = Vec2f.zero;
@@ -207,6 +210,9 @@ class VContainer: GuiElement {
 	}
 }
 
+/// Horizontal container. \
+/// Align its children horizontally without changing their size. \
+/// Resized automatically to fits its children.
 class HContainer: GuiElement {
 	protected {
 		Vec2f _spacing = Vec2f.zero;

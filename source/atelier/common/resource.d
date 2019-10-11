@@ -54,6 +54,7 @@ void getResourceCache(T)() {
 	return cast(ResourceCache!T)(*cache);
 }
 
+/// Is an object of this name and of this type stored ?
 bool canFetch(T)(string name) {
 	auto cache = T.stringof in _caches;
 	if(!cache)
@@ -61,6 +62,7 @@ bool canFetch(T)(string name) {
 	return (cast(ResourceCache!T)*cache).canGet(name);
 }
 
+/// Is an set of this name and of this type stored ?
 bool canFetchPack(T)(string name = ".") {
 	auto cache = T.stringof in _caches;
 	if(!cache)
@@ -68,6 +70,7 @@ bool canFetchPack(T)(string name = ".") {
 	return (cast(ResourceCache!T)*cache).canGetPack(name);
 }
 
+/// Returns a stored resource.
 T fetch(T)(string name) {
 	auto cache = T.stringof in _caches;
 	if(!cache)
@@ -75,6 +78,7 @@ T fetch(T)(string name) {
 	return (cast(ResourceCache!T)*cache).get(name);
 }
 
+/// Returns all resources of a set.
 T[] fetchPack(T)(string name = ".") {
 	auto cache = T.stringof in _caches;
 	if(!cache)
@@ -82,6 +86,7 @@ T[] fetchPack(T)(string name = ".") {
 	return (cast(ResourceCache!T)*cache).getPack(name);
 }
 
+/// Returns all resources' name of a set.
 string[] fetchPackNames(T)(string name = ".") {
 	auto cache = T.stringof in _caches;
 	if(!cache)
@@ -89,6 +94,7 @@ string[] fetchPackNames(T)(string name = ".") {
 	return (cast(ResourceCache!T)*cache).getPackNames(name);
 }
 
+/// Returns all resources of a set as a tuple of the resource + its name.
 Tuple!(T, string)[] fetchPackTuples(T)(string name = ".") {
 	auto cache = T.stringof in _caches;
 	if(!cache)
@@ -96,6 +102,7 @@ Tuple!(T, string)[] fetchPackTuples(T)(string name = ".") {
 	return (cast(ResourceCache!T)*cache).getPackTuples(name);
 }
 
+/// Returns everything of this type as tuples of the resources + their name.
 Tuple!(T, string)[] fetchAllTuples(T)() {
 	auto cache = T.stringof in _caches;
 	if(!cache)
@@ -103,6 +110,7 @@ Tuple!(T, string)[] fetchAllTuples(T)() {
 	return (cast(ResourceCache!T)*cache).getAllTuples();
 }
 
+/// Internal cache storing all loaded resources.
 class ResourceCache(T) {
 	protected {
 		Tuple!(T, string)[] _data;

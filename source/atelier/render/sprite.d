@@ -18,22 +18,40 @@ import atelier.render.window;
 import atelier.render.texture;
 import atelier.render.drawable;
 
+/// Renders a **Texture** with its own properties.
 final class Sprite {
 	@property {
+		/// Is the texture loaded ?
 		bool isValid() const { return texture !is null; }
+
+		/// Get the anchored and scaled center of the sprite.
 		Vec2f center() const { return anchor * size * scale; }
 	}
 
+	/// Texture being used.
 	Texture texture;
+
+	/// Mirroring property.
 	Flip flip = Flip.NoFlip;
+
 	Vec2f scale = Vec2f.one, size = Vec2f.zero, anchor = Vec2f.half;
+
+	/// Texture region being rendered (the source size).
 	Vec4i clip;
+
+	/// Angle in which the sprite will be rendered.
 	float angle = 0f;
+
+	/// Color added to the sprite.
     Color color = Color.white;
+
+	/// Blending algorithm.
     Blend blend = Blend.AlphaBlending;
 
+	/// Default ctor.
     this() {}
 
+	/// Copy another sprite.
     this(Sprite sprite) {
         texture = sprite.texture;
         flip = sprite.flip;
@@ -46,6 +64,7 @@ final class Sprite {
         blend = sprite.blend;
     }
 
+	/// Default sprite that takes the whole Texture.
 	this(Texture newTexture, Flip newFlip = Flip.NoFlip) {
 		texture = newTexture;
 		clip = Vec4i(0, 0, texture.width, texture.height);
@@ -53,6 +72,7 @@ final class Sprite {
 		flip = newFlip;
 	}
 
+	/// Sprite that takes a clipped region of a Texture.
 	this(Texture newTexture, Vec4i newClip, Flip newFlip = Flip.NoFlip) {
 		texture = newTexture;
 		clip = newClip;
@@ -60,6 +80,7 @@ final class Sprite {
 		flip = newFlip;
 	}
 	
+	/// Reset the sprite to take the whole specified Texture.
 	Sprite opAssign(Texture newTexture) {
 		texture = texture;
 		clip = Vec4i(0, 0, texture.width, texture.height);
@@ -67,10 +88,12 @@ final class Sprite {
 		return this;
 	}
 
+	/// Set the sprite's size to fit inside the specified size.
 	void fit(Vec2f newSize) {
 		size = to!Vec2f(clip.zw).fit(newSize);
 	}
 
+	/// Render the sprite there.
 	void draw(const Vec2f position) {
 		Vec2f finalSize = size * scale * transformScale();
 		//if (isVisible(position, finalSize)) {
@@ -80,6 +103,7 @@ final class Sprite {
 		//}
 	}
 
+	/// Ditto
 	void drawUnchecked(const Vec2f position) {
 		Vec2f finalSize = size * scale * transformScale();
         texture.setColorMod(color, blend);
@@ -110,6 +134,8 @@ final class Sprite {
         texture.setColorMod(Color.white);
 	}
 
+	/// Is this inside the sprite region ? \
+	/// Note: Does not take angle into account. may not work properly.
 	bool isInside(const Vec2f position) const {
 		Vec2f halfSize = size * scale * transformScale() * 0.5f;
 		return position.isBetween(-halfSize, halfSize);

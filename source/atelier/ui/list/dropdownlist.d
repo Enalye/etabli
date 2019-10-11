@@ -37,6 +37,7 @@ private class DropDownListSubElement: Button {
     }
 }
 
+/// A clickable button that deploy a list of choices.
 class DropDownList: GuiElementCanvas {
 	private {
 		VList _list;
@@ -49,10 +50,14 @@ class DropDownList: GuiElementCanvas {
 	}
 
 	@property {
+        /// The ID of the currently selected child.
 		uint selected() const { return _list.selected; }
+        /// Ditto
 		uint selected(uint id) { return _list.selected = id; }
 	}
 
+    /// Size is used for the canvas, avoid resizing too often. \
+    /// maxListLength is the maximum number of choices that can be displayed at the same time.
 	this(Vec2f newSize, uint maxListLength = 5U) {
 		_maxListLength = maxListLength;
 		size = newSize;
@@ -154,6 +159,8 @@ class DropDownList: GuiElementCanvas {
         _list.size = Vec2f(width, min(_maxListLength, guis.length) * size.y);
 	}
 
+    /// Add a choice to the list. \
+    /// Use this instead of addChildGui unless you want to define your own.
     void add(string msg) {
         auto gui = new DropDownListSubElement(msg, size);
 		addChildGui(gui);
@@ -175,6 +182,7 @@ class DropDownList: GuiElementCanvas {
 		return _list.getList();
 	}
 
+    /// Returns the name of the selected choice.
     string getSelectedName() {
         auto list = cast(DropDownListSubElement[])getList();
         if(selected() >= list.length)
@@ -182,6 +190,7 @@ class DropDownList: GuiElementCanvas {
         return list[selected()].label.text;
     }
 
+    /// Change the name of the selected choice.
     void setSelectedName(string name) {
         auto list = cast(DropDownListSubElement[])getList();
         int i;

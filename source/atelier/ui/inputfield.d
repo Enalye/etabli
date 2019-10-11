@@ -14,6 +14,7 @@ import std.string: indexOf;
 import atelier.core, atelier.render, atelier.common;
 import atelier.ui.gui_element, atelier.ui.label;
 
+/// Editable field.
 class InputField: GuiElementCanvas {
 	private {
 		Label _label;
@@ -26,7 +27,9 @@ class InputField: GuiElementCanvas {
 	}
 
 	@property {
+		/// The displayed text.
 		string text() const { return to!string(_text); }
+		/// Ditto
 		string text(string newText) {
 			_text = to!dstring(newText);
 			_caretIndex = to!uint(_text.length);
@@ -34,7 +37,9 @@ class InputField: GuiElementCanvas {
 			return newText;
 		}
 
+		/// Max number of characters.
 		uint limit() const { return _limit; }
+		/// Ditto
 		uint limit(uint newLimit) {
 			_limit = newLimit;
 			if(_text.length > _limit) {
@@ -47,6 +52,8 @@ class InputField: GuiElementCanvas {
 		}
 	}
 
+	/// The size is used to setup a canvas, avoid resizing too often. \
+	/// Set startWithFocus to true if you want the inputfield to accept inputs immediatly.
 	this(Vec2f newSize, string defaultText = "", bool startWithFocus = false) {
 		size = newSize;
 		_label = new Label(getDefaultFont(), "");
@@ -146,12 +153,14 @@ class InputField: GuiElementCanvas {
 		drawRect(origin, size, _borderColor);
     }
 
+	/// Resets the text.
 	void clear() {
 		_text.length = 0L;
 		_caretIndex = 0u;
 		_label.text = "";
 	}
 
+	/// It will discard any characters from keyboard that aren't in this list.
     void setAllowedCharacters(dstring allowedCharacters) {
         _allowedCharacters = allowedCharacters;
     }

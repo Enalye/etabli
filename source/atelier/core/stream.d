@@ -13,6 +13,7 @@ import std.conv;
 import std.string;
 import std.bitmanip;
 
+/// Binary stream to write onto.
 class OutStream {
 	private Appender!(const ubyte[]) _buffer;
 
@@ -59,6 +60,7 @@ class OutStream {
 	}
 }
 
+/// Binary stream to read from.
 class InStream {
 	private ubyte[] _buffer;
 
