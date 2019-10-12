@@ -57,7 +57,7 @@ class InputField: GuiElementCanvas {
 	this(Vec2f newSize, string defaultText = "", bool startWithFocus = false) {
 		size = newSize;
 		_label = new Label(getDefaultFont(), "");
-        _label.setAlign(GuiAlignX.Left, GuiAlignY.Center);
+        _label.setAlign(GuiAlignX.left, GuiAlignY.center);
         addChildGui(_label);
 		hasFocus = startWithFocus;
 		_text = to!dstring(defaultText);
@@ -66,13 +66,13 @@ class InputField: GuiElementCanvas {
 
 		_borderColor = Color.white;
 		_caretColor = Color.white;
-		_time.start(1f, TimeMode.Bounce);
+		_time.start(1f, TimeMode.bounce);
 	}
 
 	override void onEvent(Event event) {
 		if(hasFocus) {
 			switch(event.type) with(EventType) {
-			case KeyInput:
+			case keyInput:
 				if(_caretIndex >= _limit)
 					break;
                 const auto textInput = to!dstring(event.str);
@@ -89,7 +89,7 @@ class InputField: GuiElementCanvas {
 				_caretIndex ++;
 				_label.text = to!string(_text);
 				break;
-			case KeyDelete:
+			case keyDelete:
 				if(_text.length) {
 					if(event.ivalue > 0) {
 						if(_caretIndex == 0U)
@@ -111,13 +111,13 @@ class InputField: GuiElementCanvas {
 					_label.text = to!string(_text);
 				}
 				break;
-			case KeyDir:
+			case keyDir:
 				if(event.position.x > 0f && _caretIndex < _text.length)
 					_caretIndex ++;
 				if(event.position.x < 0f && _caretIndex > 0U)
 					_caretIndex --;
 				break;
-			case KeyEnter:
+			case keyEnter:
 				triggerCallback();
 				break;
 			default:

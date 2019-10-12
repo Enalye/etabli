@@ -11,7 +11,7 @@ module atelier.render.drawable;
 import atelier.core.vec2;
 
 /// Everything that can be rendered.
-interface IDrawable {
-    /// Render
-	void draw(const Vec2f pos);
+interface Drawable {
+    /// Render the drawable.
+	void draw(const Vec2f position);
 }

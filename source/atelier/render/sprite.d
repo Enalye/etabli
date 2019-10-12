@@ -19,7 +19,7 @@ import atelier.render.texture;
 import atelier.render.drawable;
 
 /// Renders a **Texture** with its own properties.
-final class Sprite {
+final class Sprite: Drawable {
 	@property {
 		/// Is the texture loaded ?
 		bool isValid() const { return texture !is null; }
@@ -32,7 +32,7 @@ final class Sprite {
 	Texture texture;
 
 	/// Mirroring property.
-	Flip flip = Flip.NoFlip;
+	Flip flip = Flip.none;
 
 	Vec2f scale = Vec2f.one, size = Vec2f.zero, anchor = Vec2f.half;
 
@@ -46,7 +46,7 @@ final class Sprite {
     Color color = Color.white;
 
 	/// Blending algorithm.
-    Blend blend = Blend.AlphaBlending;
+    Blend blend = Blend.alpha;
 
 	/// Default ctor.
     this() {}
@@ -65,7 +65,7 @@ final class Sprite {
     }
 
 	/// Default sprite that takes the whole Texture.
-	this(Texture newTexture, Flip newFlip = Flip.NoFlip) {
+	this(Texture newTexture, Flip newFlip = Flip.none) {
 		texture = newTexture;
 		clip = Vec4i(0, 0, texture.width, texture.height);
 		size = to!Vec2f(clip.zw);
@@ -73,7 +73,7 @@ final class Sprite {
 	}
 
 	/// Sprite that takes a clipped region of a Texture.
-	this(Texture newTexture, Vec4i newClip, Flip newFlip = Flip.NoFlip) {
+	this(Texture newTexture, Vec4i newClip, Flip newFlip = Flip.none) {
 		texture = newTexture;
 		clip = newClip;
 		size = to!Vec2f(clip.zw);

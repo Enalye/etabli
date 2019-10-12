@@ -25,7 +25,7 @@ private class DropDownListSubElement: Button {
     this(string title, Vec2f sz) {
         size = sz;
         label = new Label(getDefaultFont(), title);
-        label.setAlign(GuiAlignX.Center, GuiAlignY.Center);
+        label.setAlign(GuiAlignX.center, GuiAlignY.center);
         if((label.size.x + 20) > size.x) {
             size = Vec2f(label.size.x + 20, size.y);
         }
@@ -64,17 +64,17 @@ class DropDownList: GuiElementCanvas {
         _maxWidth = max(size.x, _maxWidth);
 
 		_list = new VList(Vec2f(_maxWidth, _maxListLength * size.x));
-        _list.setAlign(GuiAlignX.Left, GuiAlignY.Top);
+        _list.setAlign(GuiAlignX.left, GuiAlignY.top);
 
         _cancelTrigger = new DropDownListCancelTrigger;
-        _cancelTrigger.setAlign(GuiAlignX.Left, GuiAlignY.Top);
+        _cancelTrigger.setAlign(GuiAlignX.left, GuiAlignY.top);
         _cancelTrigger.size = size;
         _cancelTrigger.setCallback(this, "cancel");
 
         _label = new Label(getDefaultFont(), "");
-        _label.setAlign(GuiAlignX.Center, GuiAlignY.Center);
+        _label.setAlign(GuiAlignX.center, GuiAlignY.center);
 
-        _timer.start(2f, TimeMode.Bounce);
+        _timer.start(2f, TimeMode.bounce);
         super.addChildGui(_label);
 	}
 
@@ -104,11 +104,11 @@ class DropDownList: GuiElementCanvas {
 	override void update(float deltaTime) {
         _timer.update(deltaTime);
         if(_label.size.x > size.x) {
-            _label.setAlign(GuiAlignX.Left, GuiAlignY.Center);
+            _label.setAlign(GuiAlignX.left, GuiAlignY.center);
             _label.position = Vec2f(lerp(-(_label.size.x - size.x), 0f, easeInOutSine(_timer.time)), 0f);
         }
         else {
-            _label.setAlign(GuiAlignX.Center, GuiAlignY.Center);
+            _label.setAlign(GuiAlignX.center, GuiAlignY.center);
             _label.position = Vec2f.zero;
         }
 

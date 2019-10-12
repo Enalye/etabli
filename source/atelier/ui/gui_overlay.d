@@ -73,9 +73,11 @@ void stopOverlay() {
 
 /// Process events from the guis that aren't overlay.
 package void processOverlayEvent(Event event) {
-	if(event.type == EventType.Quit) {
-		foreach(gui; _backupGuis)
+	if(event.type == EventType.quit) {
+		foreach(gui; _backupGuis) {
+			gui.onQuit();
 			gui.onEvent(event);
+		}
 	}
 }
 

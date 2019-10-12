@@ -35,8 +35,7 @@ class FontCache: ITextCache {
 	Sprite get(dchar c) {
 		Sprite* cachedSprite = (c in _cache);
 		if(cachedSprite is null) {
-			auto texture = new Texture;
-			texture.loadFromSurface(TTF_RenderUTF8_Blended(_font.font, toUTFz!(const char*)([c].toUTF8), Color.white.toSDL()));
+			auto texture = _font.render(to!string(c));
 			Sprite sprite = new Sprite(texture);
 			_cache[c] = sprite;
 			return sprite;

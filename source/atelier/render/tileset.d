@@ -40,10 +40,10 @@ final class Tileset {
 
 	Vec2f size = Vec2f.zero, scale = Vec2f.one;
 	float angle = 0f;
-	Flip flip = Flip.NoFlip;
+	Flip flip = Flip.none;
 	Vec2f anchor = Vec2f.half;
     Color color = Color.white;
-    Blend blend = Blend.AlphaBlending;
+    Blend blend = Blend.alpha;
 
     this() {}
 

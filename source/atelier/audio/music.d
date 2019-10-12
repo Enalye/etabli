@@ -13,6 +13,7 @@ import std.string: toStringz;
 import derelict.sdl2.sdl;
 import derelict.sdl2.mixer;
 
+/// Music
 class Music {
 	private {
 		Mix_Music* _chunk;

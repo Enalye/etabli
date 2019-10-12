@@ -83,20 +83,20 @@ package(atelier) void handleGuiElementEvent(Event event) {
 
     _hasClicked = false;
     switch (event.type) with(EventType) {
-    case MouseDown:
+    case mouseDown:
         dispatchMouseDownEvent(null, event.position);
 
         if(_hasClicked && _clickedGuiElement !is null) {
             _clickedGuiElement.isClicked = true;
-            Event guiEvent = EventType.MouseDown;
+            Event guiEvent = EventType.mouseDown;
             guiEvent.position = _clickedGuiElementEventPosition;
             _clickedGuiElement.onEvent(guiEvent);
         }
         break;
-    case MouseUp:
+    case mouseUp:
         dispatchMouseUpEvent(null, event.position);
         break;
-    case MouseUpdate:
+    case mouseUpdate:
         _hookedGuis.length = 0;
         dispatchMouseUpdateEvent(null, event.position);
 
@@ -107,15 +107,15 @@ package(atelier) void handleGuiElementEvent(Event event) {
                 _hoveredGuiElement.onHover();
 
             //Compatibility
-            Event guiEvent = EventType.MouseUpdate;
+            Event guiEvent = EventType.mouseUpdate;
             guiEvent.position = _hoveredGuiElementEventPosition;
             _hoveredGuiElement.onEvent(guiEvent);
         }
         break;
-    case MouseWheel:
+    case mouseWheel:
         dispatchMouseWheelEvent(event.position);
         break;
-    case Quit:
+    case quit:
         dispatchQuitEvent(null);
         break;
     default:
@@ -167,47 +167,47 @@ package(atelier) void updateGuiElements(GuiElement gui, GuiElement parent) {
     const Vec2f offset = gui._position + (gui._size * gui._currentState.scale / 2f) + gui._currentState.offset;
     if(parent !is null) {
         if(parent.hasCanvas && parent.canvas !is null) {
-            if(gui._alignX == GuiAlignX.Left)
+            if(gui._alignX == GuiAlignX.left)
                 coords.x = offset.x;
-            else if(gui._alignX == GuiAlignX.Right)
+            else if(gui._alignX == GuiAlignX.right)
                 coords.x = (parent._size.x * parent._currentState.scale.x) - offset.x;
             else
                 coords.x = (parent._size.x * parent._currentState.scale.x) / 2f + gui._currentState.offset.x;
 
-            if(gui._alignY == GuiAlignY.Top)
+            if(gui._alignY == GuiAlignY.top)
                 coords.y = offset.y;
-            else if(gui._alignY == GuiAlignY.Bottom)
+            else if(gui._alignY == GuiAlignY.bottom)
                 coords.y = (parent._size.y * parent._currentState.scale.y) - offset.y;
             else
                 coords.y = (parent._size.y * parent._currentState.scale.y) / 2f + gui._currentState.offset.y;
         }
         else {
-            if(gui._alignX == GuiAlignX.Left)
+            if(gui._alignX == GuiAlignX.left)
                 coords.x = parent.origin.x + offset.x;
-            else if(gui._alignX == GuiAlignX.Right)
+            else if(gui._alignX == GuiAlignX.right)
                 coords.x = parent.origin.x + (parent._size.x * parent._currentState.scale.x) - offset.x;
             else
                 coords.x = parent.center.x + gui._currentState.offset.x;
 
-            if(gui._alignY == GuiAlignY.Top)
+            if(gui._alignY == GuiAlignY.top)
                 coords.y = parent.origin.y + offset.y;
-            else if(gui._alignY == GuiAlignY.Bottom)
+            else if(gui._alignY == GuiAlignY.bottom)
                 coords.y = parent.origin.y + (parent._size.y * parent._currentState.scale.y) - offset.y;
             else
                 coords.y = parent.center.y + gui._currentState.offset.y;
         }
     }
     else {
-        if(gui._alignX == GuiAlignX.Left)
+        if(gui._alignX == GuiAlignX.left)
             coords.x = offset.x;
-        else if(gui._alignX == GuiAlignX.Right)
+        else if(gui._alignX == GuiAlignX.right)
             coords.x = screenWidth - offset.x;
         else
             coords.x = centerScreen.x + gui._currentState.offset.x;
 
-        if(gui._alignY == GuiAlignY.Top)
+        if(gui._alignY == GuiAlignY.top)
             coords.y = offset.y;
-        else if(gui._alignY == GuiAlignY.Bottom)
+        else if(gui._alignY == GuiAlignY.bottom)
             coords.y = screenHeight - offset.y;
         else
             coords.y = centerScreen.y + gui._currentState.offset.y;
@@ -224,7 +224,7 @@ package(atelier) void updateGuiElements(GuiElement gui, GuiElement parent) {
 void drawGuiElements(GuiElement gui) {
     if(gui.hasCanvas && gui.canvas !is null) {
         auto canvas = gui.canvas;
-        canvas.setColorMod(gui._currentState.color, Blend.AlphaBlending);
+        canvas.setColorMod(gui._currentState.color, Blend.alpha);
         pushCanvas(canvas, true);
         gui.draw();
         foreach(GuiElement child; gui.children) {
@@ -276,7 +276,7 @@ private void dispatchMouseDownEvent(GuiElement gui, Vec2f cursorPosition) {
             _hasClicked = true;
 
             if(gui._hasEventHook) {
-                Event guiEvent = EventType.MouseDown;
+                Event guiEvent = EventType.mouseDown;
                 guiEvent.position = cursorPosition;
                 gui.onEvent(guiEvent);
             }
@@ -306,7 +306,7 @@ private void dispatchMouseUpEvent(GuiElement gui, Vec2f cursorPosition) {
             }
 
             if(gui._hasEventHook) {
-                Event guiEvent = EventType.MouseUp;
+                Event guiEvent = EventType.mouseUp;
                 guiEvent.position = cursorPosition;
                 gui.onEvent(guiEvent);
             }
@@ -334,7 +334,7 @@ private void dispatchMouseUpEvent(GuiElement gui, Vec2f cursorPosition) {
         gui.onSubmit();
 
         //Compatibility
-        Event event = EventType.MouseUp;
+        Event event = EventType.mouseUp;
         event.position = cursorPosition;
         gui.onEvent(event);
     }
@@ -364,7 +364,7 @@ private void dispatchMouseUpdateEvent(GuiElement gui, Vec2f cursorPosition) {
             _hasClicked = true;
 
             if(gui._hasEventHook) {
-                Event guiEvent = EventType.MouseUpdate;
+                Event guiEvent = EventType.mouseUpdate;
                 guiEvent.position = cursorPosition;
                 gui.onEvent(guiEvent);
                 _hookedGuis ~= gui;
@@ -390,7 +390,7 @@ private void dispatchMouseUpdateEvent(GuiElement gui, Vec2f cursorPosition) {
 
 /// Process a mouse wheel event down the tree.
 private void dispatchMouseWheelEvent(Vec2f scroll) {
-    Event scrollEvent = EventType.MouseWheel;
+    Event scrollEvent = EventType.mouseWheel;
     scrollEvent.position = scroll;
 
     foreach(gui; _hookedGuis) {

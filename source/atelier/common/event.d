@@ -39,24 +39,24 @@ private bool _isRunning = false;
 
 /// Type of event
 enum EventType: uint {
-	KeyUp,
-	KeyDown,
-	KeyInput,
-	KeyDelete,
-	KeyEnter,
-	KeyDir,
-	MouseUp,
-	MouseDown,
-	MouseUpdate,
-	MouseWheel,
-	Quit,
-	DropFile,
-	Resize,
-	ModalOpen,
-	ModalClose,
-	ModalApply,
-	ModalCancel,
-	Callback
+	keyUp,
+	keyDown,
+	keyInput,
+	keyDelete,
+	keyEnter,
+	keyDir,
+	mouseUp,
+	mouseDown,
+	mouseUpdate,
+	mouseWheel,
+	quit,
+	dropFile,
+	resize,
+	modalOpen,
+	modalClose,
+	modalApply,
+	modalCancel,
+	callback
 }
 
 /// Event structure passed on onEvent() methods.
@@ -84,7 +84,7 @@ struct GuiElementCallback {
 
 	void trigger(GuiElement w) {
 		Event event;
-		event.type = EventType.Callback;
+		event.type = EventType.callback;
 		event.id = id;
 		event.widget = w;
 		widget.onEvent(event);
@@ -92,7 +92,7 @@ struct GuiElementCallback {
 
 	void trigger(string[] array) {
 		Event event;
-		event.type = EventType.Callback;
+		event.type = EventType.callback;
 		event.id = id;
 		event.sarray = array;
 		widget.onEvent(event);
@@ -100,7 +100,7 @@ struct GuiElementCallback {
 
 	void trigger(int value) {
 		Event event;
-		event.type = EventType.Callback;
+		event.type = EventType.callback;
 		event.id = id;
 		event.ivalue = value;
 		widget.onEvent(event);
@@ -207,7 +207,7 @@ bool processEvents() {
 	SDL_Event sdlEvent;
 
 	if(!_isRunning) {
-		event.type = EventType.Quit;
+		event.type = EventType.quit;
 		handleGuiElementEvent(event);
         destroyWindow();
 		return false;
@@ -220,7 +220,7 @@ bool processEvents() {
 		switch (sdlEvent.type) {
 		case SDL_QUIT:
 			_isRunning = false;
-			event.type = EventType.Quit;
+			event.type = EventType.quit;
 			handleGuiElementEvent(event);
 			destroyWindow();
 			//No operation involving the SDL after this.
@@ -230,36 +230,36 @@ bool processEvents() {
 				_keys[sdlEvent.key.keysym.scancode] = true;
 			switch(sdlEvent.key.keysym.scancode) {
 			case SDL_SCANCODE_DELETE:
-				event.type = EventType.KeyDelete;
+				event.type = EventType.keyDelete;
 				event.ivalue = 1;
 				handleGuiElementEvent(event);
 				break;
 			case SDL_SCANCODE_BACKSPACE:
-				event.type = EventType.KeyDelete;
+				event.type = EventType.keyDelete;
 				event.ivalue = -1;
 				handleGuiElementEvent(event);
 				break;
 			case SDL_SCANCODE_RETURN:
-				event.type = EventType.KeyEnter;
+				event.type = EventType.keyEnter;
 				handleGuiElementEvent(event);
 				break;
 			case SDL_SCANCODE_UP:
-				event.type = EventType.KeyDir;
+				event.type = EventType.keyDir;
 				event.position = Vec2f(0f, -1f);
 				handleGuiElementEvent(event);
 				break;
 			case SDL_SCANCODE_DOWN:
-				event.type = EventType.KeyDir;
+				event.type = EventType.keyDir;
 				event.position = Vec2f(0f, 1f);
 				handleGuiElementEvent(event);
 				break;
 			case SDL_SCANCODE_LEFT:
-				event.type = EventType.KeyDir;
+				event.type = EventType.keyDir;
 				event.position = Vec2f(-1f, 0f);
 				handleGuiElementEvent(event);
 				break;
 			case SDL_SCANCODE_RIGHT:
-				event.type = EventType.KeyDir;
+				event.type = EventType.keyDir;
 				event.position = Vec2f(1f, 0f);
 				handleGuiElementEvent(event);
 				break;
@@ -274,7 +274,7 @@ bool processEvents() {
 		case SDL_TEXTINPUT:
 			string text = to!string(sdlEvent.text.text);
 			text.length = stride(text);
-			event.type = EventType.KeyInput;
+			event.type = EventType.keyInput;
 			event.str = text;
 			handleGuiElementEvent(event);
 			break;
@@ -282,7 +282,7 @@ bool processEvents() {
 			_mousePosition.set(cast(float)sdlEvent.motion.x, cast(float)sdlEvent.motion.y);
 			_mousePosition = transformCanvasSpace(_mousePosition);
 
-			event.type = EventType.MouseUpdate;
+			event.type = EventType.mouseUpdate;
 			event.position = _mousePosition;
 
 			handleGuiElementEvent(event);
@@ -292,7 +292,7 @@ bool processEvents() {
 			_mousePosition = transformCanvasSpace(_mousePosition);
 			_buttons[sdlEvent.button.button] = true;
 			
-			event.type = EventType.MouseDown;
+			event.type = EventType.mouseDown;
 			event.position = _mousePosition;
 
 			handleGuiElementEvent(event);
@@ -302,13 +302,13 @@ bool processEvents() {
 			_mousePosition = transformCanvasSpace(_mousePosition);
 			_buttons[sdlEvent.button.button] = false;
 
-			event.type = EventType.MouseUp;
+			event.type = EventType.mouseUp;
 			event.position = _mousePosition;
 
 			handleGuiElementEvent(event);
 			break;
 		case SDL_MOUSEWHEEL:
-			event.type = EventType.MouseWheel;
+			event.type = EventType.mouseWheel;
 			event.position = Vec2f(sdlEvent.wheel.x, sdlEvent.wheel.y);
 			handleGuiElementEvent(event);
 			break;
@@ -339,7 +339,7 @@ bool processEvents() {
 					path = path[0 .. index] ~ utfChar ~ path[index + 3 .. $];		
 			}
 
-			event.type = EventType.DropFile;
+			event.type = EventType.dropFile;
 			event.str = path;
 			handleGuiElementEvent(event);
 
@@ -370,7 +370,7 @@ bool processEvents() {
 
 	foreach(Event globalEvent; _globalEvents) {
 		switch(globalEvent.type) with(EventType) {
-			case Quit:
+			case quit:
 				_isRunning = false;
 				handleGuiElementEvent(globalEvent);
                 destroyWindow();

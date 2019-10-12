@@ -19,6 +19,7 @@ import atelier.core;
 import atelier.render.window, atelier.render.texture, atelier.render.drawable;
 import atelier.render.tileset, atelier.render.sprite;
 
+/// Animation
 final class Animation {
     Tileset tileset;
     Timer timer;
@@ -50,12 +51,12 @@ final class Animation {
 
     this() {}
 
-	this(string tilesetName, TimeMode timeMode = TimeMode.Once) {
+	this(string tilesetName, TimeMode timeMode = TimeMode.once) {
 		tileset = fetch!Tileset(tilesetName);
 		start(1f, timeMode);
 	}
 
-	void start(float duration, TimeMode timeMode = TimeMode.Once) {
+	void start(float duration, TimeMode timeMode = TimeMode.once) {
 		timer.start(duration, timeMode);
 	}
 

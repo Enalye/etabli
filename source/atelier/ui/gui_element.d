@@ -13,12 +13,12 @@ import atelier.ui.gui_overlay;
 
 /// Alignment on the horizontal axis relative to its parent.
 enum GuiAlignX {
-    Left, Center, Right
+    left, center, right
 }
 
 /// Alignment on the vertical axis relative to its parent.
 enum GuiAlignY {
-    Top, Center, Bottom
+    top, center, bottom
 }
 
 /// Single state of a GUI. \
@@ -62,8 +62,8 @@ class GuiElement {
         Timer _iteratorTimer, _iteratorTimeOutTimer;
 
         Vec2f _screenCoords;
-        GuiAlignX _alignX = GuiAlignX.Left;
-        GuiAlignY _alignY = GuiAlignY.Top;
+        GuiAlignX _alignX = GuiAlignX.left;
+        GuiAlignY _alignY = GuiAlignY.top;
 
         //States
         string _currentStateName = "default";

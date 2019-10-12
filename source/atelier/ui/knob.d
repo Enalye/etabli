@@ -11,6 +11,8 @@ module atelier.ui.knob;
 import atelier.core, atelier.render, atelier.common;
 import atelier.ui.gui_element;
 
+/// A rotating knob. \
+/// Behave a bit like slider.
 class Knob: GuiElement {
 	protected {
 		float _value = 0f, _step = 1f, _min = 0f, _max = 1f, _minAngle = 0f, _maxAngle = 360f, _knobAngle = 0f, _lastValue = 0f;
@@ -59,15 +61,15 @@ class Knob: GuiElement {
 			return;
 
 		switch(event.type) with(EventType) {
-		case MouseWheel:
+		case mouseWheel:
 			_value += event.position.y * _step;
 			_value = clamp(_value, 0f, 1f);
 			break;
-		case MouseDown:
+		case mouseDown:
 			_lastCursorPosition = event.position;
 			break;
-		case MouseUp:
-		case MouseUpdate:
+		case mouseUp:
+		case mouseUpdate:
 			if(!isSelected)
 				break;
 			Vec2f delta = event.position - center;

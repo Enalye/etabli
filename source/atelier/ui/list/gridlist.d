@@ -52,10 +52,10 @@ class GridList: GuiElement {
 
 	override void onEvent(Event event) {
 		super.onEvent(event);
-		if(event.type == EventType.MouseDown || event.type == EventType.MouseUp || event.type == EventType.MouseUpdate) {
+		if(event.type == EventType.mouseDown || event.type == EventType.mouseUp || event.type == EventType.mouseUpdate) {
 			if(_slider.isInside(event.position))
 				_slider.onEvent(event);
-			else if(event.type == EventType.MouseDown) {
+			else if(event.type == EventType.mouseDown) {
 
 				auto widgets = _container.layout.children;
 				foreach(size_t id, ref GuiElement widget; _container.layout.children) {
@@ -68,7 +68,7 @@ class GridList: GuiElement {
 			}
 		}
 
-		if(!isOnInteractableGuiElement(_lastMousePos) && event.type == EventType.MouseWheel)
+		if(!isOnInteractableGuiElement(_lastMousePos) && event.type == EventType.mouseWheel)
 			_slider.onEvent(event);
 	}
 

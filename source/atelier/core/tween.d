@@ -14,15 +14,15 @@ import atelier.common;
 import atelier.core.util;
 
 /// Change the way Timer behave. \
-/// Stopped: It will do nothing and isRunning will be false. \
-/// Once: Will run from 0 to 1 in one duration then stop. \
-/// Loop: Will run from 0 to 1 in one duration then restart from 0 again, etc. \
-/// Bounce: Will run from 0 to 1 in one duration then from 1 to 0, etc. \
+/// stop: It will do nothing and isRunning will be false. \
+/// once: Will run from 0 to 1 in one duration then stop. \
+/// loop: Will run from 0 to 1 in one duration then restart from 0 again, etc. \
+/// bounce: Will run from 0 to 1 in one duration then from 1 to 0, etc. \
 enum TimeMode {
-	Stopped,
-	Once,
-	Loop,
-	Bounce
+	stop,
+	once,
+	loop,
+	bounce
 }
 
 /**
@@ -34,7 +34,7 @@ struct Timer {
 	private {
 		float _time = 0f, _speed = 0f;
 		bool _isReversed = false;
-		TimeMode _mode = TimeMode.Stopped;
+		TimeMode _mode = TimeMode.stop;
 	}
 
 	@property {
@@ -55,7 +55,7 @@ struct Timer {
 		}
 
 		/// Is the timer currently running ?
-		bool isRunning() const { return (_mode != TimeMode.Stopped); }
+		bool isRunning() const { return (_mode != TimeMode.stop); }
 
 		/// Is the timer behaving backwards ?
 		bool isReversed() const { return _isReversed; }
@@ -67,8 +67,8 @@ struct Timer {
 	}
 	
 	/// Immediatly starts the timer with the specified behavior and running time. \
-	/// Note that Loop and Bounce will never stop until you tell him to.
-	void start(float newDuration, TimeMode newTimeMode = TimeMode.Once) {
+	/// Note that loop and bounce will never stop until you tell him to.
+	void start(float newDuration, TimeMode newTimeMode = TimeMode.once) {
 		_time = 0f;
 		_isReversed = false;
 		duration(newDuration);
@@ -76,7 +76,7 @@ struct Timer {
 	}
 
 	/// Same as start() but goes in reverse (from 1 to 0).
-	void startReverse(float newDuration, TimeMode newTimeMode = TimeMode.Once) {
+	void startReverse(float newDuration, TimeMode newTimeMode = TimeMode.once) {
 		_time = 1f;
 		_isReversed = true;
 		duration(newDuration);
@@ -85,22 +85,22 @@ struct Timer {
 
 	/// Immediatly stops the timer.
     void stop() {
-        _mode = TimeMode.Stopped;
+        _mode = TimeMode.stop;
     }
 
 	/// Update with the current deltatime (~1)
 	/// If you don't call update, the timer won't advance.
 	void update(float deltaTime) {
 		final switch(_mode) with(TimeMode) {
-		case Stopped:
+		case stop:
 			break;
-		case Once:
+		case once:
 			if(_isReversed) {
 				if(_time > 0f)
 					_time -= _speed * deltaTime;
 				if(_time < 0f) {
 					_time = 0f;
-					_mode = TimeMode.Stopped;
+					_mode = TimeMode.stop;
 				}
 			}
 			else {
@@ -108,17 +108,17 @@ struct Timer {
 					_time += _speed * deltaTime;
 				if(_time > 1f) {
 					_time = 1f;
-					_mode = TimeMode.Stopped;
+					_mode = TimeMode.stop;
 				}
 			}
 			break;
-		case Loop:
+		case loop:
 			if(_time < 1f)
 				_time += _speed * deltaTime;
 			if(_time > 1f)
 				_time = (_time - 1f) + (_speed * deltaTime);
 			break;
-		case Bounce:
+		case bounce:
 			if(_isReversed) {
 				if(_time > 0f)
 					_time -= _speed * deltaTime;
@@ -142,42 +142,75 @@ struct Timer {
 
 alias EasingFunction = float function(float);
 
+/// Easing behaviour.
+enum EasingAlgorithm {
+	linear,
+	sineIn,
+	sineOut,
+	sineInOut,
+	quadIn,
+	quadOut,
+	quadInOut,
+	cubicIn,
+	cubicOut,
+	cubicInOut,
+	quartIn,
+	quartOut,
+	quartInOut,
+	quintIn,
+	quintOut,
+	quintInOut,
+	expIn,
+	expOut,
+	expInOut,
+	circIn,
+	circOut,
+	circInOut,
+	backIn,
+	backOut,
+	backInOut,
+	elasticIn,
+	elasticOut,
+	elasticInOut,
+	bounceIn,
+	bounceOut,
+	bounceInOut,
+}
+
 /// Returns an easing function.
-EasingFunction getEasingFunction(string name) {
-    switch(name) {
-    case "linear": return &easeLinear;
-    case "sine-in": return &easeInSine;
-    case "sine-out": return &easeOutSine;
-    case "sine-in-out": return &easeInOutSine;
-    case "quad-in": return &easeInQuad;
-    case "quad-out": return &easeOutQuad;
-    case "quad-in-out": return &easeInOutQuad;
-    case "cubic-in": return &easeInCubic;
-    case "cubic-out": return &easeOutCubic;
-    case "cubic-in-out": return &easeInOutCubic;
-    case "quart-in": return &easeInQuart;
-    case "quart-out": return &easeOutQuart;
-    case "quart-in-out": return &easeInOutQuart;
-    case "quint-in": return &easeInQuint;
-    case "quint-out": return &easeOutQuint;
-    case "quint-in-out": return &easeInOutQuint;
-    case "exp-in": return &easeInExp;
-    case "exp-out": return &easeOutExp;
-    case "exp-in-out": return &easeInOutExp;
-    case "circ-in": return &easeInCirc;
-    case "circ-out": return &easeOutCirc;
-    case "circ-in-out": return &easeInOutCirc;
-    case "back-in": return &easeInBack;
-    case "back-out": return &easeOutBack;
-    case "back-in-out": return &easeInOutBack;
-    case "elastic-in": return &easeInElastic;
-    case "elastic-out": return &easeOutElastic;
-    case "elastic-in-out": return &easeInOutElastic;
-    case "bounce-in": return &easeInBounce;
-    case "bounce-out": return &easeOutBounce;
-    case "bounce-in-out": return &easeInOutBounce;
-    default:
-        throw new Exception("Undefined ease function " ~ name);
+EasingFunction getEasingFunction(EasingAlgorithm algorithm = EasingAlgorithm.linear) {
+    final switch(algorithm) with(EasingAlgorithm) {
+    case linear: return &easeLinear;
+    case sineIn: return &easeInSine;
+    case sineOut: return &easeOutSine;
+    case sineInOut: return &easeInOutSine;
+    case quadIn: return &easeInQuad;
+    case quadOut: return &easeOutQuad;
+    case quadInOut: return &easeInOutQuad;
+    case cubicIn: return &easeInCubic;
+    case cubicOut: return &easeOutCubic;
+    case cubicInOut: return &easeInOutCubic;
+    case quartIn: return &easeInQuart;
+    case quartOut: return &easeOutQuart;
+    case quartInOut: return &easeInOutQuart;
+    case quintIn: return &easeInQuint;
+    case quintOut: return &easeOutQuint;
+    case quintInOut: return &easeInOutQuint;
+    case expIn: return &easeInExp;
+    case expOut: return &easeOutExp;
+    case expInOut: return &easeInOutExp;
+    case circIn: return &easeInCirc;
+    case circOut: return &easeOutCirc;
+    case circInOut: return &easeInOutCirc;
+    case backIn: return &easeInBack;
+    case backOut: return &easeOutBack;
+    case backInOut: return &easeInOutBack;
+    case elasticIn: return &easeInElastic;
+    case elasticOut: return &easeOutElastic;
+    case elasticInOut: return &easeInOutElastic;
+    case bounceIn: return &easeInBounce;
+    case bounceOut: return &easeOutBounce;
+    case bounceInOut: return &easeInOutBounce;
     }
 }
 
@@ -342,7 +375,7 @@ float easeInOutElastic(float t) {
 		return .5f * (sin(-13f * PI_2 * ((2f * t - 1f) + 1f)) * pow(2f, -10f * (2f * t - 1f)) + 2f);
 }
 
-//Bounce
+//bounce
 float easeInBounce(float t) {
 	return 1f - easeOutBounce(1f - t);
 }

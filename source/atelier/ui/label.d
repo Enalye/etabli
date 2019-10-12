@@ -98,11 +98,10 @@ final class Label: GuiElement {
 		if(_font is null)
 			return;
 
-		if ((_text.length > 0)  && _font.isLoaded) {
-			_texture.loadFromSurface(TTF_RenderUTF8_Blended(_font.font, toStringz(_text), Color.white.toSDL()));
+		if ((_text.length > 0) && _font.isLoaded) {
+			_texture = _font.render(_text);
 		}
 		_sprite = _texture;
-		_sprite.size *= _font.scale;
 		size = _sprite.size;
 	}
 }

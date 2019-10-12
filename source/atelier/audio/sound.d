@@ -17,12 +17,14 @@ private {
 	uint _topChannelIndex = 0u;
 }
 
+/// Create a group with a number of reserved channels for sounds in the same category.
 void createSoundGroup(int index, int size) {
 	if(size <= 0)
 		throw new Exception("Invalid sound group size");
 	_topChannelIndex += Mix_GroupChannels(_topChannelIndex, _topChannelIndex + (size - 1), index);
 }
 
+/// Sound
 class Sound {
 	private {
 		Mix_Chunk* _chunk;

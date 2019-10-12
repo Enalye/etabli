@@ -69,10 +69,10 @@ class VList: GuiElement {
 	this(Vec2f newSize) {
 		isLocked = true;
 		_slider = new VScrollbar;
-        _slider.setAlign(GuiAlignX.Left, GuiAlignY.Center);
+        _slider.setAlign(GuiAlignX.left, GuiAlignY.center);
 		_container = new ListContainer(newSize);
-        _container.setAlign(GuiAlignX.Right, GuiAlignY.Top);
-        _container.container.setAlign(GuiAlignX.Right, GuiAlignY.Top);
+        _container.setAlign(GuiAlignX.right, GuiAlignY.top);
+        _container.container.setAlign(GuiAlignX.right, GuiAlignY.top);
 
 		super.addChildGui(_slider);
 		super.addChildGui(_container);
@@ -99,7 +99,7 @@ class VList: GuiElement {
     }
 
     override void onEvent(Event event) {
-        if(event.type == EventType.MouseWheel)
+        if(event.type == EventType.mouseWheel)
             _slider.onEvent(event);
     }
     
@@ -129,7 +129,7 @@ class VList: GuiElement {
 
 	override void addChildGui(GuiElement gui) {
         gui.position = Vec2f.zero;
-        gui.setAlign(GuiAlignX.Right, GuiAlignY.Top);
+        gui.setAlign(GuiAlignX.right, GuiAlignY.top);
 		gui.isSelected = (_nbElements == 0u);
         gui.setCallback(this, "list");
 

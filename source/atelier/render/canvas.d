@@ -15,10 +15,11 @@ import derelict.sdl2.sdl;
 import atelier.core;
 import atelier.render.window;
 import atelier.render.texture;
+import atelier.render.drawable;
 
 /// Behave like Texture but you can render onto it.
 /// Use pushCanvas/popCanvas to start the drawing region on it.
-class Canvas {
+final class Canvas: Drawable {
 	private {
 		SDL_Texture* _renderTexture;
 		Vec2u _renderSize;
@@ -71,7 +72,7 @@ class Canvas {
 			throw new Exception("Canvas render size exceeds limits.");
 		_renderSize = newRenderSize;
 		_renderTexture = SDL_CreateTexture(_sdlRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _renderSize.x, _renderSize.y);
-        setColorMod(Color.white, Blend.AlphaBlending);
+        setColorMod(Color.white, Blend.alpha);
 
 		size = cast(Vec2f)_renderSize;
 		isCentered = false;
@@ -103,12 +104,8 @@ class Canvas {
 	}
 
 	/// Apply a color filter or change its blending algorithm.
-	void setColorMod(const Color color, Blend blend = Blend.AlphaBlending) {
-		SDL_SetTextureBlendMode(_renderTexture,
-			((blend == Blend.AlphaBlending) ? SDL_BLENDMODE_BLEND :
-				((blend == Blend.AdditiveBlending) ? SDL_BLENDMODE_ADD :
-					((blend == Blend.ModularBlending) ? SDL_BLENDMODE_MOD :
-						SDL_BLENDMODE_NONE))));
+	void setColorMod(const Color color, Blend blend = Blend.alpha) {
+		SDL_SetTextureBlendMode(_renderTexture, getSDLBlend(blend));
 		
 		auto sdlColor = color.toSDL();
 		SDL_SetTextureColorMod(_renderTexture, sdlColor.r, sdlColor.g, sdlColor.b);
@@ -159,7 +156,7 @@ class Canvas {
     }
 
 	/// Draw the part of the texture at the specified location.
-    void draw(Vec2f pos, Vec2f rsize, Vec4i srcRect, float angle, Flip flip = Flip.NoFlip, Vec2f anchor = Vec2f.half) const {
+    void draw(Vec2f pos, Vec2f rsize, Vec4i srcRect, float angle, Flip flip = Flip.none, Vec2f anchor = Vec2f.half) const {
 		pos -= anchor * rsize;
 		
 		SDL_Rect srcSdlRect = srcRect.toSdlRect();
@@ -170,12 +167,7 @@ class Canvas {
 			cast(uint)rsize.y
 		};
 
-		SDL_RendererFlip rendererFlip = (flip == Flip.BothFlip) ?
-			cast(SDL_RendererFlip)(SDL_FLIP_HORIZONTAL | SDL_FLIP_VERTICAL) :
-			(flip == Flip.HorizontalFlip ? SDL_FLIP_HORIZONTAL :
-				(flip == Flip.VerticalFlip ? SDL_FLIP_VERTICAL :
-					SDL_FLIP_NONE));
-
+		SDL_RendererFlip rendererFlip = getSDLFlip(flip);
 		SDL_RenderCopyEx(cast(SDL_Renderer*)_sdlRenderer, cast(SDL_Texture*)_renderTexture, &srcSdlRect, &destSdlRect, angle, null, rendererFlip);
 	}
 }

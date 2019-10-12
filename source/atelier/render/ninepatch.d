@@ -14,7 +14,7 @@ import atelier.common, atelier.core;
 import atelier.render.drawable, atelier.render.canvas, atelier.render.texture, atelier.render.window;
 
 /// Render a resizable repeated sprite with borders. (ex: bubble speech).
-final class NinePatch: IDrawable {
+final class NinePatch: Drawable {
     @property {
         /// Size of the render zone. \
         /// Changing the value allocate a new Canvas (don't do it too often).
@@ -168,7 +168,7 @@ final class NinePatch: IDrawable {
                     if(width <= 0)
                         break;
                     localClip = Vec4i(_clip.x + _left, _clip.y + _top, width, height);
-                    _texture.draw(Vec2f(_left + filledWidth, _top + filledHeight), Vec2f(width, height), localClip, 0f, Flip.NoFlip, Vec2f.zero);
+                    _texture.draw(Vec2f(_left + filledWidth, _top + filledHeight), Vec2f(width, height), localClip, 0f, Flip.none, Vec2f.zero);
                     filledWidth += width;
                 }
                 filledHeight += height;
@@ -187,7 +187,7 @@ final class NinePatch: IDrawable {
                     break;
                 int height = _top;
                 localClip = Vec4i(_clip.x + _left, _clip.y, width, height);
-                _texture.draw(Vec2f(_left + filled, 0f), Vec2f(width, height), localClip, 0f, Flip.NoFlip, Vec2f.zero);
+                _texture.draw(Vec2f(_left + filled, 0f), Vec2f(width, height), localClip, 0f, Flip.none, Vec2f.zero);
                 filled += width;
             }
         }
@@ -202,7 +202,7 @@ final class NinePatch: IDrawable {
                     break;
                 int height = _bottom;
                 localClip = Vec4i(_clip.x + _left, _clip.y + _clip.w - _bottom, width, height);
-                _texture.draw(Vec2f(_left + filled, to!int(_size.y) - _bottom), Vec2f(width, height), localClip, 0f, Flip.NoFlip, Vec2f.zero);
+                _texture.draw(Vec2f(_left + filled, to!int(_size.y) - _bottom), Vec2f(width, height), localClip, 0f, Flip.none, Vec2f.zero);
                 filled += width;
             }
         }
@@ -217,7 +217,7 @@ final class NinePatch: IDrawable {
                     break;
                 int width = _top;
                 localClip = Vec4i(_clip.x, _clip.y + _top, width, height);
-                _texture.draw(Vec2f(0f, _top + filled), Vec2f(width, height), localClip, 0f, Flip.NoFlip, Vec2f.zero);
+                _texture.draw(Vec2f(0f, _top + filled), Vec2f(width, height), localClip, 0f, Flip.none, Vec2f.zero);
                 filled += height;
             }
         }
@@ -232,7 +232,7 @@ final class NinePatch: IDrawable {
                     break;
                 int width = _top;
                 localClip = Vec4i(_clip.x + _clip.z - _right, _clip.y + _top, width, height);
-                _texture.draw(Vec2f(to!int(_size.x) - _right, _top + filled), Vec2f(width, height), localClip, 0f, Flip.NoFlip, Vec2f.zero);
+                _texture.draw(Vec2f(to!int(_size.x) - _right, _top + filled), Vec2f(width, height), localClip, 0f, Flip.none, Vec2f.zero);
                 filled += height;
             }
         }
@@ -243,28 +243,28 @@ final class NinePatch: IDrawable {
         if(_top > 0 && _left > 0) {
             localSize = Vec2i(_left, _top);
             localClip = Vec4i(_clip.xy, localSize);
-            _texture.draw(Vec2f.zero, to!Vec2f(localSize), localClip, 0f, Flip.NoFlip, Vec2f.zero);
+            _texture.draw(Vec2f.zero, to!Vec2f(localSize), localClip, 0f, Flip.none, Vec2f.zero);
         }
 
         //Top right corner
         if(_top > 0 && _right > 0) {
             localSize = Vec2i(_right, _top);
             localClip = Vec4i(_clip.x + _clip.z - _right, _clip.y, localSize.x, localSize.y);
-            _texture.draw(Vec2f(to!int(_size.x) - _right, 0f), to!Vec2f(localSize), localClip, 0f, Flip.NoFlip, Vec2f.zero);
+            _texture.draw(Vec2f(to!int(_size.x) - _right, 0f), to!Vec2f(localSize), localClip, 0f, Flip.none, Vec2f.zero);
         }
 
         //Bottom left corner
         if(_bottom > 0 && _left > 0) {
             localSize = Vec2i(_left, _top);
             localClip = Vec4i(_clip.x, _clip.y + _clip.w - _bottom, localSize.x, localSize.y);
-            _texture.draw(Vec2f(0f, to!int(_size.y) - _bottom), to!Vec2f(localSize), localClip, 0f, Flip.NoFlip, Vec2f.zero);
+            _texture.draw(Vec2f(0f, to!int(_size.y) - _bottom), to!Vec2f(localSize), localClip, 0f, Flip.none, Vec2f.zero);
         }
 
         //Bottom right corner
         if(_bottom > 0 && _right > 0) {
             localSize = Vec2i(_right, _top);
             localClip = Vec4i(_clip.x + _clip.z - _right, _clip.y + _clip.w - _bottom, localSize.x, localSize.y);
-            _texture.draw(Vec2f(to!int(_size.x) - _right, to!int(_size.y) - _bottom), to!Vec2f(localSize), localClip, 0f, Flip.NoFlip, Vec2f.zero);
+            _texture.draw(Vec2f(to!int(_size.x) - _right, to!int(_size.y) - _bottom), to!Vec2f(localSize), localClip, 0f, Flip.none, Vec2f.zero);
         }
 
         popCanvas();

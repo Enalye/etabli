@@ -35,7 +35,7 @@ class VLayout: GuiElement {
 	}
 
 	override void addChildGui(GuiElement gui) {
-        gui.setAlign(GuiAlignX.Left, GuiAlignY.Top);
+        gui.setAlign(GuiAlignX.left, GuiAlignY.top);
 		super.addChildGui(gui);
 		resize();
 	}
@@ -76,7 +76,7 @@ class HLayout: GuiElement {
 	}
 
 	override void addChildGui(GuiElement gui) {
-        gui.setAlign(GuiAlignX.Left, GuiAlignY.Top);
+        gui.setAlign(GuiAlignX.left, GuiAlignY.top);
 		super.addChildGui(gui);
 		resize();
 	}
@@ -117,7 +117,7 @@ class GridLayout: GuiElement {
 	}
 
 	override void addChildGui(GuiElement gui) {
-        gui.setAlign(GuiAlignX.Left, GuiAlignY.Top);
+        gui.setAlign(GuiAlignX.left, GuiAlignY.top);
 		super.addChildGui(gui);
 		resize();
 	}
@@ -149,7 +149,7 @@ class GridLayout: GuiElement {
 class VContainer: GuiElement {
 	protected {
 		Vec2f _spacing = Vec2f.zero;
-		GuiAlignX _childAlignX = GuiAlignX.Center;
+		GuiAlignX _childAlignX = GuiAlignX.center;
         float _minimalWidth = 0f;
 	}
 
@@ -164,7 +164,7 @@ class VContainer: GuiElement {
 	this() {}
 
 	override void addChildGui(GuiElement gui) {
-        gui.setAlign(_childAlignX, GuiAlignY.Top);
+        gui.setAlign(_childAlignX, GuiAlignY.top);
 		super.addChildGui(gui);
 		resize();
 	}
@@ -202,7 +202,7 @@ class VContainer: GuiElement {
 		size = totalSize + Vec2f(_spacing.x * 2f, _spacing.y);
 		Vec2f currentPosition = _spacing;
 		foreach(GuiElement gui; _children) {
-            gui.setAlign(_childAlignX, GuiAlignY.Top);
+            gui.setAlign(_childAlignX, GuiAlignY.top);
 			gui.position = currentPosition;
 			currentPosition = currentPosition + Vec2f(0f, gui.scaledSize.y + _spacing.y);
 		}
@@ -216,7 +216,7 @@ class VContainer: GuiElement {
 class HContainer: GuiElement {
 	protected {
 		Vec2f _spacing = Vec2f.zero;
-		GuiAlignY _childAlignY = GuiAlignY.Center;
+		GuiAlignY _childAlignY = GuiAlignY.center;
         float _minimalHeight = 0f;
 	}
 
@@ -231,7 +231,7 @@ class HContainer: GuiElement {
 	this() {}
 
 	override void addChildGui(GuiElement gui) {
-        gui.setAlign(GuiAlignX.Left, _childAlignY);
+        gui.setAlign(GuiAlignX.left, _childAlignY);
 		super.addChildGui(gui);
 		resize();
 	}
@@ -269,7 +269,7 @@ class HContainer: GuiElement {
 		size = totalSize + Vec2f(_spacing.x, _spacing.y * 2f);
 		Vec2f currentPosition = _spacing;
 		foreach(GuiElement gui; _children) {
-            gui.setAlign(GuiAlignX.Left, _childAlignY);
+            gui.setAlign(GuiAlignX.left, _childAlignY);
 			gui.position = currentPosition;
 			currentPosition = currentPosition + Vec2f(gui.scaledSize.x + _spacing.x, 0f);
 		}
@@ -304,7 +304,7 @@ class AnchoredLayout: GuiElement {
     }
 
 	void addChildGui(GuiElement gui, Vec2f position, Vec2f size) {
-        gui.setAlign(GuiAlignX.Left, GuiAlignY.Top);
+        gui.setAlign(GuiAlignX.left, GuiAlignY.top);
 		super.addChildGui(gui);
 		_childrenPositions ~= position;
 		_childrenSizes ~= size;
@@ -331,7 +331,7 @@ class LogLayout: GuiElement {
 	this() {}
 
 	override void addChildGui(GuiElement gui) {
-        gui.setAlign(GuiAlignX.Left, GuiAlignY.Top);
+        gui.setAlign(GuiAlignX.left, GuiAlignY.top);
 		super.addChildGui(gui);
 		resize();
 	}

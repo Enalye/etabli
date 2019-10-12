@@ -13,7 +13,9 @@ import core.sync.semaphore;
 
 import atelier.core.singleton;
 
-//Size MUST be a power of 2
+/// Fixed size circular buffer. \
+/// Size **must** be a power of 2.
+/// Block when reading when empty or writing when full.
 class RingBuffer(T, uint Size = 128u): Singleton!(RingBuffer!(T, Size)) {
 	static assert(Size != 0 && (Size & (Size-1)) == 0);
 	private {
@@ -25,10 +27,13 @@ class RingBuffer(T, uint Size = 128u): Singleton!(RingBuffer!(T, Size)) {
 	}
 
 	@property {
+		/// Is the buffer empty ?
 		bool isEmpty() const { return _size == 0u; }
+		/// Is the buffer full ?
 		bool isFull() const { return _size == _bufferSize; }
 	}
 
+	/// Ctor
 	this() {
 		_writerMutex = new Mutex;
 		_readerMutex = new Mutex;
@@ -36,6 +41,7 @@ class RingBuffer(T, uint Size = 128u): Singleton!(RingBuffer!(T, Size)) {
 		_emptySemaphore = new Semaphore(Size);
 	}
 
+	/// Append a new value.
 	void write(T value) {
 		synchronized(_writerMutex) {
 			_emptySemaphore.wait();
@@ -46,6 +52,7 @@ class RingBuffer(T, uint Size = 128u): Singleton!(RingBuffer!(T, Size)) {
 		}
 	}
 
+	/// Extract a value.
 	T read() {
 		T value;
 		synchronized(_readerMutex) {
@@ -58,6 +65,7 @@ class RingBuffer(T, uint Size = 128u): Singleton!(RingBuffer!(T, Size)) {
 		return value;
 	}
 
+	/// Cleanup everything, don't use the buffer afterwards.
 	void close() {
 		foreach(i; 0 .. _bufferSize)
 			_emptySemaphore.notify();
@@ -68,6 +76,7 @@ class RingBuffer(T, uint Size = 128u): Singleton!(RingBuffer!(T, Size)) {
 		_size = 0u;
 	}
 
+	/// Empty the buffer.
 	void reset() {
 		synchronized(_writerMutex) {
 			synchronized(_readerMutex) {

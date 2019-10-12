@@ -89,12 +89,12 @@ abstract class Slider: GuiElement {
 			return;
 
 		switch(event.type) with(EventType) {
-		case MouseWheel:
+		case mouseWheel:
 			_offset -= event.position.y * _step;
 			_offset = (_offset < -_step) ? -_step : ((_offset > 1f + _step) ? 1f + _step : _offset);	//Clamp the value.
 			break;
-		case MouseDown:
-		case MouseUp:
+		case mouseDown:
+		case mouseUp:
 			if(isSelected)
 				break;
 			relocateSlider(event);

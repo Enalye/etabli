@@ -57,10 +57,11 @@ private struct CanvasReference {
 
 static private CanvasReference[] _canvases;
 
+/// Fullscreen mode.
 enum Fullscreen {
-	RealFullscreen,
-	DesktopFullscreen,
-	NoFullscreen
+	fullscreen,
+	desktop,
+	windowed
 }
 
 /// Create the application window.
@@ -164,10 +165,19 @@ void showWindowCursor(bool show) {
 
 /// Change the fullscreen property between windowed, desktop fullscreen and fullscreen.
 void setWindowFullScreen(Fullscreen fullscreen) {
-	SDL_SetWindowFullscreen(_sdlWindow,
-		(Fullscreen.RealFullscreen == fullscreen ? SDL_WINDOW_FULLSCREEN :
-			(Fullscreen.DesktopFullscreen == fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP :
-				0)));
+	uint mode;
+	final switch(fullscreen) with(Fullscreen) {
+	case fullscreen:
+		mode = SDL_WINDOW_FULLSCREEN;
+		break;
+	case desktop:
+		mode = SDL_WINDOW_FULLSCREEN_DESKTOP;
+		break;
+	case windowed:
+		mode = 0;
+		break;
+	}
+	SDL_SetWindowFullscreen(_sdlWindow, mode);
 }
 
 /// Enable/Disable the borders.

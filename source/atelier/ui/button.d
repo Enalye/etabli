@@ -105,7 +105,7 @@ class TextButton: Button {
 
 	this(Font font, string text) {
 		label = new Label(font, text);
-        label.setAlign(GuiAlignX.Center, GuiAlignY.Center);
+        label.setAlign(GuiAlignX.center, GuiAlignY.center);
 		size = label.size;
         addChildGui(label);
 	}
@@ -203,7 +203,7 @@ class ImgButton: Button {
 
 	this(Font font, string text) {
 		label = new Label(font, text);
-        label.setAlign(GuiAlignX.Center, GuiAlignY.Center);
+        label.setAlign(GuiAlignX.center, GuiAlignY.center);
 		label.text = text;
 		size = label.size;
         addChildGui(label);

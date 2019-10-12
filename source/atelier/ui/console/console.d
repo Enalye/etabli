@@ -129,7 +129,7 @@ private class Console: AnchoredLayout {
 		super.onEvent(event);
 
 		switch(event.type) with(EventType) {
-		case KeyEnter:
+		case keyEnter:
 			if(_inputField.hasFocus) {
 				string text = _inputField.text;
 				if(text.length) {
@@ -179,7 +179,7 @@ private class Console: AnchoredLayout {
 		auto widgetCallback = parameters[0] in _widgetCallbacks;
 		if(widgetCallback) {
 			Event event;
-			event.type = EventType.Callback;
+			event.type = EventType.callback;
 			event.id = (*widgetCallback).id;
 			event.sarray = parameters[1..$];
 			(*widgetCallback).widget.onEvent(event);

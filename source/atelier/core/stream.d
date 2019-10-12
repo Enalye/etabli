@@ -17,27 +17,34 @@ import std.bitmanip;
 class OutStream {
 	private Appender!(const ubyte[]) _buffer;
 
+	/// Ctor.
 	this() {
 		_buffer = appender!(const ubyte[])();
 	}
 
 	@property {
+		/// Raw buffer.
 		const(ubyte)[] data() const { return _buffer.data; }
+		/// Total size of the buffer.
 		size_t length() const { return _buffer.data.length; }
 	}
 
+	/// Append a string.
 	void write(string values) {
 		write!(char[])(cast(char[])values);
 	}
 
+	/// Append a wstring.
 	void write(wstring values) {
 		write!(wchar[])(cast(wchar[])values);
 	}
 
+	/// Append a dstring.
 	void write(dstring values) {
 		write!(dchar[])(cast(dchar[])values);
 	}
 
+	/// Append an array.
 	void write(T : T[])(T[] values) {
 		//Values size.
 		ubyte[ushort.sizeof] sizeValues = nativeToBigEndian!ushort(cast(ushort)values.length);
@@ -49,6 +56,7 @@ class OutStream {
 				_buffer.append!ubyte(b);
 	}
 
+	/// Append a value.
 	void write(T)(T value) {
 		//Value size.
 		ubyte[ushort.sizeof] sizeValues = nativeToBigEndian!ushort(1u);
@@ -65,29 +73,38 @@ class InStream {
 	private ubyte[] _buffer;
 
 	@property {
+		/// Raw buffer.
 		void data(ubyte[] buffer) { _buffer = buffer; }
+		/// Ditto
 		ref ubyte[] data() { return _buffer; }
 
+		/// Total size of the buffer.
 		ushort length(ushort newLength) { return _buffer.length = newLength; }
+		/// Ditto
 		size_t length() const { return _buffer.length; }
 	}
 
+	/// Sets a raw buffer.
 	void set(const ubyte[] buffer) {
 		_buffer = buffer.dup;
 	}
 
+	/// Extract a string.
 	string read(T : string)() {
 		return read!(char[])();
 	}
 
+	/// Extract a wstring.
 	wstring read(T : wstring)() {
 		return read!(wchar[])();
 	}
 
+	/// Extract a dstring.
 	dstring read(T : dstring)() {
 		return read!(dchar[])();
 	}
 
+	/// Extract an array.
 	T[] read(T : T[])() {
 		T[] values;
 		ushort size = _buffer.read!ushort();
@@ -98,6 +115,7 @@ class InStream {
 		return values;
 	}
 
+	/// Extract a value.
 	T read(T)() {
 		ushort size = _buffer.read!ushort();
 		if(size != 1uL)

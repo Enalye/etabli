@@ -20,22 +20,41 @@ import atelier.render.window;
 
 /// Indicate if something is mirrored.
 enum Flip {
-	NoFlip,
-	HorizontalFlip,
-	VerticalFlip,
-	BothFlip
+	none,
+	horizontal,
+	vertical,
+	both
+}
+
+package SDL_RendererFlip getSDLFlip(Flip flip) {
+	final switch(flip) with(Flip) {
+	case both: return cast(SDL_RendererFlip)(SDL_FLIP_HORIZONTAL | SDL_FLIP_VERTICAL);
+	case horizontal: return SDL_FLIP_HORIZONTAL;
+	case vertical: return SDL_FLIP_VERTICAL;
+	case none: return SDL_FLIP_NONE;
+	}
 }
 
 /// Blending algorithm \
-/// NoBlending: Paste everything without transparency \
-/// ModularBlending: Multiply color value with the destination \
-/// AdditiveBlending: Add color value with the destination \
-/// AlphaBlending: Paste everything with transparency (Default one)
+/// none: Paste everything without transparency \
+/// modular: Multiply color value with the destination \
+/// additive: Add color value with the destination \
+/// alpha: Paste everything with transparency (Default one)
 enum Blend {
-	NoBlending,
-	ModularBlending,
-	AdditiveBlending,
-	AlphaBlending
+	none,
+	modular,
+	additive,
+	alpha
+}
+
+/// Returns the SDL blend flag.
+package SDL_BlendMode getSDLBlend(Blend blend) {
+	final switch(blend) with(Blend) {
+	case alpha: return SDL_BLENDMODE_BLEND;
+	case additive: return SDL_BLENDMODE_ADD;
+	case modular: return SDL_BLENDMODE_MOD;
+	case none: return SDL_BLENDMODE_NONE;
+	}
 }
 
 /// Base rendering class.
@@ -74,12 +93,8 @@ final class Texture {
 		unload();
 	}
 
-	void setColorMod(Color color, Blend blend = Blend.AlphaBlending) {
-		SDL_SetTextureBlendMode(_texture,
-			((blend == Blend.AlphaBlending) ? SDL_BLENDMODE_BLEND :
-				((blend == Blend.AdditiveBlending) ? SDL_BLENDMODE_ADD :
-					((blend == Blend.ModularBlending) ? SDL_BLENDMODE_MOD :
-						SDL_BLENDMODE_NONE))));
+	void setColorMod(Color color, Blend blend = Blend.alpha) {
+		SDL_SetTextureBlendMode(_texture, getSDLBlend(blend));
 		
 		auto sdlColor = color.toSDL();
 		SDL_SetTextureColorMod(_texture, sdlColor.r, sdlColor.g, sdlColor.b);
@@ -193,7 +208,7 @@ final class Texture {
 		SDL_RenderCopy(cast(SDL_Renderer*)_sdlRenderer, cast(SDL_Texture*)_texture, &srcSdlRect, &destSdlRect);
 	}
 
-	void draw(Vec2f pos, Vec2f size, Vec4i srcRect, float angle, Flip flip = Flip.NoFlip, Vec2f anchor = Vec2f.half) const {
+	void draw(Vec2f pos, Vec2f size, Vec4i srcRect, float angle, Flip flip = Flip.none, Vec2f anchor = Vec2f.half) const {
 		enforce(_isLoaded, "Cannot render the texture: Asset not loaded.");
 		pos -= anchor * size;
 		
@@ -205,12 +220,10 @@ final class Texture {
 			cast(uint)size.y
 		};
 
-		SDL_RendererFlip rendererFlip = (flip == Flip.BothFlip) ?
-			cast(SDL_RendererFlip)(SDL_FLIP_HORIZONTAL | SDL_FLIP_VERTICAL) :
-			(flip == Flip.HorizontalFlip ? SDL_FLIP_HORIZONTAL :
-				(flip == Flip.VerticalFlip ? SDL_FLIP_VERTICAL :
-					SDL_FLIP_NONE));
-
-		SDL_RenderCopyEx(cast(SDL_Renderer*)_sdlRenderer, cast(SDL_Texture*)_texture, &srcSdlRect, &destSdlRect, angle, null, rendererFlip);
+		const SDL_RendererFlip rendererFlip = getSDLFlip(flip);
+		SDL_RenderCopyEx(
+			cast(SDL_Renderer*)_sdlRenderer,
+			cast(SDL_Texture*)_texture,
+			&srcSdlRect, &destSdlRect, angle, null, rendererFlip);
 	}
 }
