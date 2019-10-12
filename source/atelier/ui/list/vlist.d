@@ -16,15 +16,15 @@ import atelier.common;
 
 import atelier.ui;
 
-private class ListContainer: GuiElementCanvas {
+private final class ListContainer: GuiElementCanvas {
 	public {
 		VContainer container;
 	}
 
-	this(Vec2f newSize) {
+	this(Vec2f sz) {
 		isLocked = true;
 		container = new VContainer;
-		size(newSize);
+		size(sz);
 		addChildGui(container);
 	}
 }
@@ -66,18 +66,18 @@ class VList: GuiElement {
 		}
 	}
 
-	this(Vec2f newSize) {
+	this(Vec2f sz) {
 		isLocked = true;
 		_slider = new VScrollbar;
         _slider.setAlign(GuiAlignX.left, GuiAlignY.center);
-		_container = new ListContainer(newSize);
+		_container = new ListContainer(sz);
         _container.setAlign(GuiAlignX.right, GuiAlignY.top);
-        _container.container.setAlign(GuiAlignX.right, GuiAlignY.top);
+        _container.container.setAlign(GuiAlignX.center, GuiAlignY.top);
 
 		super.addChildGui(_slider);
 		super.addChildGui(_container);
 
-		size(newSize);
+		size(sz);
 		position(Vec2f.zero);
 
         setEventHook(true);
@@ -112,9 +112,9 @@ class VList: GuiElement {
 
 	override void update(float deltaTime) {
 		super.update(deltaTime);
-		float min = 0f;
-		float max = _container.container.size.y - _container.size.y;
-		float exceedingHeight = _container.container.size.y - _container.canvas.size.y;
+		const float min = 0f;
+		const float max = _container.container.size.y - _container.size.y;
+		const float exceedingHeight = _container.container.size.y - _container.canvas.size.y;
 
 		if(exceedingHeight < 0f) {
 			_slider.max = 0;
@@ -129,6 +129,7 @@ class VList: GuiElement {
 
 	override void addChildGui(GuiElement gui) {
         gui.position = Vec2f.zero;
+		gui.size = Vec2f(_container.size.x, gui.size.y);
         gui.setAlign(GuiAlignX.right, GuiAlignY.top);
 		gui.isSelected = (_nbElements == 0u);
         gui.setCallback(this, "list");
