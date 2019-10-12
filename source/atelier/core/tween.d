@@ -98,7 +98,7 @@ struct Timer {
 			if(_isReversed) {
 				if(_time > 0f)
 					_time -= _speed * deltaTime;
-				if(_time < 0f) {
+				if(_time <= 0f) {
 					_time = 0f;
 					_mode = TimeMode.stop;
 				}
@@ -106,7 +106,7 @@ struct Timer {
 			else {
 				if(_time < 1f)
 					_time += _speed * deltaTime;
-				if(_time > 1f) {
+				if(_time >= 1f) {
 					_time = 1f;
 					_mode = TimeMode.stop;
 				}
@@ -115,14 +115,14 @@ struct Timer {
 		case loop:
 			if(_time < 1f)
 				_time += _speed * deltaTime;
-			if(_time > 1f)
+			if(_time >= 1f)
 				_time = (_time - 1f) + (_speed * deltaTime);
 			break;
 		case bounce:
 			if(_isReversed) {
 				if(_time > 0f)
 					_time -= _speed * deltaTime;
-				if(_time < 0f) {
+				if(_time <= 0f) {
 					_time = -(_time - (_speed * deltaTime));
 					_isReversed = false;
 				}
@@ -130,7 +130,7 @@ struct Timer {
 			else {
 				if(_time < 1f)
 					_time += _speed * deltaTime;
-				if(_time > 1f) {
+				if(_time >= 1f) {
 					_time = 1f - ((_time - 1f) + (_speed * deltaTime));
 					_isReversed = true;
 				}
