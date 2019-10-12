@@ -109,7 +109,7 @@ private final class HintWindow: GuiElement {
 		bool _isRendered;
 	}
 	Label title;
-	Text text;
+	Label text;
 
 	@property void hint(Hint hint) {
 		_isRendered = hint !is null;
@@ -121,7 +121,7 @@ private final class HintWindow: GuiElement {
 
 	this() {
 		title = new Label(getDefaultFont(), "");
-		text = new Text;
+		text = new Label(getDefaultFont(), "");
 	}
 
 	override void update(float deltaTime) {
