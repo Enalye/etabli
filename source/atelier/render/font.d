@@ -99,8 +99,11 @@ final class TrueTypeFont: Font {
 
 	/// Renders the given text to a texture.
 	Texture render(string text) {
-		Texture texture = new Texture;
-		texture.loadFromSurface(TTF_RenderUTF8_Blended(_trueTypeFont, toStringz(text), Color.white.toSDL()));
+		if(!text.length)
+			return null;
+		SDL_Surface* surface = TTF_RenderUTF8_Blended(_trueTypeFont, toStringz(text), Color.white.toSDL());
+		Texture texture = new Texture(surface);
+		SDL_FreeSurface(surface);
 		return texture;
 	}
 }

@@ -63,7 +63,7 @@ final class Label: GuiElement {
         _font = font;
 		_text = newText;
 		isInteractable = false;
-		_texture = new Texture;
+		_texture = _font.render(_text);
 		_sprite = new Sprite(_texture);
 		reload();
 	}
@@ -72,7 +72,7 @@ final class Label: GuiElement {
         _font = getDefaultFont();
 		_text = newText;
 		isInteractable = false;
-		_texture = new Texture;
+		_texture = _font.render(_text);
 		_sprite = new Sprite(_texture);
 		reload();
 	}
@@ -81,13 +81,13 @@ final class Label: GuiElement {
 		_font = getDefaultFont();
 		_text = "";
 		isInteractable = false;
-		_texture = new Texture;
+		_texture = _font.render(_text);
 		_sprite = new Sprite(_texture);
 		reload();
 	}
 
 	override void draw() {
-		if(_text.length > 0 && _texture.isLoaded) {
+		if(_text.length && _texture) {
 			_sprite.color = color;
 			_sprite.scale = scale;
 			_sprite.draw(center);

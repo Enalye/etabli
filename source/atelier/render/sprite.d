@@ -65,26 +65,38 @@ final class Sprite: Drawable {
     }
 
 	/// Default sprite that takes the whole Texture.
-	this(Texture newTexture, Flip newFlip = Flip.none) {
-		texture = newTexture;
-		clip = Vec4i(0, 0, texture.width, texture.height);
-		size = to!Vec2f(clip.zw);
-		flip = newFlip;
+	this(Texture tex, Flip flip_ = Flip.none) {
+		texture = tex;
+		if(!texture) {
+			clip = Vec4i.zero;
+			size = Vec2f.zero;
+		}
+		else {
+			clip = Vec4i(0, 0, texture.width, texture.height);
+			size = to!Vec2f(clip.zw);
+		}
+		flip = flip_;
 	}
 
 	/// Sprite that takes a clipped region of a Texture.
-	this(Texture newTexture, Vec4i newClip, Flip newFlip = Flip.none) {
-		texture = newTexture;
-		clip = newClip;
+	this(Texture tex, Vec4i clip_, Flip flip_ = Flip.none) {
+		texture = tex;
+		clip = clip_;
 		size = to!Vec2f(clip.zw);
-		flip = newFlip;
+		flip = flip_;
 	}
 	
 	/// Reset the sprite to take the whole specified Texture.
-	Sprite opAssign(Texture newTexture) {
-		texture = texture;
-		clip = Vec4i(0, 0, texture.width, texture.height);
-		size = to!Vec2f(clip.zw);
+	Sprite opAssign(Texture tex) {
+		texture = tex;
+		if(!texture) {
+			clip = Vec4i.zero;
+			size = Vec2f.zero;
+		}
+		else {
+			clip = Vec4i(0, 0, texture.width, texture.height);
+			size = to!Vec2f(clip.zw);
+		}
 		return this;
 	}
 
@@ -95,6 +107,7 @@ final class Sprite: Drawable {
 
 	/// Render the sprite there.
 	void draw(const Vec2f position) {
+		assert(texture, "Texture is null");
 		Vec2f finalSize = size * scale * transformScale();
 		//if (isVisible(position, finalSize)) {
             texture.setColorMod(color, blend);
@@ -105,6 +118,7 @@ final class Sprite: Drawable {
 
 	/// Ditto
 	void drawUnchecked(const Vec2f position) {
+		assert(texture, "Texture is null");
 		Vec2f finalSize = size * scale * transformScale();
         texture.setColorMod(color, blend);
 		texture.draw(transformRenderSpace(position), finalSize, clip, angle, flip, anchor);
@@ -112,6 +126,7 @@ final class Sprite: Drawable {
 	}
 	
 	void drawRotated(const Vec2f position) {
+		assert(texture, "Texture is null");
 		Vec2f finalSize = size * scale * transformScale();
 		Vec2f dist = (anchor - Vec2f.half) * size * scale;
 		dist.rotate(angle);
@@ -121,6 +136,7 @@ final class Sprite: Drawable {
 	}
 
 	void draw(const Vec2f pivot, float pivotDistance, float pivotAngle) {
+		assert(texture, "Texture is null");
 		Vec2f finalSize = size * scale * transformScale();
         texture.setColorMod(color, blend);
 		texture.draw(transformRenderSpace(pivot + Vec2f.angled(pivotAngle) * pivotDistance), finalSize, clip, angle, flip, anchor);
@@ -128,6 +144,7 @@ final class Sprite: Drawable {
 	}
 
 	void draw(const Vec2f pivot, const Vec2f pivotOffset, float pivotAngle) {
+		assert(texture, "Texture is null");
 		Vec2f finalSize = size * scale * transformScale();
         texture.setColorMod(color, blend);
 		texture.draw(transformRenderSpace(pivot + pivotOffset.rotated(pivotAngle)), finalSize, clip, angle, flip, anchor);

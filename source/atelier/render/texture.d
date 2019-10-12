@@ -67,11 +67,12 @@ final class Texture {
 
 	@property {
 		bool isLoaded() const { return _isLoaded; }
+
+		/// Width in texels.
 		uint width() const { return _width; }
+		/// Height in texels.
 		uint height() const { return _height; }
 	}
-
-	this() {}
 
 	this(Texture texture) {
         _isLoaded = texture._isLoaded;
@@ -82,7 +83,7 @@ final class Texture {
     }
 
 	this(SDL_Surface* surface) {
-		loadFromSurface(surface);
+		load(surface);
 	}
 
 	this(string path) {
@@ -105,9 +106,9 @@ final class Texture {
 		SDL_SetTextureAlphaMod(_texture, cast(ubyte)(clamp(alpha, 0f, 1f) * 255f));
 	}
 
-	void loadFromSurface(SDL_Surface* surface) {
+	package void load(SDL_Surface* surface) {
 		enforce(null != surface, "Invalid surface.");
-		enforce(null != _sdlRenderer, "The _sdlRenderer does not exist.");
+		enforce(null != _sdlRenderer, "The renderer does not exist.");
 
 		if (null != _texture)
 			SDL_DestroyTexture(_texture);
@@ -118,7 +119,6 @@ final class Texture {
 
 		_width = surface.w;
 		_height = surface.h;
-		SDL_FreeSurface(surface);
 
 		_isLoaded = true;
         _ownData = true;
@@ -128,7 +128,7 @@ final class Texture {
 		SDL_Surface* surface = IMG_Load(toStringz(path));
 			
 		enforce(null != surface, "Cannot load image file \'" ~ path ~ "\'.");
-		enforce(null != _sdlRenderer, "The _sdlRenderer does not exist.");
+		enforce(null != _sdlRenderer, "The renderer does not exist.");
 
 		_texture = SDL_CreateTextureFromSurface(_sdlRenderer, surface);
 
@@ -152,7 +152,7 @@ final class Texture {
 	}
 
 	void draw(Vec2f pos, Vec2f anchor = Vec2f.half) const {
-		enforce(_isLoaded, "Cannot render the texture: Asset not loaded.");
+		assert(_isLoaded, "Cannot render the texture: Asset not loaded.");
 		pos -= anchor * Vec2f(_width, _height);
 
 		SDL_Rect destRect = {
@@ -166,7 +166,7 @@ final class Texture {
 	}
 
 	void draw(Vec2f pos, Vec4i srcRect, Vec2f anchor = Vec2f.half) const {
-		enforce(_isLoaded, "Cannot render the texture: Asset not loaded.");
+		assert(_isLoaded, "Cannot render the texture: Asset not loaded.");
 
 		SDL_Rect srcSdlRect = srcRect.toSdlRect();
 		SDL_Rect destSdlRect = {
@@ -180,7 +180,7 @@ final class Texture {
 	}
 
 	void draw(Vec2f pos, Vec2f size, Vec2f anchor = Vec2f.half) const {
-		enforce(_isLoaded, "Cannot render the texture: Asset not loaded.");
+		assert(_isLoaded, "Cannot render the texture: Asset not loaded.");
 		pos -= anchor * size;
 
 		SDL_Rect destSdlRect = {
@@ -209,7 +209,7 @@ final class Texture {
 	}
 
 	void draw(Vec2f pos, Vec2f size, Vec4i srcRect, float angle, Flip flip = Flip.none, Vec2f anchor = Vec2f.half) const {
-		enforce(_isLoaded, "Cannot render the texture: Asset not loaded.");
+		assert(_isLoaded, "Cannot render the texture: Asset not loaded.");
 		pos -= anchor * size;
 		
 		SDL_Rect srcSdlRect = srcRect.toSdlRect();
