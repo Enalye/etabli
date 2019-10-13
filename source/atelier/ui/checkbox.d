@@ -12,26 +12,32 @@ import std.conv: to;
 import atelier.core, atelier.common, atelier.render;
 import atelier.ui.gui_element;
 
+/// A simple check box.
 class Checkbox: GuiElement {
 	private {
-		bool _isChecked;
+		bool _value;
 	}
 
 	@property {
-		bool isChecked() const { return _isChecked; }
-		bool isChecked(bool newIsChecked) {
-			_isChecked = newIsChecked;
-			onCheck();
-			return _isChecked;
+		/// Value of the checkbox, true if checked.
+		bool value() const { return _value; }
+		/// Ditto
+		bool value(bool v) {
+			return _value = v;
 		}
 	}
 
 	override void onSubmit() {
 		if(isLocked)
 			return;
-		isChecked = !isChecked;
+		_value = !_value;
         triggerCallback();
 	}
 
-	protected void onCheck() {}
+	override void draw() {
+		if(_value)
+			drawFilledRect(origin, size, Color.white);
+		else
+			drawRect(origin, size, Color.white);
+	}
 }
