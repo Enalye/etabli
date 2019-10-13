@@ -93,21 +93,20 @@ abstract class Slider: GuiElement {
 			_offset -= event.position.y * _step;
 			_offset = (_offset < -_step) ? -_step : ((_offset > 1f + _step) ? 1f + _step : _offset);	//Clamp the value.
 			break;
-		case mouseDown:
-		case mouseUp:
-			if(isSelected)
+		case mouseUpdate:
+			if(!isClicked)
 				break;
+			relocateSlider(event);
+			break;
+		case mouseDown:
+			relocateSlider(event);
+			break;
+		case mouseUp:
 			relocateSlider(event);
 			break;
 		default:
 			break;
 		}
-		/+if(!_hasFocus) {
-			if(getKeyDown("left"))
-				_offset = clamp(_offset - _step, 0f, 1f);
-			if(getKeyDown("right"))
-				_offset = clamp(_offset + _step, 0f, 1f);
-		}+/
 		if(isSelected)
 			relocateSlider(event);
 	}
