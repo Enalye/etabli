@@ -43,15 +43,6 @@ private {
 
 /// Open all the connected controllers
 void initializeControllers() {
-    const(char)[] dbPath = buildPath(getResourceFolder(), "gamecontrollerdb.txt");
-    if(!exists(dbPath)) {
-        writeln("Could not find \'gamecontrollerdb.txt\'.");
-        return;
-    }
-    if(-1 == SDL_GameControllerAddMappingsFromFile(toStringz(dbPath))) {
-        writeln("Could not open \'gamecontrollerdb.txt\'.");
-        return;
-    }
     foreach(index; 0.. SDL_NumJoysticks())
         addController(index);
     SDL_GameControllerEventState(SDL_ENABLE);
@@ -59,9 +50,22 @@ void initializeControllers() {
 
 /// Close all the connected controllers
 void destroyControllers() {
-    foreach(ref controller; _controllers) {
+    foreach(ref controller; _controllers)
         SDL_GameControllerClose(controller.sdlController);
-    }
+}
+
+/// Register all controller definitions in a file, must be a valid format.
+void addControllerMappingsFromFile(string filePath) {
+    if(!exists(filePath))
+        throw new Exception("Could not find \'" ~ filePath ~ "\'.");
+    if(-1 == SDL_GameControllerAddMappingsFromFile(toStringz(filePath)))
+        throw new Exception("Invalid mapping file \'" ~ filePath ~ "\'.");
+}
+
+/// Register a controller definition, must be a valid format.
+void addControllerMapping(string mapping) {
+    if(-1 == SDL_GameControllerAddMapping(toStringz(mapping)))
+        throw new Exception("Invalid mapping.");
 }
 
 /// Update the state of the controllers

@@ -21,92 +21,73 @@ import atelier.audio;
 private {
 	void*[string] _caches;
 	string[string] _cachesSubFolder;
-	string _dataFolder = "./";
-}
-
-void setResourceFolder(string dataFolder) {
-	_dataFolder = dataFolder;
-}
-
-string getResourceFolder() {
-	return buildNormalizedPath(absolutePath(_dataFolder));
-}
-
-void setResourceSubFolder(T)(string subFolder) {
-	_cachesSubFolder[T.stringof] = subFolder;
-}
-
-string getResourceSubFolder(T)() {
-	auto subFolder = T.stringof in _cachesSubFolder;
-	if(!subFolder)
-		return "";
-	return *subFolder;
 }
 
 void setResourceCache(T)(ResourceCache!T cache) {
+	static assert(!__traits(isAbstractClass, T), "Fetch cannot instanciate the abstract class " ~ T.stringof);
 	_caches[T.stringof] = cast(void*)cache;
 }
 
 void getResourceCache(T)() {
+	static assert(!__traits(isAbstractClass, T), "Fetch cannot instanciate the abstract class " ~ T.stringof);
 	auto cache = T.stringof in _caches;
-	if(!cache)
-		throw new Exception("No cache of type \'" ~ T.stringof ~ "\' has been declared");
+	assert(cache, "No cache declared of type "  ~ T.stringof);
 	return cast(ResourceCache!T)(*cache);
 }
 
 /// Is an object of this name and of this type stored ?
 bool canFetch(T)(string name) {
+	static assert(!__traits(isAbstractClass, T), "Fetch cannot instanciate the abstract class " ~ T.stringof);
 	auto cache = T.stringof in _caches;
-	if(!cache)
-		throw new Exception("No cache of type \'" ~ T.stringof ~ "\' has been declared");
+	assert(cache, "No cache declared of type "  ~ T.stringof);
 	return (cast(ResourceCache!T)*cache).canGet(name);
 }
 
 /// Is an set of this name and of this type stored ?
 bool canFetchPack(T)(string name = ".") {
+	static assert(!__traits(isAbstractClass, T), "Fetch cannot instanciate the abstract class " ~ T.stringof);
 	auto cache = T.stringof in _caches;
-	if(!cache)
-		throw new Exception("No cache of type \'" ~ T.stringof ~ "\' has been declared");
+	assert(cache, "No cache declared of type "  ~ T.stringof);
 	return (cast(ResourceCache!T)*cache).canGetPack(name);
 }
 
 /// Returns a stored resource.
 T fetch(T)(string name) {
+	static assert(!__traits(isAbstractClass, T), "Fetch cannot instanciate the abstract class " ~ T.stringof);
 	auto cache = T.stringof in _caches;
-	if(!cache)
-		throw new Exception("No cache of type \'" ~ T.stringof ~ "\' has been declared");
+	assert(cache, "No cache declared of type "  ~ T.stringof);
 	return (cast(ResourceCache!T)*cache).get(name);
 }
 
 /// Returns all resources of a set.
 T[] fetchPack(T)(string name = ".") {
+	static assert(!__traits(isAbstractClass, T), "Fetch cannot instanciate the abstract class " ~ T.stringof);
 	auto cache = T.stringof in _caches;
-	if(!cache)
-		throw new Exception("No cache of type \'" ~ T.stringof ~ "\' has been declared");
+	assert(cache, "No cache declared of type "  ~ T.stringof);
 	return (cast(ResourceCache!T)*cache).getPack(name);
 }
 
 /// Returns all resources' name of a set.
 string[] fetchPackNames(T)(string name = ".") {
+	static assert(!__traits(isAbstractClass, T), "Fetch cannot instanciate the abstract class " ~ T.stringof);
 	auto cache = T.stringof in _caches;
-	if(!cache)
-		throw new Exception("No cache of type \'" ~ T.stringof ~ "\' has been declared");
+	assert(cache, "No cache declared of type "  ~ T.stringof);
 	return (cast(ResourceCache!T)*cache).getPackNames(name);
 }
 
 /// Returns all resources of a set as a tuple of the resource + its name.
 Tuple!(T, string)[] fetchPackTuples(T)(string name = ".") {
+	static assert(!__traits(isAbstractClass, T), "Fetch cannot instanciate the abstract class " ~ T.stringof);
 	auto cache = T.stringof in _caches;
-	if(!cache)
-		throw new Exception("No cache of type \'" ~ T.stringof ~ "\' has been declared");
+	assert(cache, "No cache declared of type "  ~ T.stringof);
 	return (cast(ResourceCache!T)*cache).getPackTuples(name);
 }
 
 /// Returns everything of this type as tuples of the resources + their name.
 Tuple!(T, string)[] fetchAllTuples(T)() {
+	static assert(!__traits(isAbstractClass, T), "Fetch cannot instanciate the abstract class " ~ T.stringof);
 	auto cache = T.stringof in _caches;
-	if(!cache)
-		throw new Exception("No cache of type \'" ~ T.stringof ~ "\' has been declared");
+	assert(cache, "No cache declared of type "  ~ T.stringof);
 	return (cast(ResourceCache!T)*cache).getAllTuples();
 }
 
