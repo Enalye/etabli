@@ -11,7 +11,7 @@ module atelier.ui.console.console;
 import atelier.common, atelier.core, atelier.render;
 import atelier.ui.list, atelier.ui.gui_element, atelier.ui.layout, atelier.ui.inputfield;
 import atelier.ui.gui_overlay, atelier.ui.text, atelier.ui.gui_manager;
-
+/*
 private {
 	Console _console;
 	ConsoleHandler _consoleHandler;
@@ -71,7 +71,7 @@ private class ConsoleHandler: GuiElement {
 			_console.position = lerp(
 				Vec2f(_console.size.x /2f, -_console.size.y / 2f),
 				_console.size / 2f,
-				easeInOutSine(_timer.time));
+				easeInOutSine(_timer.value01));
 
 			if(!_timer.isRunning && !_isToggled)
 				stopOverlay();
@@ -192,4 +192,4 @@ private class Console: AnchoredLayout {
 		}		
 		addMessage("Invalid command \'" ~ parameters[0] ~ "\'.");
 	}
-}
+}*/

@@ -9,10 +9,13 @@
 module atelier.core.util;
 
 public import std.math;
+public import std.algorithm.comparison: clamp;
 
 import atelier.core.vec2;
 
+/// The square root of 2, then divided by 2.
 enum sqrt2_2 = std.math.sqrt(2.0) / 2.0;
+/// 2 times PI.
 enum pi2 = PI * 2f;
 
 /// Interpolation, returns a value between a and b. \

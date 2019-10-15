@@ -101,8 +101,8 @@ final class Sprite: Drawable {
 	}
 
 	/// Set the sprite's size to fit inside the specified size.
-	void fit(Vec2f newSize) {
-		size = to!Vec2f(clip.zw).fit(newSize);
+	void fit(Vec2f size_) {
+		size = to!Vec2f(clip.zw).fit(size_);
 	}
 
 	/// Render the sprite there.

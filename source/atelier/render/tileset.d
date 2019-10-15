@@ -19,6 +19,7 @@ import atelier.render.texture;
 import atelier.render.sprite;
 import atelier.render.drawable;
 
+/// Series of aligned tiles.
 final class Tileset {
 	@property {
 		bool isLoaded() const { return texture.isLoaded; }
@@ -31,18 +32,39 @@ final class Tileset {
         }
 	}
 
+    /// The maximum number of tile, cannot be more than columns * lines, cannot be less than 0.
     private int _maxtiles;
 
+	/// Texture region of the first tile (the source size).
 	Vec4i clip;
+
+    /// Spacing between each tiles.
     Vec2i margin;
-	int columns = 1, lines = 1;
+
+    /// Number of tiles on the horizontal axis.
+	int columns = 1,
+    /// Number of tiles on the vertical axis.
+        lines = 1;
+
+    /// Source material.
     Texture texture;
 
+    /// Destination size.
 	Vec2f size = Vec2f.zero, scale = Vec2f.one;
+
+	/// Angle in which the sprite will be rendered.
 	float angle = 0f;
+
+	/// Mirroring property.
 	Flip flip = Flip.none;
+
+    /// Anchor.
 	Vec2f anchor = Vec2f.half;
+
+	/// Color added to the tile.
     Color color = Color.white;
+
+	/// Blending algorithm.
     Blend blend = Blend.alpha;
 
     this() {}
@@ -71,11 +93,7 @@ final class Tileset {
         maxtiles(newMaxTiles);
 	}
 
-    Sprite getSprite(Timer timer) {
-		const float id = floor(lerp(0f, to!float(_maxtiles), timer.time));
-        return getSprite(to!int(id));
-    }
-
+    /// Create a new Sprite from the tile id.
     Sprite getSprite(int id) {
         if(id >= _maxtiles)
 			id = _maxtiles - 1;
@@ -93,6 +111,7 @@ final class Tileset {
         return sprite;
     }
 
+    /// Return each tile as a Sprite.
 	Sprite[] asSprites() {
 		Sprite[] sprites;
 		foreach(id; 0.. _maxtiles)
@@ -100,13 +119,9 @@ final class Tileset {
 		return sprites;
 	}
 
-    void fit(Vec2f newSize) {
-		size = to!Vec2f(clip.zw).fit(newSize);
-	}
-
-	void drawRotated(Timer timer, const Vec2f position) {
-		float id = floor(lerp(0f, to!float(_maxtiles), timer.time));
-		drawRotated(to!int(id), position);
+    /// Set the sprite's size to fit inside the specified size.
+	void fit(Vec2f size_) {
+		size = to!Vec2f(clip.zw).fit(size_);
 	}
 
 	void drawRotated(int id, const Vec2f position) {
@@ -126,11 +141,6 @@ final class Tileset {
         texture.setColorMod(color, blend);
         texture.draw(transformRenderSpace(position - dist), finalSize, currentClip, angle, flip);
         texture.setColorMod(Color.white);
-	}
-
-	void draw(Timer timer, const Vec2f position) {
-		float id = floor(lerp(0f, to!float(_maxtiles), timer.time));
-		draw(to!int(id), position);
 	}
 
 	void draw(int id, const Vec2f position) {

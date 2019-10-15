@@ -132,7 +132,7 @@ package(atelier) void updateGuiElements(GuiElement gui, GuiElement parent) {
     //Calculate transitions
     if(gui._timer.isRunning) {
         gui._timer.update(_deltaTime);
-        const float t = gui._targetState.easingFunction(gui._timer.time);
+        const float t = gui._targetState.easingFunction(gui._timer.value01);
         gui._currentState.offset = lerp(
             gui._initState.offset,
             gui._targetState.offset,

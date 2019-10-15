@@ -223,8 +223,9 @@ struct Vec2(T) {
 	}
 
 	/// The total length of this vector.
-	/// Can crash if null.
+	/// Must be non-null.
 	T length() const {
+		assert(this != Vec2!T.zero, "Null vector");
 		static if(__traits(isFloating, T))
 			return std.math.sqrt(x * x + y * y);
 		else
@@ -232,13 +233,14 @@ struct Vec2(T) {
 	}
 
 	/// The squared length of this vector.
-	/// Cannot crash if null, and more efficiant than length.
+	/// Can be null, and more efficiant than length.
 	T lengthSquared() const  {
 		return x * x + y * y;
 	}
 
 	/// Transform this vector in a unit vector.
 	void normalize() {
+		assert(this != Vec2!T.zero, "Null vector");
 		static if(__traits(isFloating, T))
 			const T len = std.math.sqrt(x * x + y * y);
 		else
@@ -250,6 +252,7 @@ struct Vec2(T) {
 
 	/// Returns a unit vector from this one without modifying this one.
 	Vec2!T normalized() const  {
+		assert(this != Vec2!T.zero, "Null vector");
 		static if(__traits(isFloating, T))
 			const T len = std.math.sqrt(x * x + y * y);
 		else
@@ -288,19 +291,21 @@ struct Vec2(T) {
 	}
 
 	static if(__traits(isFloating, T)) {
-		/// Returns an interpolated vector from this vector to the end vector by a factor.
+		/// Returns an interpolated vector from this vector to the end vector by a factor. \
 		/// Does not modify this vector.
 		Vec2!T lerp(Vec2!T end, float t) const {
 			return (this * (1.0 - t)) + (end * t);
 		}
+	}
 
-		/// While conserving the x/y ratio, returns the largest vector possible that fits inside the other vector. (like a size) \
-		/// Does not modify this vector.
-		Vec2!T fit(const Vec2!T v) const {
-            return (x / y) < (v.x / v.y) ?
-                Vec2!T(x * v.y / y, v.y):
-                Vec2!T(v.x, y * v.x / x);
-		}
+	/// While conserving the x/y ratio, returns the largest vector possible that fits inside the other vector. (like a size) \
+	/// Does not modify this vector. \
+	/// Must be non-null.
+	Vec2!T fit(const Vec2!T v) const {
+		assert(v != Vec2!T.zero, "Null vector");
+		return (x / y) < (v.x / v.y) ?
+			Vec2!T(x * v.y / y, v.y):
+			Vec2!T(v.x, y * v.x / x);
 	}
 
 	/// Equality operations
@@ -343,6 +348,12 @@ struct Vec2(T) {
 	/// Conversion
 	Vec2!U opCast(V: Vec2!U, U)() const {
 		return V(cast(U)x, cast(U)y);
+	}
+
+	/// Hash value.
+	ulong toHash() const {
+		import std.typecons: tuple;
+		return tuple(x, y).toHash();
 	}
 }
 

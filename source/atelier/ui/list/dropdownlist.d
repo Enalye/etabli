@@ -74,7 +74,8 @@ class DropDownList: GuiElementCanvas {
         _label = new Label(getDefaultFont(), "");
         _label.setAlign(GuiAlignX.center, GuiAlignY.center);
 
-        _timer.start(2f, TimeMode.bounce);
+        _timer.mode = Timer.Mode.bounce;
+        _timer.start(2f);
         super.addChildGui(_label);
 	}
 
@@ -105,7 +106,7 @@ class DropDownList: GuiElementCanvas {
         _timer.update(deltaTime);
         if(_label.size.x > size.x) {
             _label.setAlign(GuiAlignX.left, GuiAlignY.center);
-            _label.position = Vec2f(lerp(-(_label.size.x - size.x), 0f, easeInOutSine(_timer.time)), 0f);
+            _label.position = Vec2f(lerp(-(_label.size.x - size.x), 0f, easeInOutSine(_timer.value01)), 0f);
         }
         else {
             _label.setAlign(GuiAlignX.center, GuiAlignY.center);

@@ -22,7 +22,7 @@ import atelier.common.settings;
 import atelier.common.resource;
 
 private {
-    float _deltaTime = 1f;
+    float _deltatime = 1f;
     float _currentFps;
     long _tickStartFrame;
 
@@ -31,23 +31,22 @@ private {
     GuiElement[] _children;
 
     bool _isInitialized;
-    uint _nominalFps = 60u;
+    uint _nominalFPS = 60u;
 }
 
-@property {
-    /// Maximum framerate of the application.
-    /// The deltatime is equal to 1 if the framerate is exactly that.
-    uint nominalFps() { return _nominalFps; }
-    /// Ditto
-    uint nominalFps(uint v) { return _nominalFps = v; }
+/// Actual framerate divided by the nominal framerate
+/// 1 if the same, less if the application slow down,
+/// more if the application runs too quickly.
+float getDeltatime() { return _deltatime; }
 
-    /// Actual framerate divided by the nominal framerate
-    /// 1 if the same, less if the application slow down,
-    /// more if the application runs too quickly.
-    float deltaTime() { return _deltaTime; }
-    /// Actual framerate of the application.
-    float currentFps() { return _currentFps; }
-}
+/// Actual framerate of the application.
+float getCurrentFPS() { return _currentFps; }
+
+/// Maximum framerate of the application. \
+/// The deltatime is equal to 1 if the framerate is exactly that.
+uint getNominalFPS() { return _nominalFPS; }
+/// Ditto
+uint setNominalFPS(uint fps) { return _nominalFPS = fps; }
 
 /// Application startup
 void createApplication(Vec2u size, string title = "Atelier") {
@@ -65,22 +64,22 @@ void runApplication() {
 		throw new Exception("Cannot run the application.");
     
     while(processEvents()) {
-        updateEvents(_deltaTime);
+        updateEvents(_deltatime);
         processModalBack();
         processOverlayBack();
-        updateGuiElements(_deltaTime);
+        updateGuiElements(_deltatime);
         drawGuiElements();
-        processOverlayFront(_deltaTime);
+        processOverlayFront(_deltatime);
         renderWindow();
         endOverlay();
         
         long deltaTicks = Clock.currStdTime() - _tickStartFrame;
-        if(deltaTicks < (10_000_000 / _nominalFps))
-            Thread.sleep(dur!("hnsecs")((10_000_000 / _nominalFps) - deltaTicks));
+        if(deltaTicks < (10_000_000 / _nominalFPS))
+            Thread.sleep(dur!("hnsecs")((10_000_000 / _nominalFPS) - deltaTicks));
 
         deltaTicks = Clock.currStdTime() - _tickStartFrame;
-        _deltaTime = (cast(float)(deltaTicks) / 10_000_000f) * _nominalFps;
-        _currentFps = (_deltaTime == .0f) ? .0f : (10_000_000f / cast(float)(deltaTicks));
+        _deltatime = (cast(float)(deltaTicks) / 10_000_000f) * _nominalFPS;
+        _currentFps = (_deltatime == .0f) ? .0f : (10_000_000f / cast(float)(deltaTicks));
         _tickStartFrame = Clock.currStdTime();
     }
 }

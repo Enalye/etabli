@@ -20,7 +20,7 @@ class InputField: GuiElementCanvas {
 		Label _label;
 		Color _borderColor, _caretColor;
 		dstring _text, _allowedCharacters;
-		Timer _time;
+		Timer _timer;
 		uint _caretIndex = 0U;
 		Vec2f _caretPosition = Vec2f.zero;
 		uint _limit = 80u;
@@ -66,7 +66,8 @@ class InputField: GuiElementCanvas {
 
 		_borderColor = Color.white;
 		_caretColor = Color.white;
-		_time.start(1f, TimeMode.bounce);
+		_timer.mode = Timer.Mode.bounce;
+		_timer.start(1f);
 	}
 
 	override void onEvent(Event event) {
@@ -140,8 +141,8 @@ class InputField: GuiElementCanvas {
 		else
 			_borderColor = lerp(_borderColor, Color.white * .21f, deltaTime * .1f);
 
-		_time.update(deltaTime);
-		_caretColor = lerp(Color.white, Color.white * .21f, _time.time);
+		_timer.update(deltaTime);
+		_caretColor = lerp(Color.white, Color.white * .21f, _timer.value01);
 	}
 
 	override void draw() {
