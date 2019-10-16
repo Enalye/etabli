@@ -102,7 +102,7 @@ class ResourceCache(T) {
 	this() {}
 
 	bool canGet(string name) {
-		return (buildNormalizedPath(name) in _ids) !is null;
+		return (name in _ids) !is null;
 	}
 
 	bool canGetPack(string pack = ".") {
@@ -110,11 +110,8 @@ class ResourceCache(T) {
 	}
 
 	T get(string name) {
-		name = buildNormalizedPath(name);
-
 		auto p = (name in _ids);
-		if(p is null)
-			throw new Exception("Resource: no \'" ~ name ~ "\' loaded");
+		assert(p, "Resource: no \'" ~ name ~ "\' loaded");
 		return new T(_data[*p][0]);
 	}
 
@@ -122,8 +119,7 @@ class ResourceCache(T) {
 		pack = buildNormalizedPath(pack);
 
 		auto p = (pack in _packs);
-		if(p is null)
-			throw new Exception("Resource: no pack \'" ~ pack ~ "\' loaded");
+		assert(p, "Resource: no pack \'" ~ pack ~ "\' loaded");
 
 		T[] result;
 		foreach(i; *p)
@@ -135,8 +131,7 @@ class ResourceCache(T) {
 		pack = buildNormalizedPath(pack);
 
 		auto p = (pack in _packs);
-		if(p is null)
-			throw new Exception("Resource: no pack \'" ~ pack ~ "\' loaded");
+		assert(p, "Resource: no pack \'" ~ pack ~ "\' loaded");
 
 		string[] result;
 		foreach(i; *p)
@@ -148,8 +143,7 @@ class ResourceCache(T) {
 		pack = buildNormalizedPath(pack);
 
 		auto p = (pack in _packs);
-		if(p is null)
-			throw new Exception("Resource: no pack \'" ~ pack ~ "\' loaded");
+		assert(p, "Resource: no pack \'" ~ pack ~ "\' loaded");
 
 		Tuple!(T, string)[] result;
 		foreach(i; *p)
