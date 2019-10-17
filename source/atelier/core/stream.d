@@ -79,7 +79,7 @@ class InStream {
 		ref ubyte[] data() { return _buffer; }
 
 		/// Total size of the buffer.
-		ushort length(ushort newLength) { return _buffer.length = newLength; }
+		size_t length(size_t len) { return _buffer.length = len; }
 		/// Ditto
 		size_t length() const { return _buffer.length; }
 	}
