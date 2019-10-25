@@ -309,49 +309,49 @@ struct Vec2(T) {
 	}
 
 	/// Equality operations
-	bool opEquals(const Vec2!T v) const {
+	bool opEquals(const Vec2!T v) const @safe pure nothrow {
 		return (x == v.x) && (y == v.y);
 	}
 
 	/// Unary operations
-	Vec2!T opUnary(string op)() const {
+	Vec2!T opUnary(string op)() const @safe pure nothrow {
 		return mixin("Vec2!T(" ~ op ~ " x, " ~ op ~ " y)");
 	}
 
 	/// Binary operations
-	Vec2!T opBinary(string op)(const Vec2!T v) const {
+	Vec2!T opBinary(string op)(const Vec2!T v) const @safe pure nothrow {
 		return mixin("Vec2!T(x " ~ op ~ " v.x, y " ~ op ~ " v.y)");
 	}
 
 	/// Binary operations
-	Vec2!T opBinary(string op)(T s) const {
+	Vec2!T opBinary(string op)(T s) const @safe pure nothrow {
 		return mixin("Vec2!T(x " ~ op ~ " s, y " ~ op ~ " s)");
 	}
 
 	/// Binary operations
-	Vec2!T opBinaryRight(string op)(T s) const {
+	Vec2!T opBinaryRight(string op)(T s) const @safe pure nothrow {
 		return mixin("Vec2!T(s " ~ op ~ " x, s " ~ op ~ " y)");
 	}
 
 	/// Assignment
-	Vec2!T opOpAssign(string op)(Vec2!T v) {
+	Vec2!T opOpAssign(string op)(Vec2!T v) @safe pure nothrow {
 		mixin("x = x" ~ op ~ "v.x;y = y" ~ op ~ "v.y;");
 		return this;
 	}
 
 	/// Assignment
-	Vec2!T opOpAssign(string op)(T s) {
+	Vec2!T opOpAssign(string op)(T s) @safe pure nothrow {
 		mixin("x = x" ~ op ~ "s;y = y" ~ op ~ "s;");
 		return this;
 	}
 
 	/// Conversion
-	Vec2!U opCast(V: Vec2!U, U)() const {
+	Vec2!U opCast(V: Vec2!U, U)() const @safe pure nothrow {
 		return V(cast(U)x, cast(U)y);
 	}
 
 	/// Hash value.
-	ulong toHash() const {
+	size_t toHash() const @safe pure nothrow {
 		import std.typecons: tuple;
 		return tuple(x, y).toHash();
 	}
