@@ -51,8 +51,8 @@ class GuiElement {
 		GuiElement[] _children;
 		Hint _hint;
 		bool _isLocked, _isMovable, _isHovered, _isClicked, _isSelected, _hasFocus, _isInteractable = true, _hasEventHook;
-		Vec2f _position = Vec2f.zero, _size = Vec2f.zero, _anchor = Vec2f.half, _padding = Vec2f.zero, _center = Vec2f.zero, _origin = Vec2f.zero;
-		//float _angle = 0f;
+		Vec2f _position = Vec2f.zero, _size = Vec2f.zero, _anchor = Vec2f.half,
+            _padding = Vec2f.zero, _center = Vec2f.zero, _origin = Vec2f.zero;
 		GuiElement _callbackGuiElement;
 		string _callbackId;
 
@@ -186,6 +186,7 @@ class GuiElement {
         /// The gui position relative to its parent and alignment. \
         /// Call **onPosition()** and **onDeltaPosition()** and **onCenter()** on change.
 		final Vec2f position() { return _position; }
+        /// Ditto
 		final Vec2f position(Vec2f newPosition) {
             auto oldPosition = _position;
             _position = newPosition;
@@ -254,6 +255,7 @@ class GuiElement {
         /// Extra space on top of its size. \
         /// Call **onPadding()** and update the gui size.
 		final Vec2f padding() const { return _padding; }
+        /// Ditto
 		final Vec2f padding(Vec2f newPadding) {
             _padding = newPadding;
 			size(_size);
@@ -264,6 +266,7 @@ class GuiElement {
         /// Color of the actual state (GuiState) of the gui. \
         /// Call **onColor()** on change.
         final Color color() const { return _currentState.color; }
+        /// Ditto
 		final Color color(Color newColor) {
             if(newColor != _currentState.color) {
                 _currentState.color = newColor;
@@ -369,7 +372,7 @@ class GuiElement {
     /// Ideally, it's equal to 1.
     /// ___
     /// If the canvas is set, the coordinate are those *inside* the canvas.
-	void update(float deltaTime) {}
+	void update(float deltaTime) { cast(void) deltaTime; }
 
     /// Override this to render the gui itself. \
     /// If the canvas is set, the coordinate are those *inside* the canvas.
@@ -381,7 +384,7 @@ class GuiElement {
 
     /// With the eventHook, receive all events. \
     /// Useful if you want to control like for text input. 
-	void onEvent(Event event) {}
+	void onEvent(Event event) { cast(void) event; }
 
     /// Fired when clicked on.
     void onSubmit() {}
@@ -432,21 +435,21 @@ class GuiElement {
 
         /// Called when the position is changed. \
         /// The delta value is the difference with the last position.
-        void onDeltaPosition(Vec2f delta) {}
+        void onDeltaPosition(Vec2f delta) { cast(void) delta; }
 
         /// Called when the position is changed.
         void onPosition() {}
 
         /// Called when the size is changed. \
         /// The delta value is the difference with the last size.
-        void onDeltaSize(Vec2f delta) {}
+        void onDeltaSize(Vec2f delta) { cast(void) delta; }
 
         /// Called when the size is changed.
         void onSize() {}
 
         /// Called when the anchor is changed. \
         /// The delta value is the difference with the last anchor.
-        void onDeltaAnchor(Vec2f delta) {}
+        void onDeltaAnchor(Vec2f delta) { cast(void) delta; }
 
         /// Called when the anchor is changed.
         void onAnchor() {}
@@ -462,7 +465,7 @@ class GuiElement {
         //void onAngle() {}
 
         /// Any callback set to this gui will call this.
-        void onCallback(string id) {}
+        void onCallback(string id) { cast(void) id; }
     }
 
     /// Add a gui as a child of this one.

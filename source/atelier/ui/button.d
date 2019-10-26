@@ -14,6 +14,7 @@ import atelier.ui.gui_element, atelier.ui.label;
 
 /// Simple GUI that trigger its callback when onSubmit() is fired (like when you click on it).
 class Button: GuiElement {
+	/// Function callback triggered when *onSubmit* is called.
 	void function() onClick;
 
     override void onSubmit() {
@@ -95,7 +96,9 @@ class ListButton: Button {
 	}
 }
 
+/// Button with a label.
 class TextButton: Button {
+	/// The text of the button.
 	Label label;
 
 	@property {
@@ -103,6 +106,7 @@ class TextButton: Button {
 		alias text = label.text;
 	}
 
+	/// Ctor
 	this(Font font, string text) {
 		label = new Label(font, text);
         label.setAlign(GuiAlignX.center, GuiAlignY.center);

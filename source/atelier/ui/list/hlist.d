@@ -41,7 +41,9 @@ class HList: GuiElement {
 	}
 
 	@property {
+		/// The ID of the child that has been selected.
 		int selected() const { return _idElementSelected; }
+		/// Ditto
 		int selected(int id) {
 			if(id >= _nbElements)
 				id = _nbElements - 1;
@@ -58,7 +60,9 @@ class HList: GuiElement {
 			return _idElementSelected;
 		}
 
+		/// Width of a single child.
 		float layoutLength() const { return _layoutLength; }
+		/// Ditto
 		float layoutLength(float length) {
 			_layoutLength = length;
 			_container.container.size = Vec2f(_layoutLength * _nbElements, _container.size.y);
@@ -66,6 +70,7 @@ class HList: GuiElement {
 		}
 	}
 
+	/// Ctor.
 	this(Vec2f sz) {
 		isLocked = true;
 		_slider = new HScrollbar;

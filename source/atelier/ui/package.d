@@ -19,15 +19,11 @@ public {
 	import atelier.ui.slider;
 	import atelier.ui.knob;
 	import atelier.ui.label;
-	import atelier.ui.frame;
 	import atelier.ui.layout;
-	import atelier.ui.panel;
 	import atelier.ui.inputfield;
-	import atelier.ui.save;
 	import atelier.ui.info;
 	import atelier.ui.text;
 	import atelier.ui.colorpicker;
-	import atelier.ui.listwindow;
 	import atelier.ui.list;
 	import atelier.ui.console;
 }

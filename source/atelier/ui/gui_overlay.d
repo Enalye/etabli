@@ -129,7 +129,7 @@ private final class HintWindow: GuiElement {
 			return;
 		size = Vec2f(max(title.size.x, text.size.x) + 25f, title.size.y + text.size.y);
 		
-        //They aren't processed buy the gui_manager, so we use setScreenCoords directly.
+        //They aren't processed by the gui manager, so we use setScreenCoords directly.
         setScreenCoords(getMousePos() + size / 2f + Vec2f(20f, 10f));
         title.setScreenCoords(center + Vec2f(0f, (title.size.y - size.y) / 2f));
 		text.setScreenCoords(center + Vec2f(0f, title.size.y + (text.size.y - size.y) / 2f));

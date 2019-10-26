@@ -13,7 +13,9 @@ import std.math;
 import atelier.core.vec3;
 import atelier.core.vec4;
 
+/// Ratio to multiply with to get a value in radians from a value in degrees.
 enum double degToRad = std.math.PI / 180.0;
+/// Ratio to multiply with to get a value in degrees from a value in radians.
 enum double radToDeg = 180.0 / std.math.PI;
 
 /// Represent a mathematical 2-dimensional vector.

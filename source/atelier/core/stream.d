@@ -107,7 +107,7 @@ class InStream {
 	/// Extract an array.
 	T[] read(T : T[])() {
 		T[] values;
-		ushort size = _buffer.read!ushort();
+		const ushort size = _buffer.read!ushort();
 		if(size == 0)
 			return values;
 		foreach(_; 0..size)
@@ -117,7 +117,7 @@ class InStream {
 
 	/// Extract a value.
 	T read(T)() {
-		ushort size = _buffer.read!ushort();
+		const ushort size = _buffer.read!ushort();
 		if(size != 1uL)
 			throw new Exception("Stream data does not match.");
 		return _buffer.read!T();

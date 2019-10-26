@@ -9,7 +9,8 @@
 
 module atelier.ui.gui_modal;
 import atelier.core, atelier.render, atelier.common;
-import atelier.ui.gui_element, atelier.ui.layout, atelier.ui.label, atelier.ui.button, atelier.ui.panel, atelier.ui.gui_manager;
+import atelier.ui.gui_element, atelier.ui.layout, atelier.ui.label,
+	atelier.ui.button, atelier.ui.gui_manager;
 
 private {
 	GuiElement[] _backupGuis;

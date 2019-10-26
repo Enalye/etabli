@@ -13,7 +13,7 @@ import std.algorithm.comparison: max;
 import atelier.render, atelier.core, atelier.common;
 import atelier.ui.gui_element;
 
-
+/// Resize children to fit and align them vertically.
 class VLayout: GuiElement {
 	private {
 		Vec2f _spacing = Vec2f.zero;
@@ -28,8 +28,10 @@ class VLayout: GuiElement {
 		uint capacity(uint newCapacity) { _capacity = newCapacity; resize(); return _capacity; }
 	}
 
+	/// Ctor
 	this() {}
 
+	/// Ctor
 	this(Vec2f newSize) {
 		size = newSize;
 	}
@@ -55,6 +57,7 @@ class VLayout: GuiElement {
 	}
 }
 
+/// Resize children to fit and align them horizontally.
 class HLayout: GuiElement {
 	private {
 		Vec2f _spacing = Vec2f.zero;
@@ -69,8 +72,10 @@ class HLayout: GuiElement {
 		uint capacity(uint newCapacity) { _capacity = newCapacity; resize(); return _capacity; }
 	}
 
+	/// Ctor
 	this() {}
 
+	/// Ctor
 	this(Vec2f newSize) {
 		size = newSize;
 	}
@@ -96,6 +101,7 @@ class HLayout: GuiElement {
 	}
 }
 
+/// Resize children to fit and align them on a grid.
 class GridLayout: GuiElement {
 	private {
 		Vec2f _spacing = Vec2f.zero;
@@ -110,8 +116,10 @@ class GridLayout: GuiElement {
 		Vec2u capacity(Vec2u newCapacity) { _capacity = newCapacity; resize(); return _capacity; }
 	}
 
+	/// Ctor
 	this() {}
 
+	/// Ctor
 	this(Vec2f newSize) {
 		size = newSize;
 	}
@@ -161,6 +169,7 @@ class VContainer: GuiElement {
 		float minimalWidth(float newMinimalWidth) { _minimalWidth = newMinimalWidth; resize(); return _minimalWidth; }
 	}
 
+	/// Ctor
 	this() {}
 
 	override void addChildGui(GuiElement gui) {
@@ -228,6 +237,7 @@ class HContainer: GuiElement {
 		float minimalHeight(float newMinimalHeight) { _minimalHeight = newMinimalHeight; resize(); return _minimalHeight; }
     }
 
+	/// Ctor
 	this() {}
 
 	override void addChildGui(GuiElement gui) {
@@ -282,8 +292,10 @@ class AnchoredLayout: GuiElement {
 		Vec2f[] _childrenPositions, _childrenSizes;
 	}
 
+	/// Ctor
 	this() {}
 
+	/// Ctor
 	this(Vec2f newSize) {
 		size = newSize;
 	}

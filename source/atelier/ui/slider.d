@@ -17,7 +17,8 @@ import atelier.ui.button, atelier.ui.gui_element;
 /// Base abstract class for any vertical or horizontal slider/scrollbar.
 abstract class Slider: GuiElement {
 	protected {	
-		float _value = 0f, _offset = 0f, _step = 1f, _min = 0f, _max = 1f, _scrollLength = 1f, _minimalSliderSize = 25f, _scrollAngle = 0f;
+		float _value = 0f, _offset = 0f, _step = 1f, _min = 0f, _max = 1f,
+			_scrollLength = 1f, _minimalSliderSize = 25f, _scrollAngle = 0f;
 		bool _isGrabbed = false;
 	}
 
@@ -142,6 +143,7 @@ abstract class Slider: GuiElement {
 
 /// Simple vertical scrollbar with basic rendering.
 class VScrollbar: Slider {
+	/// Ctor
 	this() {
 		super(90f);
 	}
@@ -180,6 +182,7 @@ class VScrollbar: Slider {
 
 /// Simple horizontal scrollbar with basic rendering.
 class HScrollbar: Slider {
+	/// Ctor
 	this() {
 		super(0f);
 	}
@@ -218,6 +221,7 @@ class HScrollbar: Slider {
 
 /// Simple vertical slider with basic rendering.
 class VSlider: Slider {
+	/// Ctor
 	this() {
 		super(90f);
 	}
@@ -239,6 +243,7 @@ class VSlider: Slider {
 
 /// Simple horizontal slider with basic rendering.
 class HSlider: Slider {
+	/// Ctor
 	this() {
 		super(0f);
 	}

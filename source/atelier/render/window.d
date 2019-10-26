@@ -41,9 +41,13 @@ static {
 }
 
 @property {
+	/// Width of the window in pixels.
 	uint screenWidth() { return _windowSize.x; }
+	/// Height of the window in pixels.
 	uint screenHeight() { return _windowSize.y; }
+	/// Size of the window in pixels.
 	Vec2f screenSize() { return _screenSize; }
+	/// Half of the size of the window in pixels.
 	Vec2f centerScreen() { return _centerScreen; }
 }
 
@@ -78,14 +82,16 @@ void createWindow(const Vec2u windowSize, string title) {
 		throw new Exception("Could not initialize TTF module.");
 
 	if(_hasAudio) {
-		if(-1 == Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024))
+		if(-1 == Mix_OpenAudio(44_100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024))
 			throw new Exception("No audio device connected.");
 
 		if(-1 == Mix_AllocateChannels(16))
 			throw new Exception("Could not allocate audio channels.");
 	}
 
-	if(-1 == SDL_CreateWindowAndRenderer(windowSize.x, windowSize.y, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_WINDOW_RESIZABLE, &_sdlWindow, &_sdlRenderer))
+	if(-1 == SDL_CreateWindowAndRenderer(windowSize.x, windowSize.y,
+		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_WINDOW_RESIZABLE,
+		&_sdlWindow, &_sdlRenderer))
 		throw new Exception("Window initialization failed.");
 
     SDL_RenderSetLogicalSize(_sdlRenderer, windowSize.x, windowSize.y);
