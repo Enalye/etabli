@@ -466,6 +466,8 @@ bool processEvents() {
 			//No operation involving the SDL after this.
 			return false;
 		case SDL_KEYDOWN:
+			if(sdlEvent.key.keysym.scancode >= _keys.length)
+				break;
 			if (!_keys[sdlEvent.key.keysym.scancode])
 				_keys[sdlEvent.key.keysym.scancode] = true;
 			switch(sdlEvent.key.keysym.scancode) {
@@ -508,7 +510,9 @@ bool processEvents() {
 			}
 			break;
 		case SDL_KEYUP:
-			if (_keys[sdlEvent.key.keysym.scancode])
+			if(sdlEvent.key.keysym.scancode >= _keys.length)
+				break;
+			if(_keys[sdlEvent.key.keysym.scancode])
 				_keys[sdlEvent.key.keysym.scancode] = false;
 			break;
 		case SDL_TEXTINPUT:
@@ -530,6 +534,8 @@ bool processEvents() {
 		case SDL_MOUSEBUTTONDOWN:
 			_mousePosition.set(cast(float)sdlEvent.motion.x, cast(float)sdlEvent.motion.y);
 			_mousePosition = transformCanvasSpace(_mousePosition);
+			if(sdlEvent.button.button >= _buttons.length)
+				break;
 			_buttons[sdlEvent.button.button] = true;
 			
 			event.type = EventType.mouseDown;
@@ -540,6 +546,8 @@ bool processEvents() {
 		case SDL_MOUSEBUTTONUP:
 			_mousePosition.set(cast(float)sdlEvent.motion.x, cast(float)sdlEvent.motion.y);
 			_mousePosition = transformCanvasSpace(_mousePosition);
+			if(sdlEvent.button.button >= _buttons.length)
+				break;
 			_buttons[sdlEvent.button.button] = false;
 
 			event.type = EventType.mouseUp;
