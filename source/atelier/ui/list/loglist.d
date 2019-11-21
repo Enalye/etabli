@@ -57,8 +57,8 @@ class LogList: GuiElement {
 	override void onEvent(Event event) {
 		super.onEvent(event);
 		if(event.type == EventType.mouseDown || event.type == EventType.mouseUp || event.type == EventType.mouseUpdate) {
-			_lastMousePos = event.position;
-			if(_slider.isInside(event.position))
+			_lastMousePos = event.mouse.position;
+			if(_slider.isInside(event.mouse.position))
 				_slider.onEvent(event);
 			else if(event.type == EventType.mouseDown) {
 				auto widgets = _container.layout.children;

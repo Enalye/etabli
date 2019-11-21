@@ -76,7 +76,7 @@ class InputField: GuiElementCanvas {
 			case keyInput:
 				if(_caretIndex >= _limit)
 					break;
-                const auto textInput = to!dstring(event.str);
+                const auto textInput = to!dstring(event.input.text);
                 if(_allowedCharacters.length) {
                     if(indexOf(_allowedCharacters, textInput) == -1)
                         break;
@@ -92,7 +92,7 @@ class InputField: GuiElementCanvas {
 				break;
 			case keyDelete:
 				if(_text.length) {
-					if(event.ivalue > 0) {
+					if(event.textDelete.direction > 0) {
 						if(_caretIndex == 0U)
 							_text = _text[1U..$];
 						else if(_caretIndex != _text.length) {
@@ -113,9 +113,9 @@ class InputField: GuiElementCanvas {
 				}
 				break;
 			case keyDir:
-				if(event.position.x > 0f && _caretIndex < _text.length)
+				if(event.keyMove.direction.x > 0f && _caretIndex < _text.length)
 					_caretIndex ++;
-				if(event.position.x < 0f && _caretIndex > 0U)
+				if(event.keyMove.direction.x < 0f && _caretIndex > 0U)
 					_caretIndex --;
 				break;
 			case keyEnter:

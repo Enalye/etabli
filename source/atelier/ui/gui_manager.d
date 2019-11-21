@@ -84,21 +84,21 @@ package(atelier) void handleGuiElementEvent(Event event) {
     _hasClicked = false;
     switch (event.type) with(EventType) {
     case mouseDown:
-        dispatchMouseDownEvent(null, event.position);
+        dispatchMouseDownEvent(null, event.mouse.position);
 
         if(_hasClicked && _clickedGuiElement !is null) {
             _clickedGuiElement.isClicked = true;
             Event guiEvent = EventType.mouseDown;
-            guiEvent.position = _clickedGuiElementEventPosition;
+            guiEvent.mouse.position = _clickedGuiElementEventPosition;
             _clickedGuiElement.onEvent(guiEvent);
         }
         break;
     case mouseUp:
-        dispatchMouseUpEvent(null, event.position);
+        dispatchMouseUpEvent(null, event.mouse.position);
         break;
     case mouseUpdate:
         _hookedGuis.length = 0;
-        dispatchMouseUpdateEvent(null, event.position);
+        dispatchMouseUpdateEvent(null, event.mouse.position);
 
         if(_hasClicked && _hoveredGuiElement !is null) {
             _hoveredGuiElement.isHovered = true;
@@ -108,12 +108,12 @@ package(atelier) void handleGuiElementEvent(Event event) {
 
             //Compatibility
             Event guiEvent = EventType.mouseUpdate;
-            guiEvent.position = _hoveredGuiElementEventPosition;
+            guiEvent.mouse.position = _hoveredGuiElementEventPosition;
             _hoveredGuiElement.onEvent(guiEvent);
         }
         break;
     case mouseWheel:
-        dispatchMouseWheelEvent(event.position);
+        dispatchMouseWheelEvent(event.scroll.delta);
         break;
     case quit:
         dispatchQuitEvent(null);
@@ -277,7 +277,7 @@ private void dispatchMouseDownEvent(GuiElement gui, Vec2f cursorPosition) {
 
             if(gui._hasEventHook) {
                 Event guiEvent = EventType.mouseDown;
-                guiEvent.position = cursorPosition;
+                guiEvent.mouse.position = cursorPosition;
                 gui.onEvent(guiEvent);
             }
         }
@@ -307,7 +307,7 @@ private void dispatchMouseUpEvent(GuiElement gui, Vec2f cursorPosition) {
 
             if(gui._hasEventHook) {
                 Event guiEvent = EventType.mouseUp;
-                guiEvent.position = cursorPosition;
+                guiEvent.mouse.position = cursorPosition;
                 gui.onEvent(guiEvent);
             }
         }
@@ -335,7 +335,7 @@ private void dispatchMouseUpEvent(GuiElement gui, Vec2f cursorPosition) {
 
         //Compatibility
         Event event = EventType.mouseUp;
-        event.position = cursorPosition;
+        event.mouse.position = cursorPosition;
         gui.onEvent(event);
     }
     if(_clickedGuiElement !is null)
@@ -365,7 +365,7 @@ private void dispatchMouseUpdateEvent(GuiElement gui, Vec2f cursorPosition) {
 
             if(gui._hasEventHook) {
                 Event guiEvent = EventType.mouseUpdate;
-                guiEvent.position = cursorPosition;
+                guiEvent.mouse.position = cursorPosition;
                 gui.onEvent(guiEvent);
                 _hookedGuis ~= gui;
             }
@@ -391,7 +391,7 @@ private void dispatchMouseUpdateEvent(GuiElement gui, Vec2f cursorPosition) {
 /// Process a mouse wheel event down the tree.
 private void dispatchMouseWheelEvent(Vec2f scroll) {
     Event scrollEvent = EventType.mouseWheel;
-    scrollEvent.position = scroll;
+    scrollEvent.scroll.delta = scroll;
 
     foreach(gui; _hookedGuis) {
         gui.onEvent(scrollEvent);
@@ -446,7 +446,7 @@ private void handleGuiElementEvents(GuiElement gui) {
             if(!widget.isInteractable)
                 continue;
 
-            if(!hasClickedGuiElement && widget.isInside(_isFrame ? transformCanvasSpace(event.position, _position) : event.position)) {
+            if(!hasClickedGuiElement && widget.isInside(_isFrame ? transformCanvasSpace(event.mouse.position, _position) : event.mouse.position)) {
                 widget.hasFocus = true;
                 widget.isSelected = true;
                 widget.isHovered = true;
@@ -454,7 +454,7 @@ private void handleGuiElementEvents(GuiElement gui) {
                 _idChildGrabbed = id;
 
                 if(_isFrame)
-                    event.position = transformCanvasSpace(event.position, _position);
+                    event.mouse.position = transformCanvasSpace(event.mouse.position, _position);
                 widget.onEvent(event);
                 hasClickedGuiElement = true;
             }
@@ -462,7 +462,7 @@ private void handleGuiElementEvents(GuiElement gui) {
 
         if(!_isChildGrabbed && _isMovable) {
             _isGrabbed = true;
-            _lastMousePos = event.position;
+            _lastMousePos = event.mouse.position;
         }
         break;
     case MouseUp:
@@ -471,7 +471,7 @@ private void handleGuiElementEvents(GuiElement gui) {
             _children[_idChildGrabbed].isSelected = false;
 
             if(_isFrame)
-                event.position = transformCanvasSpace(event.position, _position);
+                event.mouse.position = transformCanvasSpace(event.mouse.position, _position);
             _children[_idChildGrabbed].onEvent(event);
         }
         else {
@@ -480,14 +480,14 @@ private void handleGuiElementEvents(GuiElement gui) {
         break;
     case MouseUpdate:
         _isIterating = false; //Use mouse control
-        Vec2f mousePosition = event.position;
+        Vec2f mousePosition = event.mouse.position;
         if(_isFrame)
-            event.position = transformCanvasSpace(event.position, _position);
+            event.mouse.position = transformCanvasSpace(event.mouse.position, _position);
 
         _isChildHovered = false;
         foreach(uint id, GuiElement widget; _children) {
             if(isHovered) {
-                widget.isHovered = widget.isInside(event.position);
+                widget.isHovered = widget.isInside(event.mouse.position);
                 if(widget.isHovered && widget.isInteractable) {
                     _isChildHovered = true;
                     widget.onEvent(event);

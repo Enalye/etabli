@@ -83,18 +83,18 @@ class Knob: GuiElement {
 
 		switch(event.type) with(EventType) {
 		case mouseWheel:
-			_value += event.position.y * _step;
+			_value += event.scroll.delta.y * _step;
 			_value = clamp(_value, 0f, 1f);
 			break;
 		case mouseDown:
-			_lastCursorPosition = event.position;
+			_lastCursorPosition = event.mouse.position;
 			break;
 		case mouseUp:
 		case mouseUpdate:
 			if(!isSelected)
 				break;
-			Vec2f delta = event.position - center;
-			Vec2f delta2 = event.position - _lastCursorPosition;
+			Vec2f delta = event.mouse.position - center;
+			Vec2f delta2 = event.mouse.position - _lastCursorPosition;
 			if(delta2.lengthSquared() > 0f)
 				delta2.normalize();
 			else
@@ -105,7 +105,7 @@ class Knob: GuiElement {
 			direction = direction > .5f ? 1f : (direction < -.5f ? -1f : 0f);
 			_value += direction * _step;
 			_value = clamp(_value, 0f, 1f);
-			_lastCursorPosition = event.position;
+			_lastCursorPosition = event.mouse.position;
 			break;
 		default:
 			break;

@@ -36,28 +36,6 @@ static private {
 
 private bool _isRunning = false;
 
-/// Type of event
-enum EventType: uint {
-	keyUp,
-	keyDown,
-	keyInput,
-	keyDelete,
-	keyEnter,
-	keyDir,
-	mouseUp,
-	mouseDown,
-	mouseUpdate,
-	mouseWheel,
-	quit,
-	dropFile,
-	resize,
-	modalOpen,
-	modalClose,
-	modalApply,
-	modalCancel,
-	callback
-}
-
 /// List of mouse buttons.
 enum MouseButton: ubyte {
 	left = SDL_BUTTON_LEFT,
@@ -312,6 +290,28 @@ enum KeyButton {
 	app2 = SDL_SCANCODE_APP2
 }
 
+/// Type of event
+enum EventType: uint {
+	keyUp,
+	keyDown,
+	keyInput,
+	keyDelete,
+	keyEnter,
+	keyDir,
+	mouseUp,
+	mouseDown,
+	mouseUpdate,
+	mouseWheel,
+	quit,
+	dropFile,
+	resize,
+	modalOpen,
+	modalClose,
+	modalApply,
+	modalCancel,
+	callback
+}
+
 /// Event structure passed on onEvent() methods.
 struct Event {
 	/// Ctor from basic type.
@@ -319,45 +319,78 @@ struct Event {
 		type = type_;
 	}
 
+	/// Base type.
 	EventType type;
-	string id;
 	union {
+		/// For base type `keyDown` and `keyUp`.
+		KeyEvent key;
+		/// For base type `mouseDown`, `mouseUp` and `mouseUpdate`.
+		MouseEvent mouse;
+		/// For base type `mouseWheel`.
+		MouseWheelEvent scroll;
+		/// For base type `keyInput`.
+		TextInputEvent input;
+		/// For base type `dropFile`.
+		DropFileEvent drop;
+		/// For base type `keyDelete`.
+		TextDeleteEvent textDelete;
+		/// For base type `keyDir`.
+		KeyMoveEvent keyMove;
+		/// For base type `resize`.
+		WindowEvent window;
+	}
+
+	/// For base type `keyDown` and `keyUp`.
+	struct KeyEvent {
+		KeyButton button;
+		bool isRepeated;
+	}
+
+	/// For base type `mouseDown`, `mouseUp` and `mouseUpdate`.
+	struct MouseEvent {
+		/// Mouse position relative to its canvas. (Not an absolute position)
 		Vec2f position;
-		Vec2i coord;
-		string str;
-		int ivalue;
-		string[] sarray;
-		GuiElement widget;
-	}
-}
-
-/// Deprecated, don't use this.
-struct GuiElementCallback {
-	GuiElement widget;
-	string id;
-
-	void trigger(GuiElement w) {
-		Event event;
-		event.type = EventType.callback;
-		event.id = id;
-		event.widget = w;
-		widget.onEvent(event);
+		/// Button pressed or not.
+		MouseButton button;
+		/// How many time the button was pressed.
+		uint clicks;
 	}
 
-	void trigger(string[] array) {
-		Event event;
-		event.type = EventType.callback;
-		event.id = id;
-		event.sarray = array;
-		widget.onEvent(event);
+	/// For base type `mouseWheel`.
+	struct MouseWheelEvent {
+		/// Direction of scrolling.
+		Vec2f delta;
 	}
 
-	void trigger(int value) {
-		Event event;
-		event.type = EventType.callback;
-		event.id = id;
-		event.ivalue = value;
-		widget.onEvent(event);
+	/// For base type `dropFile`.
+	struct DropFileEvent {
+		/// Full path of the file dropped.
+		string filePath;
+	}
+
+	/// For base type `keyInput`.
+	struct TextInputEvent {
+		/// Text written by the user.
+		string text;
+	}
+
+	/// For base type `keyDelete`.
+	struct TextDeleteEvent {
+		/// 1 = delete right char, \
+		/// -1 = delete left char.
+		int direction;
+	}
+
+	/// For base type `keyDir`.
+	struct KeyMoveEvent {
+		/// Arrow keys movement.
+		Vec2f direction;
+	}
+
+	/// For base type `resize`.
+	struct WindowEvent {
+		/// New size of the window.
+		Vec2u size;
 	}
 }
 
@@ -454,7 +487,7 @@ bool processEvents() {
 	}
 
 	//Used to start receiving SDL_TEXTINPUT events
-	SDL_StartTextInput();
+	//SDL_StartTextInput();
 	
 	while (SDL_PollEvent(&sdlEvent)) {
 		switch (sdlEvent.type) {
@@ -470,15 +503,22 @@ bool processEvents() {
 				break;
 			if (!_keys[sdlEvent.key.keysym.scancode])
 				_keys[sdlEvent.key.keysym.scancode] = true;
+			
+			{ // KeyDown Event
+				event.type = EventType.keyDown;
+				event.key.button = cast(KeyButton) sdlEvent.key.keysym.scancode;
+				event.key.isRepeated = sdlEvent.key.repeat > 0;
+				handleGuiElementEvent(event);
+			}
 			switch(sdlEvent.key.keysym.scancode) {
 			case SDL_SCANCODE_DELETE:
 				event.type = EventType.keyDelete;
-				event.ivalue = 1;
+				event.textDelete.direction = 1;
 				handleGuiElementEvent(event);
 				break;
 			case SDL_SCANCODE_BACKSPACE:
 				event.type = EventType.keyDelete;
-				event.ivalue = -1;
+				event.textDelete.direction = -1;
 				handleGuiElementEvent(event);
 				break;
 			case SDL_SCANCODE_RETURN:
@@ -487,22 +527,22 @@ bool processEvents() {
 				break;
 			case SDL_SCANCODE_UP:
 				event.type = EventType.keyDir;
-				event.position = Vec2f(0f, -1f);
+				event.keyMove.direction = Vec2f(0f, -1f);
 				handleGuiElementEvent(event);
 				break;
 			case SDL_SCANCODE_DOWN:
 				event.type = EventType.keyDir;
-				event.position = Vec2f(0f, 1f);
+				event.keyMove.direction = Vec2f(0f, 1f);
 				handleGuiElementEvent(event);
 				break;
 			case SDL_SCANCODE_LEFT:
 				event.type = EventType.keyDir;
-				event.position = Vec2f(-1f, 0f);
+				event.keyMove.direction = Vec2f(-1f, 0f);
 				handleGuiElementEvent(event);
 				break;
 			case SDL_SCANCODE_RIGHT:
 				event.type = EventType.keyDir;
-				event.position = Vec2f(1f, 0f);
+				event.keyMove.direction = Vec2f(1f, 0f);
 				handleGuiElementEvent(event);
 				break;
 			default:
@@ -514,12 +554,19 @@ bool processEvents() {
 				break;
 			if(_keys[sdlEvent.key.keysym.scancode])
 				_keys[sdlEvent.key.keysym.scancode] = false;
+			
+			{ // KeyUp Event
+				event.type = EventType.keyUp;
+				event.key.button = cast(KeyButton) sdlEvent.key.keysym.scancode;
+				event.key.isRepeated = sdlEvent.key.repeat > 0;
+				handleGuiElementEvent(event);
+			}
 			break;
 		case SDL_TEXTINPUT:
 			string text = to!string(sdlEvent.text.text);
 			text.length = stride(text);
 			event.type = EventType.keyInput;
-			event.str = text;
+			event.input.text = text;
 			handleGuiElementEvent(event);
 			break;
 		case SDL_MOUSEMOTION:
@@ -527,7 +574,7 @@ bool processEvents() {
 			_mousePosition = transformCanvasSpace(_mousePosition);
 
 			event.type = EventType.mouseUpdate;
-			event.position = _mousePosition;
+			event.mouse.position = _mousePosition;
 
 			handleGuiElementEvent(event);
 			break;
@@ -539,7 +586,9 @@ bool processEvents() {
 			_buttons[sdlEvent.button.button] = true;
 			
 			event.type = EventType.mouseDown;
-			event.position = _mousePosition;
+			event.mouse.position = _mousePosition;
+			event.mouse.button = cast(MouseButton) sdlEvent.button.button;
+			event.mouse.clicks = sdlEvent.button.clicks;
 
 			handleGuiElementEvent(event);
 			break;
@@ -551,19 +600,26 @@ bool processEvents() {
 			_buttons[sdlEvent.button.button] = false;
 
 			event.type = EventType.mouseUp;
-			event.position = _mousePosition;
+			event.mouse.position = _mousePosition;
+			event.mouse.button = cast(MouseButton) sdlEvent.button.button;
+			event.mouse.clicks = sdlEvent.button.clicks;
 
 			handleGuiElementEvent(event);
 			break;
 		case SDL_MOUSEWHEEL:
 			event.type = EventType.mouseWheel;
-			event.position = Vec2f(sdlEvent.wheel.x, sdlEvent.wheel.y);
+			event.scroll.delta = Vec2f(sdlEvent.wheel.x, sdlEvent.wheel.y);
 			handleGuiElementEvent(event);
 			break;
 		case SDL_WINDOWEVENT:
 			switch (sdlEvent.window.event) {
 				case SDL_WINDOWEVENT_RESIZED:
-					setWindowSize(Vec2u(sdlEvent.window.data1, sdlEvent.window.data2));
+					event.type = EventType.resize;
+					event.window.size = Vec2u(sdlEvent.window.data1, sdlEvent.window.data2);
+					resizeWindow(event.window.size);
+					handleGuiElementEvent(event);
+					break;
+				case SDL_WINDOWEVENT_SIZE_CHANGED:
 					break;
 				default:
 					break;
@@ -588,7 +644,7 @@ bool processEvents() {
 			}
 
 			event.type = EventType.dropFile;
-			event.str = path;
+			event.drop.filePath = path;
 			handleGuiElementEvent(event);
 
 			SDL_free(sdlEvent.drop.file);

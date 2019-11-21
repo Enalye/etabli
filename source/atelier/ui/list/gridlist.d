@@ -53,7 +53,7 @@ class GridList: GuiElement {
 	override void onEvent(Event event) {
 		super.onEvent(event);
 		if(event.type == EventType.mouseDown || event.type == EventType.mouseUp || event.type == EventType.mouseUpdate) {
-			if(_slider.isInside(event.position))
+			if(_slider.isInside(event.mouse.position))
 				_slider.onEvent(event);
 			else if(event.type == EventType.mouseDown) {
 

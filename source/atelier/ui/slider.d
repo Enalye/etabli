@@ -91,7 +91,7 @@ abstract class Slider: GuiElement {
 
 		switch(event.type) with(EventType) {
 		case mouseWheel:
-			_offset -= event.position.y * _step;
+			_offset -= event.scroll.delta.y * _step;
 			_offset = (_offset < -_step) ? -_step : ((_offset > 1f + _step) ? 1f + _step : _offset);	//Clamp the value.
 			break;
 		case mouseUpdate:
@@ -125,8 +125,8 @@ abstract class Slider: GuiElement {
 		const float b = startPos.y - (coef * startPos.x);
 
 		const Vec2f closestPoint = Vec2f(
-			(coef * event.position.y + event.position.x - coef * b) / (coef * coef + 1f),
-			(coef * coef * event.position.y + coef * event.position.x + b) / (coef * coef + 1f));
+			(coef * event.mouse.position.y + event.mouse.position.x - coef * b) / (coef * coef + 1f),
+			(coef * coef * event.mouse.position.y + coef * event.mouse.position.x + b) / (coef * coef + 1f));
 
 		_offset = ((closestPoint.x - startPos.x) + (closestPoint.y - startPos.y)) / _scrollLength;	
 		_offset = (_offset < 0f) ? 0f : ((_offset > 1f) ? 1f : _offset);	//Clamp the value.

@@ -26,7 +26,7 @@ static {
 	package(atelier) {
 		SDL_Window* _sdlWindow;
 		SDL_Renderer* _sdlRenderer;
-		Color windowClearColor;
+		Color _windowClearColor;
 	}
 
 	private {
@@ -131,9 +131,24 @@ void setWindowTitle(string title) {
 	SDL_SetWindowTitle(_sdlWindow, toStringz(title));
 }
 
+/// Change the base color of the base canvas.
+void setWindowClearColor(Color color) {
+	_windowClearColor = color;
+}
+
 /// Update the window size. \
 /// If `isLogical` is set, the actual window won't be resized, only the canvas will.
 void setWindowSize(const Vec2u windowSize, bool isLogical = false) {
+	resizeWindow(windowSize);
+
+	if(isLogical)
+		SDL_RenderSetLogicalSize(_sdlRenderer, windowSize.x, windowSize.y);
+	else
+		SDL_SetWindowSize(_sdlWindow, windowSize.x, windowSize.y);
+}
+
+/// Call this to update canvas size when window's size is changed externally.
+package(atelier) void resizeWindow(const Vec2u windowSize) {
 	_windowSize = windowSize;
 	_screenSize = cast(Vec2f)(windowSize);
 	_centerScreen = _screenSize / 2f;
@@ -143,10 +158,6 @@ void setWindowSize(const Vec2u windowSize, bool isLogical = false) {
 		_canvases[0].size = cast(Vec2f)(windowSize);
 		_canvases[0].renderSize = cast(Vec2f)windowSize;
 	}
-	if(isLogical)
-		SDL_RenderSetLogicalSize(_sdlRenderer, windowSize.x, windowSize.y);
-	else
-		SDL_SetWindowSize(_sdlWindow, windowSize.x, windowSize.y);
 }
 
 /// Current window size.
@@ -231,7 +242,7 @@ void renderWindow() {
 		_customCursorSprite.draw(mousePos + _customCursorSprite.size / 2f);
 	}
 	SDL_RenderPresent(_sdlRenderer);
-	setRenderColor(windowClearColor);
+	setRenderColor(_windowClearColor);
 	SDL_RenderClear(_sdlRenderer);
 }
 
@@ -269,7 +280,7 @@ void popCanvas() {
     _canvases[$ - 1].canvas._isTargetOnStack = false;
 	_canvases.length --;
 	SDL_SetRenderTarget(_sdlRenderer, cast(SDL_Texture*)_canvases[$ - 1].target);
-	setRenderColor(windowClearColor);
+	setRenderColor(_windowClearColor);
 }
 
 /// Change coordinate system from inside to outside the canvas.
