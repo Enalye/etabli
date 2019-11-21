@@ -94,7 +94,6 @@ void createWindow(const Vec2u windowSize, string title) {
 		&_sdlWindow, &_sdlRenderer))
 		throw new Exception("Window initialization failed.");
 
-    SDL_RenderSetLogicalSize(_sdlRenderer, windowSize.x, windowSize.y);
 	CanvasReference canvasRef;
 	canvasRef.target = null;
 	canvasRef.position = cast(Vec2f)(windowSize) / 2;
@@ -132,15 +131,39 @@ void setWindowTitle(string title) {
 	SDL_SetWindowTitle(_sdlWindow, toStringz(title));
 }
 
-/// Update the window size.
-void setWindowSize(const Vec2u windowSize) {
+/// Update the window size. \
+/// If `isLogical` is set, the actual window won't be resized, only the canvas will.
+void setWindowSize(const Vec2u windowSize, bool isLogical = false) {
 	_windowSize = windowSize;
 	_screenSize = cast(Vec2f)(windowSize);
 	_centerScreen = _screenSize / 2f;
 	
-	if (_canvases.length)
+	if (_canvases.length) {
+		_canvases[0].position = cast(Vec2f)(windowSize) / 2;
+		_canvases[0].size = cast(Vec2f)(windowSize);
 		_canvases[0].renderSize = cast(Vec2f)windowSize;
-	SDL_SetWindowSize(_sdlWindow, windowSize.x, windowSize.y);
+	}
+	if(isLogical)
+		SDL_RenderSetLogicalSize(_sdlRenderer, windowSize.x, windowSize.y);
+	else
+		SDL_SetWindowSize(_sdlWindow, windowSize.x, windowSize.y);
+}
+
+/// Current window size.
+Vec2i getWindowSize() {
+	Vec2i windowSize;
+	SDL_GetWindowSize(_sdlWindow, &windowSize.x, &windowSize.y);
+	return windowSize;
+}
+
+/// The window cannot be resized less than this.
+void setWindowMinSize(Vec2u size) {
+	SDL_SetWindowMinimumSize(_sdlWindow, size.x, size.y);
+}
+
+/// The window cannot be resized more than this.
+void setWindowMaxSize(Vec2u size) {
+	SDL_SetWindowMaximumSize(_sdlWindow, size.x, size.y);
 }
 
 /// Change the icon displayed.

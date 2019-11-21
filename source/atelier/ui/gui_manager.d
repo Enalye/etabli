@@ -172,14 +172,14 @@ package(atelier) void updateGuiElements(GuiElement gui, GuiElement parent) {
             else if(gui._alignX == GuiAlignX.right)
                 coords.x = (parent._size.x * parent._currentState.scale.x) - offset.x;
             else
-                coords.x = (parent._size.x * parent._currentState.scale.x) / 2f + gui._currentState.offset.x;
+                coords.x = (parent._size.x * parent._currentState.scale.x) / 2f + gui._currentState.offset.x + gui.position.x;
 
             if(gui._alignY == GuiAlignY.top)
                 coords.y = offset.y;
             else if(gui._alignY == GuiAlignY.bottom)
                 coords.y = (parent._size.y * parent._currentState.scale.y) - offset.y;
             else
-                coords.y = (parent._size.y * parent._currentState.scale.y) / 2f + gui._currentState.offset.y;
+                coords.y = (parent._size.y * parent._currentState.scale.y) / 2f + gui._currentState.offset.y + gui.position.y;
         }
         else {
             if(gui._alignX == GuiAlignX.left)
@@ -187,14 +187,14 @@ package(atelier) void updateGuiElements(GuiElement gui, GuiElement parent) {
             else if(gui._alignX == GuiAlignX.right)
                 coords.x = parent.origin.x + (parent._size.x * parent._currentState.scale.x) - offset.x;
             else
-                coords.x = parent.center.x + gui._currentState.offset.x;
+                coords.x = parent.center.x + gui._currentState.offset.x + gui.position.x;
 
             if(gui._alignY == GuiAlignY.top)
                 coords.y = parent.origin.y + offset.y;
             else if(gui._alignY == GuiAlignY.bottom)
                 coords.y = parent.origin.y + (parent._size.y * parent._currentState.scale.y) - offset.y;
             else
-                coords.y = parent.center.y + gui._currentState.offset.y;
+                coords.y = parent.center.y + gui._currentState.offset.y + gui.position.y;
         }
     }
     else {
@@ -203,14 +203,14 @@ package(atelier) void updateGuiElements(GuiElement gui, GuiElement parent) {
         else if(gui._alignX == GuiAlignX.right)
             coords.x = screenWidth - offset.x;
         else
-            coords.x = centerScreen.x + gui._currentState.offset.x;
+            coords.x = centerScreen.x + gui._currentState.offset.x + gui.position.x;
 
         if(gui._alignY == GuiAlignY.top)
             coords.y = offset.y;
         else if(gui._alignY == GuiAlignY.bottom)
             coords.y = screenHeight - offset.y;
         else
-            coords.y = centerScreen.y + gui._currentState.offset.y;
+            coords.y = centerScreen.y + gui._currentState.offset.y + gui.position.y;
     }
     gui.setScreenCoords(coords);
     gui.update(_deltaTime);

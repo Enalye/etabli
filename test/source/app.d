@@ -25,52 +25,20 @@ void main() {
         }
         setDefaultFont(fetch!TrueTypeFont("font"));
 
-        auto a = new HList(Vec2f(400f, 300f));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello1"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello2"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello3"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4dazdazdazdazda"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4adazdaz"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        a.addChildGui(new TextButton(getDefaultFont(), "Hello4"));
-        addRootGui(a);
+        addRootGui(new TextButton(getDefaultFont(), "Top Left !"));
+
+        auto o = new VContainer;
+        auto t = new TextButton(getDefaultFont(), "Hello World!");
+        o.setAlign(GuiAlignX.right, GuiAlignY.bottom);
+        auto h = new HContainer;
+        h.addChildGui(t);
+        o.addChildGui(h);
+        addRootGui(o);
 
         setDebugGui(true);
+
+        setWindowMinSize(Vec2u(100, 100));
+        setWindowMaxSize(Vec2u(600, 600));
 
 		runApplication();
 	}

@@ -563,7 +563,7 @@ bool processEvents() {
 		case SDL_WINDOWEVENT:
 			switch (sdlEvent.window.event) {
 				case SDL_WINDOWEVENT_RESIZED:
-					//setWindowSize(Vec2u(sdlEvent.window.data1, sdlEvent.window.data2));
+					setWindowSize(Vec2u(sdlEvent.window.data1, sdlEvent.window.data2));
 					break;
 				default:
 					break;

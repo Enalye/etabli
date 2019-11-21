@@ -47,7 +47,7 @@ class GuiElement {
         bool _hasCanvas;
     }
 
-    package {
+    public {
 		GuiElement[] _children;
 		Hint _hint;
 		bool _isLocked, _isMovable, _isHovered, _isClicked, _isSelected, _hasFocus, _isInteractable = true, _hasEventHook;
