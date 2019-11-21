@@ -370,7 +370,7 @@ bool isButtonDown(KeyButton button) {
 /// Check whether the key associated with the ID is pressed. \
 /// This function resets the value to false.
 bool getButtonDown(KeyButton button) {
-    const bool value = _buttons[button];
+    const bool value = _keys[button];
     _keys[button] = false;
 	return value;
 }

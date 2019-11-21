@@ -19,12 +19,11 @@ import atelier.core;
 import atelier.render.window, atelier.render.texture, atelier.render.drawable;
 import atelier.render.tileset, atelier.render.sprite;
 
-/// Series of animation _frames played successively.
+/// Series of animation frames played successively.
 final class Animation : Drawable {
 	private {
 		Texture _texture;
 		Timer _timer;
-		Vec4i[] _frames;
 		int _currentFrameID;
 	}
 
@@ -46,12 +45,14 @@ final class Animation : Drawable {
 		/// The current frame being used.
 		int currentFrameID() const { return _currentFrameID; }
 
-		/// Texture regions (the source size) for each _frames.
-		const(Vec4i[]) frames() const { return _frames; }
-
 		/// Texture.
-		const(Texture) frames() const { return _texture; }
+		Texture texture(Texture texture_) { return _texture = texture_; }
+		/// Ditto
+		const(Texture) texture() const { return _texture; }
 	}
+
+	/// Texture regions (the source size) for each frames.
+	Vec4i[] frames;
 
     /// Destination size.
 	Vec2f size;
@@ -71,12 +72,15 @@ final class Animation : Drawable {
 	/// Easing algorithm
 	EasingAlgorithm easing = EasingAlgorithm.linear;
 
+	/// Empty animation.
+	this() {}
+
 	/// Create an animation from a series of clips.
     this(Texture tex, const Vec2f size_, Vec4i[] frames_) {
 		assert(tex, "Null texture");
 		_texture = tex;
 		size = size_;
-		_frames = frames_;
+		frames = frames_;
 	}
 
 	/// Create an animation from a tileset.
@@ -95,7 +99,7 @@ final class Animation : Drawable {
 					startTileClip.y + y * (startTileClip.w + margin.y),
 					startTileClip.z,
 					startTileClip.w);
-				_frames ~= currentClip;
+				frames ~= currentClip;
 
 				if(maxcount > 0) {
 					count ++;
@@ -110,7 +114,7 @@ final class Animation : Drawable {
 	this(Animation animation) {
 		_timer = animation._timer;
 		_texture = animation._texture;
-		_frames = animation._frames;
+		frames = animation.frames;
 		size = animation.size;
 		angle = animation.angle;
 		flip = animation.flip;
@@ -145,20 +149,20 @@ final class Animation : Drawable {
 	void update(float deltaTime) {
 		_timer.update(deltaTime);
 		const float easedTime = getEasingFunction(easing)(_timer.value01());
-		if(!_frames.length)
+		if(!frames.length)
 			_currentFrameID = -1;
 		else
-			_currentFrameID = clamp(cast(int)lerp(0f, to!float(_frames.length), easedTime), 0, (cast(int) _frames.length) - 1);       
+			_currentFrameID = clamp(cast(int)lerp(0f, to!float(frames.length), easedTime), 0, (cast(int) frames.length) - 1);       
 	}
 	
 	/// Render the current frame.
 	void draw(const Vec2f position) {
-		if(_currentFrameID < 0 || !_frames.length)
+		if(_currentFrameID < 0 || !frames.length)
 			return;
 		assert(_texture, "No _texture loaded.");
-		assert(_currentFrameID < _frames.length, "Animation frame id out of bounds.");
+		assert(_currentFrameID < frames.length, "Animation frame id out of bounds.");
 		
-		const Vec4i currentClip = _frames[_currentFrameID];
+		const Vec4i currentClip = frames[_currentFrameID];
 		const Vec2f finalSize = size * transformScale();
         _texture.setColorMod(color, blend);
         _texture.draw(transformRenderSpace(position), finalSize, currentClip, angle, flip);
