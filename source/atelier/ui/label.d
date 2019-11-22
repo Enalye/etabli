@@ -20,7 +20,6 @@ final class Label: GuiElement {
 		Font _font;
 		Texture _texture;
 		Sprite _sprite;
-		Color _color = Color.white;
 	}
 
 	@property {
