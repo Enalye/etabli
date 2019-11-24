@@ -64,7 +64,7 @@ void setOverlay(GuiElement gui) {
 /// Remove the current overlay gui.
 void stopOverlay() {
 	if(!_isOverlay)
-		throw new Exception("No overlay to stop");
+		return;
 	_isOverlay = false;
 	setRootGuis(_backupGuis);
 	_backupGuis.length = 0L;
@@ -78,6 +78,7 @@ package void processOverlayEvent(Event event) {
 			gui.onQuit();
 			gui.onEvent(event);
 		}
+		stopOverlay();
 	}
 }
 

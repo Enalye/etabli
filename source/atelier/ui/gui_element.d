@@ -158,15 +158,15 @@ class GuiElement {
         }
 
         /// Does this gui has focus ? \
-        /// Call **onFocus()** on change. (<- Not for now)
+        /// Call **onFocus()** on change.
 		final bool hasFocus() const { return _hasFocus; }
         /// Ditto
 		final bool hasFocus(bool newHasFocus) {
-            /*if(newHasFocus != _hasFocus) {
+            if(newHasFocus != _hasFocus) {
                 _hasFocus = newHasFocus;
                 onFocus();
                 return _hasFocus;
-            }*/
+            }
             return _hasFocus = newHasFocus;
         }
 

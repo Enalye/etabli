@@ -253,7 +253,7 @@ void drawGuiElements(GuiElement gui) {
     }
     if(_isGuiElementDebug) {
         drawRect(gui.center - (gui._size * gui._currentState.scale) / 2f, gui._size * gui._currentState.scale,
-            gui.children.length ? Color.blue : Color.green);
+            gui.isHovered ? Color.red : (gui.children.length ? Color.blue : Color.green));
     }
 }
 
