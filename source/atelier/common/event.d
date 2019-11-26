@@ -309,7 +309,8 @@ enum EventType: uint {
 	modalClose,
 	modalApply,
 	modalCancel,
-	callback
+	callback,
+	custom
 }
 
 /// Event structure passed on onEvent() methods.
@@ -338,6 +339,8 @@ struct Event {
 		KeyMoveEvent keyMove;
 		/// For base type `resize`.
 		WindowEvent window;
+		/// For base type `custom`.
+		CustomEvent custom;
 	}
 
 	/// For base type `keyDown` and `keyUp`.
@@ -392,6 +395,11 @@ struct Event {
 		/// New size of the window.
 		Vec2u size;
 	}
+
+	struct CustomEvent {
+		string id;
+		void* data;
+	}
 }
 
 /// Check whether the key associated with the ID is pressed. \
@@ -445,6 +453,15 @@ void sendEvent(EventType eventType) {
 
 /// Dispatch an event to GUIs.
 void sendEvent(Event event) {
+	_globalEvents ~= event;
+}
+
+/// Send a custom event.
+void sendCustomEvent(string id, void* data = null) {
+	Event event;
+	event.type = EventType.custom;
+	event.custom.id = id;
+	event.custom.data = data;
 	_globalEvents ~= event;
 }
 
