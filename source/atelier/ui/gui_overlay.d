@@ -81,6 +81,7 @@ package void processOverlayEvent(Event event) {
 		}
 		stopOverlay();
 		break;
+	case resize:
 	case custom:
 		foreach(gui; _backupGuis) {
 			gui.onEvent(event);

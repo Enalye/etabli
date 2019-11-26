@@ -37,6 +37,7 @@ static {
 		bool _hasCustomCursor = false;
 		bool _showCursor = true;
 		Sprite _customCursorSprite;
+		DisplayMode _displayMode = DisplayMode.windowed;
 	}
 }
 
@@ -61,8 +62,8 @@ private struct CanvasReference {
 
 static private CanvasReference[] _canvases;
 
-/// Fullscreen mode.
-enum Fullscreen {
+/// Window display mode.
+enum DisplayMode {
 	fullscreen,
 	desktop,
 	windowed
@@ -203,10 +204,12 @@ void showWindowCursor(bool show) {
 		SDL_ShowCursor(show);
 }
 
-/// Change the fullscreen property between windowed, desktop fullscreen and fullscreen.
-void setWindowFullScreen(Fullscreen fullscreen) {
+/// Change the display mode between windowed, desktop fullscreen and fullscreen.
+void setWindowDisplay(DisplayMode displayMode) {
+	import atelier.ui: handleGuiElementEvent;
+	_displayMode = displayMode;
 	uint mode;
-	final switch(fullscreen) with(Fullscreen) {
+	final switch(displayMode) with(DisplayMode) {
 	case fullscreen:
 		mode = SDL_WINDOW_FULLSCREEN;
 		break;
@@ -218,6 +221,17 @@ void setWindowFullScreen(Fullscreen fullscreen) {
 		break;
 	}
 	SDL_SetWindowFullscreen(_sdlWindow, mode);
+	Vec2u newSize = cast(Vec2u) getWindowSize();
+	resizeWindow(newSize);
+	Event event;
+	event.type = EventType.resize;
+	event.window.size = newSize;
+	handleGuiElementEvent(event);
+}
+
+/// Current display mode.
+DisplayMode getWindowDisplay() {
+	return _displayMode;
 }
 
 /// Enable/Disable the borders.
