@@ -9,12 +9,8 @@
 module atelier.ui.list.hlist;
 
 import std.conv: to;
-
-import atelier.core;
-import atelier.render;
-import atelier.common;
-
-import atelier.ui;
+import atelier.core, atelier.render, atelier.common;
+import atelier.ui.gui_element, atelier.ui.container, atelier.ui.slider;
 
 private final class ListContainer: GuiElementCanvas {
 	public {

@@ -20,6 +20,7 @@ public {
 	import atelier.ui.knob;
 	import atelier.ui.label;
 	import atelier.ui.layout;
+	import atelier.ui.container;
 	import atelier.ui.inputfield;
 	import atelier.ui.info;
 	import atelier.ui.text;

@@ -10,87 +10,117 @@ module atelier.ui.list.gridlist;
 
 import std.conv: to;
 import atelier.core, atelier.render, atelier.common;
-import atelier.ui.gui_element, atelier.ui.layout, atelier.ui.slider;
+import atelier.ui.gui_element, atelier.ui.container, atelier.ui.slider;
 
-private class GridContainer: GuiElementCanvas {
+private final class ListContainer: GuiElementCanvas {
 	public {
-		GridLayout layout;
+		GridContainer container;
 	}
 
-	this(Vec2f newSize) {
+	this(Vec2f sz) {
 		isLocked = true;
-		layout = new GridLayout;
-		size(newSize);
-		addChildGui(layout);
+		container = new GridContainer;
+		size(sz);
+		addChildGui(container);
 	}
 }
 
 class GridList: GuiElement {
 	protected {
-		GridContainer _container;
+		ListContainer _container;
 		Slider _slider;
 		Vec2f _lastMousePos = Vec2f.zero;
-		float _layoutLength = 74f;
-		uint _nbElements = 0u;
-		uint _idElementSelected = 0u;
-		uint _nbElementsPerLine = 4u;
+		float _layoutLength = 25f;
+		int _nbElements;
+		int _idElementSelected;
 	}
 
 	@property {
-		uint selected() const { return _idElementSelected; }
-		uint selected(uint id) {
-			if(id > _nbElements)
-				throw new Exception("GridList: index out of bounds");
+		/// The ID of the child that has been selected.
+		int selected() const { return _idElementSelected; }
+		/// Ditto
+		int selected(int id) {
+			if(id >= _nbElements)
+				id = _nbElements - 1;
+            if(id < 0)
+                id = 0;
 			_idElementSelected = id;
+
+            //Update children
+            auto widgets = _container.container.children;
+            foreach(GuiElement gui; _container.container.children)
+                gui.isSelected = false;
+            if(_idElementSelected < widgets.length)
+                widgets[_idElementSelected].isSelected = true;
 			return _idElementSelected;
 		}
+
+		/// Height of a single child.
+		float layoutLength() const { return _layoutLength; }
+		/// Ditto
+		float layoutLength(float length) {
+			_layoutLength = length;
+			_container.container.size = Vec2f(_container.size.x, _layoutLength * _nbElements);
+			return _layoutLength;
+		}
+
+		/// The number of children per line.
+        uint maxElementsPerLine() const { return _container.container.maxElementsPerLine; }
+        /// Ditto
+		uint maxElementsPerLine(uint maxElementsPerLine_) { return _container.container.maxElementsPerLine = maxElementsPerLine_; }
 	}
 
-	this(Vec2f size) {
-		createGui(size);
+	/// Ctor.
+	this(Vec2f sz) {
+		isLocked = true;
+		_slider = new VScrollbar;
+        _slider.setAlign(GuiAlignX.left, GuiAlignY.center);
+		_container = new ListContainer(sz);
+        _container.setAlign(GuiAlignX.left, GuiAlignY.top);
+        _container.container.setAlign(GuiAlignX.left, GuiAlignY.top);
+
+		super.addChildGui(_slider);
+		super.addChildGui(_container);
+
+		size(sz);
+		position(Vec2f.zero);
+
+        setEventHook(true);
+        
+		_container.container.size = Vec2f(_container.size.x, 0f);
 	}
+
+	override void onCallback(string id) {
+        if(id != "list")
+            return;
+        auto widgets = _container.container.children;
+        foreach(size_t elementId, ref GuiElement gui; _container.container.children) {
+            gui.isSelected = false;
+            if(gui.isHovered)
+                _idElementSelected = cast(uint)elementId;
+        }
+        if(_idElementSelected < widgets.length)
+            widgets[_idElementSelected].isSelected = true;
+    }
 
 	override void onEvent(Event event) {
-		super.onEvent(event);
-		if(event.type == EventType.mouseDown || event.type == EventType.mouseUp || event.type == EventType.mouseUpdate) {
-			if(_slider.isInside(event.mouse.position))
-				_slider.onEvent(event);
-			else if(event.type == EventType.mouseDown) {
-
-				auto widgets = _container.layout.children;
-				foreach(size_t id, ref GuiElement widget; _container.layout.children) {
-					widget.isSelected = false;
-					if(widget.isHovered)
-						_idElementSelected = cast(uint)id;
-				}
-				if(_idElementSelected < widgets.length)
-					widgets[_idElementSelected].isSelected = true;
-			}
-		}
-
-		if(!isOnInteractableGuiElement(_lastMousePos) && event.type == EventType.mouseWheel)
-			_slider.onEvent(event);
-	}
-
-		override void onPosition() {
-			_slider.position = center - Vec2f((size.x - _slider.size.x) / 2f, 0f) + size / 2f;
-			_container.position = center + Vec2f(_slider.size.x / 2f, 0f) + size / 2f;
-		}
-
-		override void onSize() {
-			_slider.size = Vec2f(10f, size.y);
-			_container.layout.capacity = Vec2u(_nbElementsPerLine, 0u);
-			_container.layout.size = Vec2f(size.x, _layoutLength * (_nbElements / _nbElementsPerLine));
-			_container.size = Vec2f(size.x - _slider.size.x, size.y);
-			_container.canvas.renderSize = _container.size.to!Vec2u;
-			onPosition();
-		}
+        if(event.type == EventType.mouseWheel)
+            _slider.onEvent(event);
+    }
+    
+    override void onSize() {
+        _slider.size = Vec2f(10f, _size.y);
+		_container.position = Vec2f(_slider.size.x, 0f);
+        _container.container.size = Vec2f(_container.size.x, _layoutLength * _nbElements);
+        _container.size = Vec2f(size.x - _slider.size.x, size.y);
+        _container.canvas.renderSize = _container.size.to!Vec2u;
+    }
 
 	override void update(float deltaTime) {
 		super.update(deltaTime);
-		float min = _container.canvas.size.y / 2f;
-		float max = _container.layout.size.y - _container.canvas.size.y / 2f;
-		float exceedingHeight = _container.layout.size.y - _container.canvas.size.y;
+		const float min = 0f;
+		const float max = _container.container.size.y - _container.size.y;
+		const float exceedingHeight = _container.container.size.y - _container.canvas.size.y;
 
 		if(exceedingHeight < 0f) {
 			_slider.max = 0;
@@ -100,52 +130,42 @@ class GridList: GuiElement {
 			_slider.max = exceedingHeight / _layoutLength;
 			_slider.step = to!uint(_slider.max);
 		}
-		_container.canvas.position = Vec2f(0f, lerp(min, max, _slider.offset));
+		_container.canvas.position = _container.canvas.size / 2f + Vec2f(0f, lerp(min, max, _slider.offset));
 	}
 
-	override void addChildGui(GuiElement widget) {
-		widget.isSelected = (_nbElements == 0u);
+	override void addChildGui(GuiElement gui) {
+        gui.position = Vec2f.zero;
+		gui.isSelected = (_nbElements == 0u);
+        gui.setCallback(this, "list");
 
 		_nbElements ++;
-		_container.layout.size = Vec2f(size.x, _layoutLength * (_nbElements / _nbElementsPerLine));
-		_container.layout.position = Vec2f(0f, _container.layout.size.y / 2f);
-		_container.layout.addChildGui(widget);
+		_container.container.size = Vec2f(_container.size.x, _layoutLength * _nbElements);
+		_container.container.position = Vec2f.zero;
+		_container.container.addChildGui(gui);
 	}
 
 	override void removeChildrenGuis() {
 		_nbElements = 0u;
 		_idElementSelected = 0u;
-		_container.layout.size = Vec2f(size.x, 0f);
-		_container.layout.position = Vec2f.zero;
-		_container.layout.removeChildrenGuis();
+		_container.container.size = Vec2f(_container.size.x, 0f);
+		_container.container.position = Vec2f.zero;
+		_container.container.removeChildrenGuis();
 	}
 
 	override void removeChildGui(uint id) {
-		_container.layout.removeChildGui(id);
-		_nbElements = _container.layout.getChildrenGuisCount();
+		_container.container.removeChildGui(id);
+		_nbElements = _container.container.getChildrenGuisCount();
 		_idElementSelected = 0u;
-		_container.layout.size = Vec2f(size.x, _layoutLength * (_nbElements / _nbElementsPerLine));
-		_container.layout.position = Vec2f(0f, _container.layout.size.y / 2f);
+		_container.container.size = Vec2f(_container.size.x, _layoutLength * _nbElements);
+		_container.container.position = Vec2f(0f, _container.container.size.y / 2f);
 	}
 
 	override int getChildrenGuisCount() {
-		return _container.layout.getChildrenGuisCount();
+		return _container.container.getChildrenGuisCount();	
 	}
 
 	GuiElement[] getList() {
-		return _container.layout.children;
-	}
-
-	protected void createGui(Vec2f newSize) {
-		isLocked = true;
-		_slider = new VScrollbar;
-		_container = new GridContainer(newSize);
-
-		super.addChildGui(_slider);
-		super.addChildGui(_container);
-
-		size(newSize);
-		position(Vec2f.zero);
+		return _container.container.children;
 	}
 }
 
