@@ -23,7 +23,7 @@ private {
 /// It will have exclusive access to events and be rendered above all other guis.
 void setModalGui(GuiElement modalGui) {
 	if(_isModal)
-		throw new Exception("Modal gui already set");
+		stopModalGui();
 	_isModal = true;
 	_backupGuis = getRootGuis();
 	removeRootGuis();
