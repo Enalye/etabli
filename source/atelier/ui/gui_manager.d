@@ -10,7 +10,7 @@ module atelier.ui.gui_manager;
 
 import std.conv: to;
 import atelier.core, atelier.common, atelier.render;
-import atelier.ui.gui_element, atelier.ui.gui_overlay;
+import atelier.ui.gui_element, atelier.ui.gui_overlay, atelier.ui.gui_modal;
 
 private {
 	bool _isGuiElementDebug = false;
@@ -117,6 +117,10 @@ package(atelier) void handleGuiElementEvent(Event event) {
         break;
     case quit:
         dispatchQuitEvent(null);
+        if(isModalGui()) {
+            stopModalGui();
+            dispatchQuitEvent(null);
+        }
         break;
     default:
         dispatchGenericEvents(null, event);

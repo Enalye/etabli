@@ -17,6 +17,9 @@ version(linux) {
 	import core.sys.posix.unistd;
 	import core.sys.posix.signal;
 }
+version(Windows) {
+	import core.stdc.signal;
+}
 
 import derelict.sdl2.sdl;
 
@@ -34,7 +37,7 @@ static private {
 	Event[] _globalEvents;
 }
 
-private bool _isRunning = false;
+private shared bool _isRunning = false;
 
 /// List of mouse buttons.
 enum MouseButton: ubyte {
@@ -465,7 +468,6 @@ void sendCustomEvent(string id, void* data = null) {
 	_globalEvents ~= event;
 }
 
-version(linux)
 /// Capture interruptions.
 extern(C) void signalHandler(int sig) nothrow @nogc @system {
 	cast(void) sig;
@@ -474,8 +476,7 @@ extern(C) void signalHandler(int sig) nothrow @nogc @system {
 
 /// Initialize everything mouse, keyboard or controller related.
 void initializeEvents() {
-	version(linux)
-		signal(SIGINT, &signalHandler);
+	signal(SIGINT, &signalHandler);
 	_isRunning = true;
 	_mousePosition = Vec2f.zero;
     initializeControllers();
