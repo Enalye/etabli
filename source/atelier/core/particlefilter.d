@@ -16,7 +16,7 @@ import atelier.core.vec2;
 import atelier.core.color;
 import atelier.core.stream;
 import atelier.core.particle;
-
+/+
 class ParticleFilter {
 	protected {
 		Vec2f _position = Vec2f.zero;
@@ -1266,4 +1266,4 @@ final class MixColorFilterRect: ParticleFilter {
 		color.a = 1f;
 		return tuple("Couleur", _isCircle, _size, false, cast(const Vec2f)Vec2f.zero, cast(const Color)color);
 	}
-}
+}+/
