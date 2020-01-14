@@ -1,11 +1,8 @@
-/**
-    Vec2
-
-    Copyright: (c) Enalye 2017
-    License: Zlib
-    Authors: Enalye
-*/
-
+/** 
+ * Copyright: Enalye
+ * License: Zlib
+ * Authors: Enalye
+ */
 module atelier.core.vec2;
 
 import std.math;
@@ -34,26 +31,42 @@ struct Vec2(T) {
 			enum one = Vec2!T(1f, 1f);
 			/// {0.5, 0.5} vector. Its length is not 0.5 !
 			enum half = Vec2!T(.5f, .5f);
-				/// Null vector.
+			/// Null vector.
 			enum zero = Vec2!T(0f, 0f);
+			/// {-1, 0} vector.
+            enum left = Vec2!T(-1f, 0f);
+            /// {1, 0} vector.
+            enum right = Vec2!T(1f, 0f);
+            /// {0, -1} vector.
+            enum down = Vec2!T(0f, -1f);
+            /// {0, 1} vector.
+            enum up = Vec2!T(0f, 1f);
 		}
 		else {
 			/// {1, 1} vector. Its length is not one !
 			enum one = Vec2!T(1, 1);
-				/// Null vector.
+			/// Null vector.
 			enum zero = Vec2!T(0, 0);
+			/// {-1, 0} vector.
+            enum left = Vec2!T(-1, 0);
+            /// {1, 0} vector.
+            enum right = Vec2!T(1, 0);
+            /// {0, -1} vector.
+            enum down = Vec2!T(0, -1);
+            /// {0, 1} vector.
+            enum up = Vec2!T(0, 1);
 		}
 	}
 
 	/// x-axis coordinate.
-	T x,
+	T x;
 	/// y-axis coordinate.
-		y;
+	T y;
 
 	/// Changes {x, y}
-	void set(T nx, T ny) {
-		x = nx;
-		y = ny;
+	void set(T x_, T y_) {
+		x = x_;
+		y = y_;
 	}
 
 	/// The distance between this point and the other one.
