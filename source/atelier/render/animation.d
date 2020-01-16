@@ -21,20 +21,32 @@ import atelier.render.tileset, atelier.render.sprite;
 
 /// Series of animation frames played successively.
 final class Animation : Drawable {
+	/// Change the way the animation is playing.
+	/// once: Play each frames sequencially then stop.
+	/// reverse: Play each frames from the last to the first one then stop.
+	/// loop: Like "once", but go back to the first frame instead of stopping.
+	/// loopReverse: Like "reverse", but go back to the last frame instead of stopping.
+	/// bounce: Play like the "once" mode, then "reverse", then "once", etc
+	/// bounceReverse: Like "bounce", but the order is reversed.
+	enum Mode {
+		once,
+        reverse,
+		loop,
+        loopReverse,
+		bounce,
+        bounceReverse
+	}
+
 	private {
 		Texture _texture;
 		Timer _timer;
-		int _currentFrameID;
+		int _currentFrameId;
+		bool _isRunning = true, _isReversed;
 	}
 
 	@property {
 		/// Is the animation currently playing ?
 		bool isPlaying() const { return _timer.isRunning; }
-
-		/// Animation behaviour.
-		Timer.Mode mode() const { return _timer.mode; }
-		/// Ditto
-		Timer.Mode mode(Timer.Mode v) { return _timer.mode = v; }
 
 		/// Duration in seconds from witch the timer goes from 0 to 1 (framerate dependent). \
         /// Only positive non-null values.
@@ -43,7 +55,7 @@ final class Animation : Drawable {
 		float duration(float v) { return _timer.duration = v; }
 
 		/// The current frame being used.
-		int currentFrameID() const { return _currentFrameID; }
+		int currentFrameID() const { return _currentFrameId; }
 
 		/// Texture.
 		Texture texture(Texture texture_) { return _texture = texture_; }
@@ -59,6 +71,9 @@ final class Animation : Drawable {
 
 	/// Angle in which the sprite will be rendered.
 	float angle = 0f;
+
+	/// Behavior of the animation.
+	Mode mode = Mode.loop;
 
 	/// Mirroring property.
 	Flip flip = Flip.none;
@@ -121,48 +136,135 @@ final class Animation : Drawable {
 		color = animation.color;
 		blend = animation.blend;
 		easing = animation.easing;
+		mode = animation.mode;
 	}
 
 	/// Starts the animation from the beginning.
 	void start() {
 		_timer.start();
-		_currentFrameID = 0U;
+		reset();
+		_isRunning = true;
 	}
 
 	/// Stops and resets the animation.
 	void stop() {
 		_timer.stop();
-		_currentFrameID = 0U;
+		reset();
+		_isRunning = false;
 	}
 
 	/// Pauses the animation where it is.
 	void pause() {
 		_timer.pause();
+		_isRunning = false;
 	}
 
 	/// Resumes the animation from where it was.
 	void resume() {
 		_timer.resume();
+		_isRunning = true;
 	}
+
+	/// Goes back to starting settings.
+    void reset() {
+        final switch(mode) with(Mode) {
+        case once:
+            _currentFrameId = 0;
+            _isReversed = false;
+            break;
+        case reverse:
+            _currentFrameId = (cast(int) frames.length) - 1;
+            _isReversed = false;
+            break;
+        case loop:
+            _currentFrameId = 0;
+            _isReversed = false;
+            break;
+        case loopReverse:
+            _currentFrameId = (cast(int) frames.length) - 1;
+            _isReversed = false;
+            break;
+        case bounce:
+            _currentFrameId = 0;
+            _isReversed = false;
+            break;
+        case bounceReverse:
+            _currentFrameId = (cast(int) frames.length) - 1;
+            _isReversed = true;
+            break;
+        }
+    }
 
 	/// Run the animation.
 	void update(float deltaTime) {
 		_timer.update(deltaTime);
-		const float easedTime = getEasingFunction(easing)(_timer.value01());
-		if(!frames.length)
-			_currentFrameID = -1;
-		else
-			_currentFrameID = clamp(cast(int)lerp(0f, to!float(frames.length), easedTime), 0, (cast(int) frames.length) - 1);       
+		if(!_timer.isRunning && _isRunning) {
+			advance();
+		}
+	}
+	
+	/// Go to the next frame.
+	void advance() {
+		_timer.start();
+		if(!frames.length) {
+			_currentFrameId = -1;
+			return;
+		}
+		final switch(mode) with(Mode) {
+		case once:
+			_currentFrameId ++;
+			if(_currentFrameId >= frames.length) {
+				_currentFrameId = (cast(int) frames.length) - 1;
+				_isRunning = false;
+			}
+			break;
+        case reverse:
+			_currentFrameId --;
+			if(_currentFrameId < 0) {
+				_currentFrameId = 0;
+				_isRunning = false;
+			}
+			break;
+        case loop:
+			_currentFrameId ++;
+			if(_currentFrameId >= frames.length) {
+				_currentFrameId = 0;
+			}
+			break;
+        case loopReverse:
+			_currentFrameId --;
+			if(_currentFrameId < 0) {
+				_currentFrameId = (cast(int) frames.length) - 1;
+			}
+			break;
+        case bounce:
+        case bounceReverse:
+			if(_isReversed) {
+				_currentFrameId --;
+				if(_currentFrameId <= 0) {
+					_currentFrameId = 0;
+					_isReversed = false;
+				}
+			}
+			else {
+				_currentFrameId ++;
+				if((_currentFrameId + 1) >= frames.length) {
+					_currentFrameId = (cast(int) frames.length) - 1;
+					_isReversed = true;
+				}
+			}
+			break;
+		}
 	}
 	
 	/// Render the current frame.
 	void draw(const Vec2f position) {
-		if(_currentFrameID < 0 || !frames.length)
+		if(_currentFrameId < 0 || !frames.length)
 			return;
-		assert(_texture, "No _texture loaded.");
-		assert(_currentFrameID < frames.length, "Animation frame id out of bounds.");
+		assert(_texture, "No texture loaded.");
+		assert(_currentFrameId < frames.length, "Animation frame id out of bounds.");
 		
-		const Vec4i currentClip = frames[_currentFrameID];
+		const Vec4i currentClip = frames[_currentFrameId];
 		const Vec2f finalSize = size * transformScale();
         _texture.setColorMod(color, blend);
         _texture.draw(transformRenderSpace(position), finalSize, currentClip, angle, flip);
