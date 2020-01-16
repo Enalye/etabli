@@ -84,9 +84,6 @@ final class Animation : Drawable {
 	/// Blending algorithm.
     Blend blend = Blend.alpha;
 
-	/// Easing algorithm
-	EasingAlgorithm easing = EasingAlgorithm.linear;
-
 	/// Empty animation.
 	this() {}
 
@@ -135,7 +132,6 @@ final class Animation : Drawable {
 		flip = animation.flip;
 		color = animation.color;
 		blend = animation.blend;
-		easing = animation.easing;
 		mode = animation.mode;
 	}
 
