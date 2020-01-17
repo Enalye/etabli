@@ -49,7 +49,7 @@ void setDebugGui(bool isDebug) {
 //-- Internal ---
 
 /// Update all the guis from the root.
-private void updateGuiElements(float deltaTime) {
+package(atelier) void updateGuiElements(float deltaTime) {
     _deltaTime = deltaTime;
     foreach(GuiElement widget; _rootGuis) {
         updateGuiElements(widget, null);
@@ -57,7 +57,7 @@ private void updateGuiElements(float deltaTime) {
 }
 
 /// Draw all the guis from the root.
-private void drawGuiElements() {
+package(atelier) void drawGuiElements() {
     foreach_reverse(GuiElement widget; _rootGuis) {
         drawGuiElements(widget);
     }
