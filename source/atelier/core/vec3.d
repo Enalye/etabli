@@ -219,9 +219,7 @@ struct Vec3(T) {
 	}
 
 	/// The total length of this vector.
-	/// Must be non-null.
 	T length() const {
-		assert(this != Vec3!T.zero, "Null vector");
 		static if(__traits(isFloating, T))
 			return std.math.sqrt(x * x + y * y + z * z);
 		else
