@@ -12,7 +12,7 @@ import std.conv: to;
 import atelier.core, atelier.render, atelier.common;
 import atelier.ui.gui_element, atelier.ui.layout, atelier.ui.slider;
 
-private class LogContainer: GuiElementCanvas {
+private class LogContainer: GuiElement {
 	public {
 		LogLayout layout;
 	}
@@ -21,6 +21,7 @@ private class LogContainer: GuiElementCanvas {
 		isLocked = true;
 		layout = new LogLayout;
 		size(newSize);
+		super(GuiElement.Flags.canvas);
 		addChildGui(layout);
 	}
 

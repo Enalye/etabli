@@ -15,7 +15,7 @@ import atelier.core, atelier.render, atelier.common;
 import atelier.ui.gui_element, atelier.ui.label;
 
 /// Editable field.
-class InputField: GuiElementCanvas {
+class InputField: GuiElement {
 	private {
 		Label _label;
 		Color _borderColor, _caretColor;
@@ -54,8 +54,9 @@ class InputField: GuiElementCanvas {
 
 	/// The size is used to setup a canvas, avoid resizing too often. \
 	/// Set startWithFocus to true if you want the inputfield to accept inputs immediatly.
-	this(Vec2f newSize, string defaultText = "", bool startWithFocus = false) {
-		size = newSize;
+	this(Vec2f size_, string defaultText = "", bool startWithFocus = false) {
+		size = size_;
+		super(GuiElement.Flags.canvas);
 		_label = new Label(getDefaultFont(), "");
         _label.setAlign(GuiAlignX.left, GuiAlignY.center);
         addChildGui(_label);

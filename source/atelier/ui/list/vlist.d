@@ -12,7 +12,7 @@ import std.conv: to;
 import atelier.core, atelier.render, atelier.common;
 import atelier.ui.gui_element, atelier.ui.container, atelier.ui.slider;
 
-private final class ListContainer: GuiElementCanvas {
+private final class ListContainer: GuiElement {
 	public {
 		VContainer container;
 	}
@@ -21,6 +21,7 @@ private final class ListContainer: GuiElementCanvas {
 		isLocked = true;
 		container = new VContainer;
 		size(sz);
+		super(GuiElement.Flags.canvas);
 		addChildGui(container);
 	}
 }

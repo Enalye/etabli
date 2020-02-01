@@ -38,7 +38,7 @@ private class DropDownListSubElement: Button {
 }
 
 /// A clickable button that deploy a list of choices.
-class DropDownList: GuiElementCanvas {
+class DropDownList: GuiElement {
 	private {
 		VList _list;
         Label _label;
@@ -61,6 +61,7 @@ class DropDownList: GuiElementCanvas {
 	this(Vec2f newSize, uint maxListLength = 5U) {
 		_maxListLength = maxListLength;
 		size = newSize;
+        super(GuiElement.Flags.canvas);
         _maxWidth = max(size.x, _maxWidth);
 
 		_list = new VList(Vec2f(_maxWidth, _maxListLength * size.x));

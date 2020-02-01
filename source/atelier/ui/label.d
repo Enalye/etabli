@@ -59,9 +59,9 @@ final class Label: GuiElement {
 	}
 
 	this(Font font, string newText) {
+		super(GuiElement.Flags.notInteractable);
         _font = font;
 		_text = newText;
-		isInteractable = false;
 		_texture = _font.render(_text);
 		_sprite = new Sprite(_texture);
 		reload();

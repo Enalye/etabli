@@ -47,7 +47,7 @@ class GuiElement {
         bool _hasCanvas;
     }
 
-    public {
+    package {
 		GuiElement[] _children;
 		Hint _hint;
 		bool _isLocked, _isMovable, _isHovered, _isClicked, _isSelected, _hasFocus, _isInteractable = true, _hasEventHook;
@@ -284,8 +284,28 @@ class GuiElement {
         }*/
 	}
 
+    /// Gui initialization options
+    enum Flags {
+        /// Default
+        none = 0x0,
+        /// Initialize the gui with its own render canvas
+        canvas = 0x1,
+        /// Initialize the gui locked
+        locked = 0x2,
+        /// The gui can be moved around with the mouse
+        movable = 0x4,
+        /// The gui will ignore mouse events
+        notInteractable = 0x8
+    }
+
     /// Default ctor.
-	this() {}
+	this(int flags = Flags.none) {
+        if(flags & Flags.canvas)
+            initCanvas();
+        _isLocked = cast(bool) (flags & Flags.locked);
+        _isMovable = cast(bool) (flags & Flags.movable);
+        _isInteractable = cast(bool) !(flags & Flags.notInteractable);
+    }
 
     private final initCanvas() {
         _hasCanvas = true;
@@ -501,15 +521,6 @@ class GuiElement {
 	}
 }
 
-/// Utility class. \
-/// Same as GuiElement, it only sets the canvas on initialisation. \
-/// If you don't want to derivate from it, just call **initCanvas()** yourself.
-class GuiElementCanvas: GuiElement {
-    /// Initialise the canvas.
-    this() {
-        initCanvas();
-    }
-}
 /+
 class GuiElementGroup: GuiElement {
 	/*override void update(float deltaTime) {
