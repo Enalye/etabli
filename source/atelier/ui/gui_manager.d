@@ -68,9 +68,11 @@ private {
     GuiElement _clickedGuiElement;
     GuiElement _focusedGuiElement;
     GuiElement _hoveredGuiElement;
+    GuiElement _grabbedGuiElement, _tempGrabbedGuiElement;
     Canvas _canvas;
     Vec2f _clickedGuiElementEventPosition = Vec2f.zero;
     Vec2f _hoveredGuiElementEventPosition = Vec2f.zero;
+    Vec2f _grabbedGuiElementEventPosition = Vec2f.zero;
     GuiElement[] _hookedGuis;
 }
 
@@ -84,7 +86,12 @@ package(atelier) void handleGuiElementEvent(Event event) {
     _hasClicked = false;
     switch (event.type) with(EventType) {
     case mouseDown:
+        _tempGrabbedGuiElement = null;
         dispatchMouseDownEvent(null, event.mouse.position);
+
+        if(_tempGrabbedGuiElement) {
+            _grabbedGuiElement = _tempGrabbedGuiElement;
+        }
 
         if(_hasClicked && _clickedGuiElement !is null) {
             _clickedGuiElement.isClicked = true;
@@ -94,6 +101,7 @@ package(atelier) void handleGuiElementEvent(Event event) {
         }
         break;
     case mouseUp:
+        _grabbedGuiElement = null;
         dispatchMouseUpEvent(null, event.mouse.position);
         break;
     case mouseUpdate:
@@ -269,6 +277,7 @@ private void dispatchMouseDownEvent(GuiElement gui, Vec2f cursorPosition) {
     if(gui !is null) {
         if(gui.isInteractable && gui.isInside(cursorPosition)) {
             _clickedGuiElement = gui;
+            _tempGrabbedGuiElement = null;
 
             if(gui.hasCanvas && gui.canvas !is null) {
                 hasCanvas = true;
@@ -283,6 +292,11 @@ private void dispatchMouseDownEvent(GuiElement gui, Vec2f cursorPosition) {
                 Event guiEvent = EventType.mouseDown;
                 guiEvent.mouse.position = cursorPosition;
                 gui.onEvent(guiEvent);
+            }
+
+            if(gui._isMovable && !_grabbedGuiElement) {
+                _tempGrabbedGuiElement = gui;
+                _grabbedGuiElementEventPosition = _clickedGuiElementEventPosition;
             }
         }
         else
@@ -354,6 +368,29 @@ private void dispatchMouseUpdateEvent(GuiElement gui, Vec2f cursorPosition) {
     if(gui !is null) {
         wasHovered = gui.isHovered;
         gui.isHovered = false;
+
+        if(gui.isInteractable && gui == _grabbedGuiElement) {
+            if(!gui._isMovable) {
+                _grabbedGuiElement = null;
+            }
+            else {
+                if(gui.hasCanvas && gui.canvas !is null) {
+                    pushCanvas(gui.canvas, false);
+                    cursorPosition = transformCanvasSpace(cursorPosition, gui._screenCoords);
+                }
+                Vec2f deltaPosition = (cursorPosition - _grabbedGuiElementEventPosition);
+                if(gui._alignX == GuiAlignX.right)
+                    deltaPosition.x = -deltaPosition.x;
+                if(gui._alignY == GuiAlignY.bottom)
+                    deltaPosition.y = -deltaPosition.y;
+                gui._position += deltaPosition;
+                if(gui.hasCanvas && gui.canvas !is null)
+                    popCanvas();
+                else
+                    _grabbedGuiElementEventPosition = cursorPosition;
+            }
+        }
+
         if(gui.isInteractable && gui.isInside(cursorPosition)) {
             if(gui.hasCanvas && gui.canvas !is null) {
                 hasCanvas = true;

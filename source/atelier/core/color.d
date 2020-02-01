@@ -58,6 +58,8 @@ struct Color {
 	static const Color navy = Color(0f, 0f, .5f);
 	/// Ditto
 	static const Color pink = Color(1f, .75f, .8f);
+	/// Ditto
+	static const Color orange = Color(1f, .65f, 0f);
 
 	static @property {
 		/// Random RGB color.

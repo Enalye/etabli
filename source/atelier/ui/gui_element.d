@@ -349,6 +349,11 @@ class GuiElement {
         _currentState = *ptr;
     }
 
+    /// Current state name or currently transitioning to.
+    final string getState() const {
+        return _currentStateName;
+    }
+
     /// Add a new state to the list.
     final void addState(string stateName, GuiState state) {
         _states[stateName] = state;
