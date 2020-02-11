@@ -150,7 +150,7 @@ class VList: GuiElement {
 		_container.container.removeChildrenGuis();
 	}
 
-	override void removeChildGui(uint id) {
+	override void removeChildGui(size_t id) {
 		_container.container.removeChildGui(id);
 		_nbElements = _container.container.getChildrenGuisCount();
 		_idElementSelected = 0u;

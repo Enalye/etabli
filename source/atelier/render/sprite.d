@@ -34,7 +34,14 @@ final class Sprite: Drawable {
 	/// Mirroring property.
 	Flip flip = Flip.none;
 
-	Vec2f scale = Vec2f.one, size = Vec2f.zero, anchor = Vec2f.half;
+	/// Scale of the sprite.
+	Vec2f scale = Vec2f.one;
+	
+	/// Size of the sprite.
+	Vec2f size = Vec2f.zero;
+
+	/// Relative center of the sprite.
+	Vec2f anchor = Vec2f.half;
 
 	/// Texture region being rendered (the source size).
 	Vec4i clip;

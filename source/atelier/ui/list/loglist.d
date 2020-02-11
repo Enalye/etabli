@@ -116,7 +116,7 @@ class LogList: GuiElement {
 		repositionContainer();
 	}
 
-	override void removeChildGui(uint id) {
+	override void removeChildGui(size_t id) {
 		_container.layout.removeChildGui(id);
 		repositionContainer();
 	}

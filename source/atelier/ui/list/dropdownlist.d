@@ -172,7 +172,7 @@ class DropDownList: GuiElement {
 		_list.removeChildrenGuis();
 	}
 
-	override void removeChildGui(uint id) {
+	override void removeChildGui(size_t id) {
 		_list.removeChildGui(id);
 	}
 

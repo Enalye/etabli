@@ -69,6 +69,9 @@ final class Animation : Drawable {
     /// Destination size.
 	Vec2f size;
 
+	/// Relative center of the sprite.
+	Vec2f anchor = Vec2f.half;
+
 	/// Angle in which the sprite will be rendered.
 	float angle = 0f;
 
@@ -128,6 +131,7 @@ final class Animation : Drawable {
 		_texture = animation._texture;
 		frames = animation.frames;
 		size = animation.size;
+		anchor = animation.anchor;
 		angle = animation.angle;
 		flip = animation.flip;
 		color = animation.color;
@@ -263,7 +267,7 @@ final class Animation : Drawable {
 		const Vec4i currentClip = frames[_currentFrameId];
 		const Vec2f finalSize = size * transformScale();
         _texture.setColorMod(color, blend);
-        _texture.draw(transformRenderSpace(position), finalSize, currentClip, angle, flip);
+        _texture.draw(transformRenderSpace(position), finalSize, currentClip, angle, flip, anchor);
         _texture.setColorMod(Color.white);
 	}
 }

@@ -50,6 +50,7 @@ class GuiElement {
     package {
 		GuiElement[] _children;
 		Hint _hint;
+        bool _isRegistered = true;
 		bool _isLocked, _isMovable, _isHovered, _isClicked, _isSelected, _hasFocus, _isInteractable = true, _hasEventHook;
 		Vec2f _position = Vec2f.zero, _size = Vec2f.zero, _anchor = Vec2f.half,
             _padding = Vec2f.zero, _center = Vec2f.zero, _origin = Vec2f.zero;
@@ -509,7 +510,7 @@ class GuiElement {
 	}
 
     /// Remove the child at the specified index.
-	void removeChildGui(uint index) {
+	void removeChildGui(size_t index) {
 		if(!_children.length)
 			return;
 		if(index + 1u == _children.length)
@@ -519,131 +520,9 @@ class GuiElement {
 		else
 			_children = _children[0..index]  ~ _children[index + 1..$];
 	}
+
+    /// Unregister itself from its parent or root.
+    void removeSelf() {
+        _isRegistered = false;
+    }
 }
-
-/+
-class GuiElementGroup: GuiElement {
-	/*override void update(float deltaTime) {
-        _iteratorTimer.update(deltaTime);
-        _iteratorTimeOutTimer.update(deltaTime);
-		foreach(GuiElement widget; _children)
-			widget.update(deltaTime);
-	}
-
-    override void onHover() {
-        if(!_isHovered) {
-            foreach(GuiElement widget; _children)
-                widget.isHovered = false;
-        }
-    }
-    
-    override void onDeltaPosition(Vec2f delta) {
-        if(!_isFrame) {
-            foreach(widget; _children)
-                widget.position = widget.position + delta;
-        }
-    }
-
-	override bool isOnInteractableGuiElement(Vec2f pos) const {
-		if(!isInside(pos))
-			return false;
-
-		if(_isFrame)
-			pos = getViewVirtualPos(pos, _position);
-		
-		foreach(const GuiElement widget; _children) {
-			if(widget.isOnInteractableGuiElement(pos))
-				return true;
-		}
-		return false;
-	}*/
-
-	
-	
-	override void drawOverlay() {
-		//if(_isGuiElementDebug)
-		//	drawRect(_position - _anchor * _size, _size, Color.cyan);
-
-		if(!_isHovered)
-			return;
-
-		if(_hint !is null)
-			openHintWindow(_hint);
-
-		foreach(widget; _children)
-			widget.drawOverlay();
-	}
-
-    //Iteration
-    private void setupIterationTimer(float time) {
-        _iteratorTimer.start(time);
-        _iteratorTimeOutTimer.start(5f);
-    }
-
-    private bool startIteration() {
-        if(_isIterating)
-            return _iteratorTimeOutTimer.isRunning;
-        _isIterating = true;
-        
-        //If a child was hovered, we start from here
-        if(_isChildHovered) {
-            foreach(i; 0.. _children.length) {
-                if(_children[i].isHovered) {
-                    _idChildIterator = cast(int)i;
-                    break;
-                }
-            }
-        }
-        else
-            _idChildIterator = 0u;
-        return false;
-    }
-
-    void stopChild() {
-        _iteratorTimeOutTimer.stop();
-    }
-
-    void previousChild() {
-        bool wasIterating = startIteration();
-        if(_iteratorTimer.isRunning)
-            return;
-        setupIterationTimer(wasIterating ? .15f : .35f);
-        if(_idChildIterator == 0u) {
-            if(_children.length < 1)
-                return;
-            if(_isWarping)
-                _idChildIterator = (cast(int)_children.length) - 1;
-            else return;
-        }
-        else _idChildIterator --;
-
-        foreach(uint id, GuiElement widget; _children)
-            widget.isHovered = (id == _idChildIterator);
-    }
-
-    void nextChild() {
-        bool wasIterating = startIteration();
-        if(_iteratorTimer.isRunning)
-            return;
-        setupIterationTimer(wasIterating ? .15f : .35f);
-        if(_idChildIterator + 1u == _children.length) {
-            if(_children.length < 1)
-                return;
-            if(_isWarping)
-                _idChildIterator = 0u;
-            else return;
-        }
-        else _idChildIterator ++;
-
-        foreach(uint id, GuiElement widget; _children)
-            widget.isHovered = (id == _idChildIterator);
-    }
-
-    GuiElement selectChild() {
-        startIteration();
-
-        if(_idChildIterator < _children.length)
-            return _children[_idChildIterator];
-        return null;
-    }
-}+/

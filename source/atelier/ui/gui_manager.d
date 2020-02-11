@@ -48,11 +48,30 @@ void setDebugGui(bool isDebug) {
 
 //-- Internal ---
 
+/// Remove the gui at the specified index.
+private void removeRootGui(size_t index) {
+    if(!_rootGuis.length)
+        return;
+    if(index + 1u == _rootGuis.length)
+        _rootGuis.length --;
+    else if(index == 0u)
+        _rootGuis = _rootGuis[1..$];
+    else
+        _rootGuis = _rootGuis[0..index]  ~ _rootGuis[index + 1..$];
+}
+
 /// Update all the guis from the root.
 package(atelier) void updateGuiElements(float deltaTime) {
     _deltaTime = deltaTime;
-    foreach(GuiElement widget; _rootGuis) {
-        updateGuiElements(widget, null);
+    size_t index = 0;
+    while(index < _rootGuis.length) {
+        if(_rootGuis[index]._isRegistered) {
+            updateGuiElements(_rootGuis[index], null);
+            index ++;
+        }
+        else {
+            removeRootGui(index);
+        }
     }
 }
 
@@ -227,8 +246,15 @@ package(atelier) void updateGuiElements(GuiElement gui, GuiElement parent) {
     gui.setScreenCoords(coords);
     gui.update(_deltaTime);
 
-    foreach(GuiElement child; gui.children) {
-        updateGuiElements(child, gui);
+    size_t childIndex = 0;
+    while(childIndex < gui.children.length) {
+        if(gui.children[childIndex]._isRegistered) {
+            updateGuiElements(gui.children[childIndex], gui);
+            childIndex ++;
+        }
+        else {
+            gui.removeChildGui(childIndex);
+        }
     }
 }
 
