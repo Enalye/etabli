@@ -62,6 +62,7 @@ final class Texture {
 	private {
 		bool _isLoaded = false, _ownData;
 		SDL_Texture* _texture = null;
+		SDL_Surface* _surface = null;
 		uint _width, _height;
 	}
 
@@ -82,16 +83,45 @@ final class Texture {
         _ownData = false;
     }
 
-	this(SDL_Surface* surface) {
-		load(surface);
+	this(SDL_Surface* surface, bool preload_ = false) {
+		if(preload_) {
+			_surface = surface;
+			_width = _surface.w;
+			_height = _surface.h;
+		}
+		else
+			load(surface);
 	}
 
-	this(string path) {
-		load(path);
+	this(string path, bool preload_ = false) {
+		if(preload_) {
+			_surface = IMG_Load(toStringz(path));
+			_width = _surface.w;
+			_height = _surface.h;
+			_ownData = true;
+		}
+		else
+			load(path);
 	}
 
 	~this() {
 		unload();
+	}
+
+	/// Call it if you set the preload flag on ctor.
+	void postload() {
+		enforce(null != _surface, "Invalid surface.");
+		enforce(null != _sdlRenderer, "The renderer does not exist.");
+
+		if (null != _texture)
+			SDL_DestroyTexture(_texture);
+		_texture = SDL_CreateTextureFromSurface(_sdlRenderer, _surface);
+		enforce(null != _texture, "Error occurred while converting a surface to a texture format.");
+
+		if(_ownData)
+			SDL_FreeSurface(_surface);
+		_surface = null;
+		_isLoaded = true;
 	}
 
 	void setColorMod(Color color, Blend blend = Blend.alpha) {
