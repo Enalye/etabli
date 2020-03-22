@@ -9,7 +9,7 @@
 module atelier.core.util;
 
 public import std.math;
-public import std.algorithm.comparison: clamp;
+public import std.algorithm.comparison: clamp, min, max;
 
 import atelier.core.vec2;
 
@@ -53,4 +53,9 @@ Vec2f scaleToFit(Vec2f src, Vec2f dst) {
 	else
 		scale = dst.x / src.x;
 	return src * scale;
+}
+
+/// Linear interpolation to approach a target
+float approach(float value, float target, float step) {
+	return value > target ? max(value - step, target) : min(value + step, target);
 }

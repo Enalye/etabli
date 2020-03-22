@@ -130,11 +130,11 @@ class GuiElement {
 		final bool isHovered() const { return _isHovered; }
         /// Ditto
 		final bool isHovered(bool newIsHovered) {
-            /*if(newIsHovered != _isHovered) {
+            if(newIsHovered != _isHovered) {
                 _isHovered = newIsHovered;
                 onHover();
                 return _isHovered;
-            }*/
+            }
             return _isHovered = newIsHovered;
         }
 

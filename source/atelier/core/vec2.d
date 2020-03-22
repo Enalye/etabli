@@ -321,9 +321,29 @@ struct Vec2(T) {
 			Vec2!T(v.x, y * v.x / x);
 	}
 
+	/// Linear interpolation to approach a target
+	Vec2!T approach(const Vec2!T target, const Vec2!T step) {
+		import std.algorithm.comparison: min, max;
+		return Vec2!T(
+			x > target.x ? max(x - step.x, target.x) : min(x + step.x, target.x),
+			y > target.y ? max(y - step.y, target.y) : min(y + step.y, target.y)
+			);
+	}
+
 	/// Equality operations
 	bool opEquals(const Vec2!T v) const @safe pure nothrow {
 		return (x == v.x) && (y == v.y);
+	}
+
+	/// Ditto
+	int opCmp(const Vec2!T v) const @safe pure nothrow {
+		const T a = x - v.x;
+		const T b = y - v.y;
+		if(a && b)
+			return 1;
+		if(a < 0 && b < 0)
+			return -1;
+		return 0;
 	}
 
 	/// Unary operations
