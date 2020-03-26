@@ -1,11 +1,8 @@
-/**
-    Texture
-
-    Copyright: (c) Enalye 2017
-    License: Zlib
-    Authors: Enalye
-*/
-
+/** 
+ * Copyright: Enalye
+ * License: Zlib
+ * Authors: Enalye
+ */
 module atelier.render.texture;
 
 import std.string;
@@ -67,6 +64,7 @@ final class Texture {
 	}
 
 	@property {
+		/// loaded ?
 		bool isLoaded() const { return _isLoaded; }
 
 		/// Width in texels.
@@ -75,6 +73,7 @@ final class Texture {
 		uint height() const { return _height; }
 	}
 
+	/// Ctor
 	this(Texture texture) {
         _isLoaded = texture._isLoaded;
 		_texture = texture._texture;
@@ -83,6 +82,7 @@ final class Texture {
         _ownData = false;
     }
 
+	/// Ctor
 	this(SDL_Surface* surface, bool preload_ = false) {
 		if(preload_) {
 			_surface = surface;
@@ -93,6 +93,7 @@ final class Texture {
 			load(surface);
 	}
 
+	/// Ctor
 	this(string path, bool preload_ = false) {
 		if(preload_) {
 			_surface = IMG_Load(toStringz(path));
@@ -154,6 +155,7 @@ final class Texture {
         _ownData = true;
 	}
 
+	/// Load from file
 	void load(string path) {
 		SDL_Surface* surface = IMG_Load(toStringz(path));
 			
@@ -173,6 +175,7 @@ final class Texture {
         _ownData = true;
 	}
 
+	/// Free image data
 	void unload() {
         if(!_ownData)
             return;
@@ -181,6 +184,7 @@ final class Texture {
 		_isLoaded = false;
 	}
 
+	/// Render the whole texture here
 	void draw(Vec2f pos, Vec2f anchor = Vec2f.half) const {
 		assert(_isLoaded, "Cannot render the texture: Asset not loaded.");
 		pos -= anchor * Vec2f(_width, _height);
@@ -195,13 +199,15 @@ final class Texture {
 		SDL_RenderCopy(cast(SDL_Renderer*)_sdlRenderer, cast(SDL_Texture*)_texture, null, &destRect);
 	}
 
+	/// Render a section of the texture here
 	void draw(Vec2f pos, Vec4i srcRect, Vec2f anchor = Vec2f.half) const {
 		assert(_isLoaded, "Cannot render the texture: Asset not loaded.");
+		pos -= anchor * cast(Vec2f) srcRect.zw;
 
 		SDL_Rect srcSdlRect = srcRect.toSdlRect();
 		SDL_Rect destSdlRect = {
-			cast(uint)(pos.x) - (srcSdlRect.w >> 1U),
-			cast(uint)(pos.y) - (srcSdlRect.h >> 1U),
+			cast(uint)pos.x,
+			cast(uint)pos.y,
 			srcSdlRect.w,
 			srcSdlRect.h
 		};
@@ -209,6 +215,7 @@ final class Texture {
 		SDL_RenderCopy(cast(SDL_Renderer*)_sdlRenderer, cast(SDL_Texture*)_texture, &srcSdlRect, &destSdlRect);
 	}
 
+	/// Render the whole texture here
 	void draw(Vec2f pos, Vec2f size, Vec2f anchor = Vec2f.half) const {
 		assert(_isLoaded, "Cannot render the texture: Asset not loaded.");
 		pos -= anchor * size;
@@ -223,6 +230,7 @@ final class Texture {
 		SDL_RenderCopy(cast(SDL_Renderer*)_sdlRenderer, cast(SDL_Texture*)_texture, null, &destSdlRect);
 	}
 
+	/// Render a section of the texture here
 	void draw(Vec2f pos, Vec2f size, Vec4i srcRect, Vec2f anchor = Vec2f.half) const {
 		enforce(_isLoaded, "Cannot render the texture: Asset not loaded.");
 		pos -= anchor * size;
@@ -238,6 +246,7 @@ final class Texture {
 		SDL_RenderCopy(cast(SDL_Renderer*)_sdlRenderer, cast(SDL_Texture*)_texture, &srcSdlRect, &destSdlRect);
 	}
 
+	/// Render a section of the texture here
 	void draw(Vec2f pos, Vec2f size, Vec4i srcRect, float angle, Flip flip = Flip.none, Vec2f anchor = Vec2f.half) const {
 		assert(_isLoaded, "Cannot render the texture: Asset not loaded.");
 		pos -= anchor * size;

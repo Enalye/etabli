@@ -1,251 +1,351 @@
-/**
-    Text
-
-    Copyright: (c) Enalye 2017
-    License: Zlib
-    Authors: Enalye
-*/
-
+/** 
+ * Copyright: Enalye
+ * License: Zlib
+ * Authors: Enalye
+ */
 module atelier.ui.text;
 
 import std.utf;
 import std.conv: to;
-import derelict.sdl2.sdl, derelict.sdl2.ttf;
+import std.string;
 import atelier.core, atelier.render, atelier.common;
 import atelier.ui.gui_element;
 
-private {
-	ITextCache _standardCache, _italicCache, _boldCache, _italicBoldCache;
-}
-
-interface ITextCache {
-	Sprite get(dchar c);
-}
-
-class FontCache: ITextCache {
+/// Dynamic text rendering
+final class Text: GuiElement {
 	private {
-		Font _font;
-		Sprite[dchar] _cache;
-	}
-
-	this(Font newFont) {
-		_font = newFont;
-	}
-
-	Sprite get(dchar c) {
-		Sprite* cachedSprite = (c in _cache);
-		if(cachedSprite is null) {
-			auto texture = _font.render(to!string(c));
-			Sprite sprite = new Sprite(texture);
-			_cache[c] = sprite;
-			return sprite;
-		}
-		else {
-			return *cachedSprite;
-		}
-	}
-}
-
-void setTextStandardFont(ITextCache cache) {
-	_standardCache = cache;
-}
-
-void setTextItalicFont(ITextCache cache) {
-	_italicCache = cache;
-}
-
-void setTextBoldFont(ITextCache cache) {
-	_boldCache = cache;
-}
-
-void setTextItalicBoldFont(ITextCache cache) {
-	_italicBoldCache = cache;
-}
-
-private {
-	enum TextTokenType {
-		CharacterType,
-		NewLineType,
-		ColorType,
-		StandardType,
-		ItalicType,
-		BoldType,
-		ItalicBoldType
-	}
-	
-	struct TextToken {
-		TextTokenType type;
-
-		Sprite charSprite;
-		Color color;
-
-		this(TextTokenType newType) {
-			type = newType;
-		}
-	}
-}
-
-class Text: GuiElement {
-	private {
+		PixelFont _font;
+		Timer _timer;
 		dstring _text;
-		TextToken[] _tokens;
-		int[] _lineLengths;
-		int _rowLength, _maxLineLength, _lineLimit;
-		Vec2f charSize = Vec2f.zero;
-		ITextCache _currentCache;
+		size_t _currentIndex;
+		Token[] _tokens;
+		Color _defaultCharColor = Color.white;
+		float _defaultCharDelay = 0f;
+		int _defaultCharScale = 1;
+		int _defaultCharSpacing = 0;
 	}
 
 	@property {
-		string text() const { return to!string(_text); }
-		string text(string newText) {
-			_text = to!dstring(newText);
-			reload();
-			return newText;
+		/// Text
+		string text() const {
+			return to!string(_text);
+		}
+		/// Ditto
+		string text(string text_) {
+			_text = to!dstring(text_);
+			restart();
+			tokenize();
+			return text_;
+		}
+
+		/// Default change color
+		Color defaultColor() const { return _defaultCharColor; }
+		/// Ditto
+		Color defaultColor(Color defaultCharColor_) { return _defaultCharColor = defaultCharColor_; }
+
+		/// Default delay between each character
+		float defaultDelay() const { return _defaultCharDelay; }
+		/// Ditto
+		float defaultDelay(float defaultCharDelay_) { return _defaultCharDelay = defaultCharDelay_; }
+
+		/// Default character scaling
+		int defaultScale() const { return _defaultCharScale; }
+		/// Ditto
+		int defaultScale(int defaultCharScale_) { return _defaultCharScale = defaultCharScale_; }
+		
+		/// Default additionnal spacing between each character
+		int defaultSpacing() const { return _defaultCharSpacing; }
+		/// Ditto
+		int defaultSpacing(int defaultCharSpacing_) { return _defaultCharSpacing = defaultCharSpacing_; }
+	}
+
+	/// Ctor
+	this(PixelFont font_, string text_) {
+		_font = font_;
+		_text = to!dstring(text_);
+		tokenize();
+	}
+
+	/// Restart the reading from the beginning
+	void restart() {
+		_currentIndex = 0;
+		_timer.reset();
+	}
+
+	private struct Token {
+		enum Type {
+			character, line, scale, spacing, color, delay, pause, effect
+		}
+
+		Type type;
+
+		union {
+			CharToken character;
+			ScaleToken scale;
+			SpacingToken spacing;
+			ColorToken color;
+			DelayToken delay;
+			PauseToken pause;
+			EffectToken effect;
+		}
+
+		struct CharToken {
+			dchar character;
+		}
+
+		struct ScaleToken {
+			int scale;
+		}
+
+		struct SpacingToken {
+			int spacing;
+		}
+
+		struct ColorToken {
+			Color color;
+		}
+
+		struct DelayToken {
+			float duration;
+		}
+
+		struct PauseToken {
+			float duration;
+		}
+
+		struct EffectToken {
+			enum Type {
+				none
+			}
+			Type type;
 		}
 	}
 
-	this(int newLineLimit = 0) {
-		_lineLimit = newLineLimit;
-	}
+	private void tokenize() {
+		size_t current = 0;
+		_tokens.length = 0;
+		while(current < _text.length) {
+			if(_text[current] == '{') {
+				current ++;
+				size_t endOfBrackets = indexOf(_text, "}", current);
+				if(endOfBrackets == -1)
+					break;
+				dstring brackets = _text[current.. endOfBrackets];
+				current = endOfBrackets + 1;
 
-	this(string newText, int newLineLimit = 0) {
-		_lineLimit = newLineLimit;
-		text(newText);
-	}
-
-	private uint parseTag(uint i) {
-		dstring tag;
-		if(_text[i] != '{')
-			throw new Exception("Text: A tag must start with a \'{\'");
-		//'{'
-		i ++;
-		while(_text[i] != '}') {
-			tag ~= _text[i];
-			i ++;
-			if(i >= _text.length)
-				throw new Exception("Text: An opened tag must be closed with \'}\'");
-		}
-		TextToken token;
-		switch(tag) {
-		case "n"d:
-			token.type = TextTokenType.NewLineType;
-			_lineLengths.length ++;
-			_rowLength ++;
-			_lineLengths[_rowLength] = 0;
-			break;
-		case "s"d:
-			token.type = TextTokenType.StandardType;
-			_currentCache = _standardCache;
-			break;
-		case "b"d:
-			token.type = TextTokenType.BoldType;
-			_currentCache = _boldCache;
-			break;
-		case "i"d:
-			token.type = TextTokenType.ItalicType;
-			_currentCache = _italicCache;
-			break;
-		case "bi"d:
-			token.type = TextTokenType.ItalicBoldType;
-			_currentCache = _italicBoldCache;
-			break;
-		case "white"d:
-			token.type = TextTokenType.ColorType;
-			token.color = Color.white;
-			break;
-		case "red"d:
-			token.type = TextTokenType.ColorType;
-			token.color = Color.red;
-			break;
-		case "blue"d:
-			token.type = TextTokenType.ColorType;
-			token.color = Color.blue;
-			break;
-		case "green"d:
-			token.type = TextTokenType.ColorType;
-			token.color = Color.green;
-			break;
-		default:
-			throw new Exception("Text: The tag \'" ~ to!string(tag) ~ "\' does not exist");
-		}
-		_tokens ~= token;
-		//'}'
-		i ++;
-		return i;
-	}
-
-	private void reload() {
-		if(!_text.length)
-			return;
-		_tokens.length = 0L;
-		_lineLengths.length = 1;
-		_lineLengths[0] = 0;
-		_rowLength = 0;
-		_maxLineLength = 0;
-		_currentCache = _standardCache;
-		uint i = 0U;
-		while(i < _text.length) {
-			if(_text[i] == '{')
-				i = parseTag(i);
-			else {
-				if(_lineLimit > 0) {
-					//Auto carriage return.
-					if(_lineLengths[_rowLength] > _lineLimit) {
-						TextToken token;
-						token.type = TextTokenType.NewLineType;
-						_lineLengths.length ++;
-						_rowLength ++;
-						_lineLengths[_rowLength] = 0;
+				foreach(modifier; brackets.split(",")) {
+					if(!modifier.length)
+						continue;
+					auto parameters = modifier.split(":");
+					if(!parameters.length)
+						continue;
+					switch(parameters[0]) {
+					case "c":
+					case "color":
+						Token token;
+						token.type = Token.Type.color;
+						if(parameters.length > 1) {
+							if(!parameters[1].length)
+								continue;
+							if(parameters[1][0] == '#') {
+								continue;
+								// TODO: #FFFFFF RGB color format
+							}
+							else {
+								switch(parameters[1]) {
+								case "clear":
+									token.color.color = Color.clear;
+									break;
+								case "red":
+									token.color.color = Color.red;
+									break;
+								case "blue":
+									token.color.color = Color.blue;
+									break;
+								case "white":
+									token.color.color = Color.white;
+									break;
+								case "black":
+									token.color.color = Color.black;
+									break;
+								case "yellow":
+									token.color.color = Color.yellow;
+									break;
+								case "cyan":
+									token.color.color = Color.cyan;
+									break;
+								case "magenta":
+									token.color.color = Color.magenta;
+									break;
+								case "silver":
+									token.color.color = Color.silver;
+									break;
+								case "gray":
+								case "grey":
+									token.color.color = Color.gray;
+									break;
+								case "maroon":
+									token.color.color = Color.maroon;
+									break;
+								case "olive":
+									token.color.color = Color.olive;
+									break;
+								case "green":
+									token.color.color = Color.green;
+									break;
+								case "purple":
+									token.color.color = Color.purple;
+									break;
+								case "teal":
+									token.color.color = Color.teal;
+									break;
+								case "navy":
+									token.color.color = Color.navy;
+									break;
+								case "pink":
+									token.color.color = Color.pink;
+									break;
+								case "orange":
+									token.color.color = Color.orange;
+									break;
+								default:
+									continue;
+								}
+							}
+						}
+						else continue;
 						_tokens ~= token;
+						break;
+					case "s":
+					case "scale":
+					case "size":
+					case "sz":
+						Token token;
+						token.type = Token.Type.scale;
+						if(parameters.length > 1)
+							token.scale.scale = parameters[1].to!int;
+						else continue;
+						_tokens ~= token;
+						break;
+					case "l":
+					case "ln":
+					case "line":
+					case "br":
+						Token token;
+						token.type = Token.Type.line;
+						_tokens ~= token;
+						break;
+					case "w":
+					case "wait":
+					case "p":
+					case "pause":
+						Token token;
+						token.type = Token.Type.pause;
+						if(parameters.length > 1)
+							token.pause.duration = parameters[1].to!float;
+						else continue;
+						_tokens ~= token;
+						break;
+					case "fx":
+					case "effect":
+						// TODO: effect token (shake, bounce, etc)
+						break;
+					case "d":
+					case "dl":
+					case "delay":
+						Token token;
+						token.type = Token.Type.delay;
+						if(parameters.length > 1)
+							token.delay.duration = parameters[1].to!float;
+						else continue;
+						_tokens ~= token;
+						break;
+					default:
+						continue;
 					}
 				}
-				auto token = TextToken(TextTokenType.CharacterType);
-				token.charSprite = _currentCache.get(_text[i]);
+			}
+			else {
+				Token token;
+				token.type = Token.Type.character;
+				token.character.character = _text[current];
 				_tokens ~= token;
-				_lineLengths[_rowLength] ++;
-				if(_lineLengths[_rowLength] > _maxLineLength)
-					_maxLineLength = _lineLengths[_rowLength];
-				i ++;
+				current ++;
 			}
 		}
-		if(!_maxLineLength)
-			throw new Exception("Error while fetching cached characters");
-		charSize = _standardCache.get('a').size;
+	}
 
-		size = Vec2f(charSize.x * _maxLineLength, charSize.y * (_rowLength + 1));
+	override void update(float deltaTime) {
+		_timer.update(deltaTime);
 	}
 
 	override void draw() {
-		Color currentColor = Color.white;
-		Vec2i currentPos = Vec2i.zero;
-		foreach(size_t i, token; _tokens) {
-			switch(token.type) with(TextTokenType) {
-			case CharacterType:
-				token.charSprite.color = currentColor;
-				token.charSprite.draw(center + charSize * Vec2f(
-					to!float(currentPos.x) - _maxLineLength / 2f,
-					to!float(currentPos.y) - _rowLength / 2f));
-				token.charSprite.color = Color.white;
-				currentPos.x ++;
+		Vec2f pos = origin - Vec2f(0f, _font.ascent);
+		dchar prevChar;
+		Color charColor_ = _defaultCharColor;
+		float charDelay_ = _defaultCharDelay;
+		int charScale_ = _defaultCharScale;
+		int charSpacing_ = _defaultCharSpacing;
+		foreach(size_t index, Token token; _tokens) {
+			final switch(token.type) with(Token.Type) {
+			case character:
+				if(_currentIndex == index) {
+					if(_timer.isRunning)
+						break;
+					if(charDelay_ > 0f)
+						_timer.start(charDelay_);
+					_currentIndex ++;
+				}
+				GlyphMetrics metrics = _font.getMetrics(token.character.character);
+				pos.x += _font.getKerning(prevChar, token.character.character) * charScale_;
+				Vec2f drawPos = Vec2f(pos.x + metrics.offsetX * charScale_, pos.y + metrics.offsetY * charScale_);
+				metrics.draw(drawPos, charScale_, charColor_);
+				pos.x += (metrics.advance + charSpacing_) * charScale_;
+				prevChar = token.character.character;
 				break;
-			case NewLineType:
-				currentPos.x = 0;
-				currentPos.y ++;
+			case line:
+				if(_currentIndex == index)
+					_currentIndex ++;
+				pos.x = origin.x;
+				pos.y += ((_font.ascent - _font.descent) + 1f) * charScale_;
 				break;
-			case StandardType:
+			case scale:
+				if(_currentIndex == index)
+					_currentIndex ++;
+				charScale_ = token.scale.scale;
 				break;
-			case BoldType:
+			case spacing:
+				if(_currentIndex == index)
+					_currentIndex ++;
+				charSpacing_ = token.spacing.spacing;
 				break;
-			case ItalicType:
+			case color:
+				if(_currentIndex == index)
+					_currentIndex ++;
+				charColor_ = token.color.color;
 				break;
-			case ItalicBoldType:
+			case delay:
+				if(_currentIndex == index)
+					_currentIndex ++;
+				charDelay_ = token.delay.duration;
 				break;
-			case ColorType:
-				currentColor = token.color;
+			case pause:
+				if(_currentIndex == index) {
+					if(_timer.isRunning)
+						break;
+					if(token.pause.duration > 0f)
+						_timer.start(token.pause.duration);
+					_currentIndex ++;
+				}
 				break;
-			default:
-				throw new Exception("Text: Invalid token");
+			case effect:
+				if(_currentIndex == index)
+					_currentIndex ++;
+				//token.effect.type;
+				break;
 			}
+			if(index == _currentIndex)
+				break;
 		}
 	}
 }

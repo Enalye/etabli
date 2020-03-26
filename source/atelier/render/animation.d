@@ -1,11 +1,8 @@
-/**
-    Animation
-
-    Copyright: (c) Enalye 2017
-    License: Zlib
-    Authors: Enalye
-*/
-
+/** 
+ * Copyright: Enalye
+ * License: Zlib
+ * Authors: Enalye
+ */
 module atelier.render.animation;
 
 import std.conv;

@@ -1,11 +1,8 @@
-/**
-    Sprite
-
-    Copyright: (c) Enalye 2017
-    License: Zlib
-    Authors: Enalye
-*/
-
+/** 
+ * Copyright: Enalye
+ * License: Zlib
+ * Authors: Enalye
+ */
 module atelier.render.sprite;
 
 import std.conv;
@@ -132,6 +129,7 @@ final class Sprite: Drawable {
         texture.setColorMod(Color.white);
 	}
 	
+	/// Ditto
 	void drawRotated(const Vec2f position) {
 		assert(texture, "Texture is null");
 		Vec2f finalSize = size * scale * transformScale();
@@ -142,19 +140,25 @@ final class Sprite: Drawable {
         texture.setColorMod(Color.white);
 	}
 
+	/// Ditto
 	void draw(const Vec2f pivot, float pivotDistance, float pivotAngle) {
 		assert(texture, "Texture is null");
 		Vec2f finalSize = size * scale * transformScale();
         texture.setColorMod(color, blend);
-		texture.draw(transformRenderSpace(pivot + Vec2f.angled(pivotAngle) * pivotDistance), finalSize, clip, angle, flip, anchor);
+		texture.draw(
+			transformRenderSpace(pivot + Vec2f.angled(pivotAngle) * pivotDistance),
+			finalSize, clip, angle, flip, anchor);
         texture.setColorMod(Color.white);
 	}
 
+	/// Ditto
 	void draw(const Vec2f pivot, const Vec2f pivotOffset, float pivotAngle) {
 		assert(texture, "Texture is null");
 		Vec2f finalSize = size * scale * transformScale();
         texture.setColorMod(color, blend);
-		texture.draw(transformRenderSpace(pivot + pivotOffset.rotated(pivotAngle)), finalSize, clip, angle, flip, anchor);
+		texture.draw(
+			transformRenderSpace(pivot + pivotOffset.rotated(pivotAngle)),
+			finalSize, clip, angle, flip, anchor);
         texture.setColorMod(Color.white);
 	}
 

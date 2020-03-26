@@ -1,11 +1,8 @@
-/**
-    Canvas
-
-    Copyright: (c) Enalye 2017
-    License: Zlib
-    Authors: Enalye
-*/
-
+/** 
+ * Copyright: Enalye
+ * License: Zlib
+ * Authors: Enalye
+ */
 module atelier.render.canvas;
 
 import std.conv: to;
@@ -44,7 +41,11 @@ final class Canvas: Drawable {
 			_renderSize = newRenderSize;
 			if(_renderTexture !is null)
 				SDL_DestroyTexture(_renderTexture);
-			_renderTexture = SDL_CreateTexture(_sdlRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _renderSize.x, _renderSize.y);
+			_renderTexture = SDL_CreateTexture(
+				_sdlRenderer,
+				SDL_PIXELFORMAT_RGBA8888,
+				SDL_TEXTUREACCESS_TARGET,
+				_renderSize.x, _renderSize.y);
 			return _renderSize;
 		}
 	}
@@ -59,31 +60,43 @@ final class Canvas: Drawable {
 	/// The base color when nothing is rendered.
 	Color clearColor = Color.clear;
 
+	/// Ctor
 	this(Vec2f newRenderSize) {
 		this(to!Vec2u(newRenderSize));
 	}
 
+	/// Ctor
     this(Vec2i newRenderSize) {
 		this(to!Vec2u(newRenderSize));
 	}
 
+	/// Ctor
 	this(Vec2u newRenderSize) {
 		if(newRenderSize.x >= 2048u || newRenderSize.y >= 2048u)
 			throw new Exception("Canvas render size exceeds limits.");
 		_renderSize = newRenderSize;
-		_renderTexture = SDL_CreateTexture(_sdlRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _renderSize.x, _renderSize.y);
+		_renderTexture = SDL_CreateTexture(
+			_sdlRenderer,
+			SDL_PIXELFORMAT_RGBA8888,
+			SDL_TEXTUREACCESS_TARGET,
+			_renderSize.x, _renderSize.y);
         setColorMod(Color.white, Blend.alpha);
 
 		size = cast(Vec2f)_renderSize;
 		isCentered = false;
 	}
 
+	/// Ctor
 	this(const Canvas canvas) {
 		_renderSize = canvas._renderSize;
 		size = canvas.size;
 		position = canvas.position;
         isCentered = canvas.isCentered;
-		_renderTexture = SDL_CreateTexture(_sdlRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _renderSize.x, _renderSize.y);
+		_renderTexture = SDL_CreateTexture(
+			_sdlRenderer,
+			SDL_PIXELFORMAT_RGBA8888,
+			SDL_TEXTUREACCESS_TARGET,
+			_renderSize.x, _renderSize.y);
 	}
 
 	~this() {
@@ -91,6 +104,7 @@ final class Canvas: Drawable {
 			SDL_DestroyTexture(_renderTexture);
 	}
 
+	/// Copy
 	Canvas copy(const Canvas v) {
 		_renderSize = v._renderSize;
 		size = v.size;
@@ -99,7 +113,11 @@ final class Canvas: Drawable {
 
 		if(_renderTexture !is null)
 			SDL_DestroyTexture(_renderTexture);
-		_renderTexture = SDL_CreateTexture(_sdlRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _renderSize.x, _renderSize.y);
+		_renderTexture = SDL_CreateTexture(
+			_sdlRenderer,
+			SDL_PIXELFORMAT_RGBA8888,
+			SDL_TEXTUREACCESS_TARGET,
+			_renderSize.x, _renderSize.y);
 		return this;
 	}
 
@@ -119,8 +137,8 @@ final class Canvas: Drawable {
 
 	/// Draw the texture at the specified location.
 	void draw(const Vec2f renderPosition) const {
-		Vec2f pos = transformRenderSpace(renderPosition);
-		Vec2f scale = transformScale();
+		const Vec2f pos = transformRenderSpace(renderPosition);
+		const Vec2f scale = transformScale();
 
 		SDL_Rect destRect = {
 			cast(uint)(pos.x - (_renderSize.x / 2) * scale.x),
@@ -134,8 +152,8 @@ final class Canvas: Drawable {
 
 	/// Draw the texture at the specified location while scaling it.
 	void draw(const Vec2f renderPosition, const Vec2f scale) const {
-		Vec2f pos = transformRenderSpace(renderPosition);
-		Vec2f rscale = transformScale() * scale;
+		const Vec2f pos = transformRenderSpace(renderPosition);
+		const Vec2f rscale = transformScale() * scale;
 
 		SDL_Rect destRect = {
 			cast(uint)(pos.x - (_renderSize.x / 2) * rscale.x),
@@ -156,7 +174,8 @@ final class Canvas: Drawable {
     }
 
 	/// Draw the part of the texture at the specified location.
-    void draw(Vec2f pos, Vec2f rsize, Vec4i srcRect, float angle, Flip flip = Flip.none, Vec2f anchor = Vec2f.half) const {
+    void draw(Vec2f pos, Vec2f rsize, Vec4i srcRect, float angle,
+		Flip flip = Flip.none, Vec2f anchor = Vec2f.half) const {
 		pos -= anchor * rsize;
 		
 		SDL_Rect srcSdlRect = srcRect.toSdlRect();
@@ -168,6 +187,10 @@ final class Canvas: Drawable {
 		};
 
 		SDL_RendererFlip rendererFlip = getSDLFlip(flip);
-		SDL_RenderCopyEx(cast(SDL_Renderer*)_sdlRenderer, cast(SDL_Texture*)_renderTexture, &srcSdlRect, &destSdlRect, angle, null, rendererFlip);
+		SDL_RenderCopyEx(
+			cast(SDL_Renderer*) _sdlRenderer,
+			cast(SDL_Texture*) _renderTexture,
+			&srcSdlRect, &destSdlRect,
+			angle, null, rendererFlip);
 	}
 }

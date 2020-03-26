@@ -1,11 +1,8 @@
-/**
-    Tileset
-
-    Copyright: (c) Enalye 2017
-    License: Zlib
-    Authors: Enalye
-*/
-
+/** 
+ * Copyright: Enalye
+ * License: Zlib
+ * Authors: Enalye
+ */
 module atelier.render.tileset;
 
 import std.conv;
@@ -22,8 +19,11 @@ import atelier.render.drawable;
 /// Series of aligned tiles.
 final class Tileset {
 	@property {
+        /// loaded ?
 		bool isLoaded() const { return texture.isLoaded; }
+        /// Number of tiles
         int maxtiles() const { return _maxtiles; }
+        /// Ditto
         int maxtiles(int newMaxTiles) {
             _maxtiles = newMaxTiles;
             if(_maxtiles <= 0 || _maxtiles > columns * lines)
@@ -67,8 +67,10 @@ final class Tileset {
 	/// Blending algorithm.
     Blend blend = Blend.alpha;
 
+    /// Ctor
     this() {}
 
+    /// Copy ctor
     this(Tileset tileset) {
         _maxtiles = tileset._maxtiles;
         clip = tileset.clip;
@@ -84,6 +86,7 @@ final class Tileset {
         blend = tileset.blend;
     }
 
+    /// Ctor
 	this(Texture newTexture, Vec4i newClip, int newColumns, int newLines, int newMaxTiles = -1) {
 		texture = newTexture;
 		clip = newClip;
@@ -124,6 +127,7 @@ final class Tileset {
 		size = to!Vec2f(clip.zw).fit(size_);
 	}
 
+    /// Render a tile
 	void drawRotated(int id, const Vec2f position) {
 		if(id >= _maxtiles)
 			id = _maxtiles - 1;
@@ -137,12 +141,16 @@ final class Tileset {
 		Vec2f finalSize = scale * size * transformScale();
 		Vec2f dist = (anchor - Vec2f.half).rotated(angle) * size * scale;
 
-		Vec4i currentClip = Vec4i(clip.x + coord.x * (clip.z + margin.x), clip.y + coord.y * (clip.w + margin.y), clip.z, clip.w);
+		Vec4i currentClip = Vec4i(
+            clip.x + coord.x * (clip.z + margin.x),
+            clip.y + coord.y * (clip.w + margin.y),
+            clip.z, clip.w);
         texture.setColorMod(color, blend);
         texture.draw(transformRenderSpace(position - dist), finalSize, currentClip, angle, flip);
         texture.setColorMod(Color.white);
 	}
 
+    /// Ditto
 	void draw(int id, const Vec2f position) {
 		if(id >= _maxtiles)
 			id = _maxtiles - 1;
@@ -153,7 +161,10 @@ final class Tileset {
 		Vec2i coord = Vec2i(id % columns, id / columns);
 		if(coord.y > lines)
 			throw new Exception("Tileset id out of bounds");
-		Vec4i currentClip = Vec4i(clip.x + coord.x * (clip.z + margin.x), clip.y + coord.y * (clip.w + margin.y), clip.z, clip.w);
+		Vec4i currentClip = Vec4i(
+            clip.x + coord.x * (clip.z + margin.x),
+            clip.y + coord.y * (clip.w + margin.y),
+            clip.z, clip.w);
         texture.setColorMod(color, blend);
         texture.draw(transformRenderSpace(position), finalSize, currentClip, angle, flip, anchor);
         texture.setColorMod(Color.white);
