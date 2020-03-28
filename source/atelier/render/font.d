@@ -78,7 +78,7 @@ final class PixelFont {
     private {
         string _name;
         Texture _texture;
-        uint _size, _ascent, _descent, _charCount, _kerningCount;
+        int _size, _ascent, _descent, _charCount, _kerningCount;
         int[] _chars, _advance, _offsetX, _offsetY,
             _width, _height, _packX, _packY, _kerning;
     }
@@ -134,11 +134,11 @@ final class PixelFont {
         /// Font name
         string name() const { return _name; }
         /// Default font size
-        uint size() const { return _size; }
+        int size() const { return _size; }
         /// Where the top is above the baseline
-        uint ascent() const { return _ascent; }
+        int ascent() const { return _ascent; }
         /// Where the bottom is below the baseline
-        uint descent() const { return _descent; }
+        int descent() const { return _descent; }
     }
 
     int getKerning(dchar prevChar, dchar currChar) {
@@ -177,7 +177,7 @@ final class TrueTypeFont: Font {
 	private {
 		TTF_Font* _trueTypeFont;
 		bool _isLoaded, _ownData;
-		uint _size;
+		int _size;
 	}
 
 	@property {
@@ -198,7 +198,7 @@ final class TrueTypeFont: Font {
 	}
 
 	/// Ctor
-	this(const string path, uint newSize = 16u) {
+	this(const string path, int newSize = 16u) {
 		load(path, newSize);
 	}
 
@@ -207,7 +207,7 @@ final class TrueTypeFont: Font {
 	}
 
 	/// Load
-	void load(string path, uint newSize = 16u) {
+	void load(string path, int newSize = 16u) {
 		if (null != _trueTypeFont)
 			TTF_CloseFont(_trueTypeFont);
 

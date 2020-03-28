@@ -5,7 +5,7 @@
  */
 module atelier.ui.text;
 
-import std.utf;
+import std.utf, std.random;
 import std.conv: to;
 import std.string;
 import atelier.core, atelier.render, atelier.common;
@@ -15,7 +15,7 @@ import atelier.ui.gui_element;
 final class Text: GuiElement {
 	private {
 		PixelFont _font;
-		Timer _timer;
+		Timer _timer, _effectTimer;
 		dstring _text;
 		size_t _currentIndex;
 		Token[] _tokens;
@@ -64,6 +64,8 @@ final class Text: GuiElement {
 		_font = font_;
 		_text = to!dstring(text_);
 		tokenize();
+		_effectTimer.mode = Timer.Mode.loop;
+		_effectTimer.start(1f);
 	}
 
 	/// Restart the reading from the beginning
@@ -115,7 +117,7 @@ final class Text: GuiElement {
 
 		struct EffectToken {
 			enum Type {
-				none
+				none, wave, bounce, shake, rainbow
 			}
 			Type type;
 		}
@@ -248,7 +250,30 @@ final class Text: GuiElement {
 						break;
 					case "fx":
 					case "effect":
-						// TODO: effect token (shake, bounce, etc)
+						Token token;
+						token.type = Token.Type.effect;
+						token.effect.type = Token.EffectToken.Type.none;
+						if(parameters.length > 1) {
+							switch(parameters[1]) {
+							case "wave":
+								token.effect.type = Token.EffectToken.Type.wave;
+								break;
+							case "bounce":
+								token.effect.type = Token.EffectToken.Type.bounce;
+								break;
+							case "shake":
+								token.effect.type = Token.EffectToken.Type.shake;
+								break;
+							case "rainbow":
+								token.effect.type = Token.EffectToken.Type.rainbow;
+								break;
+							default:
+								token.effect.type = Token.EffectToken.Type.none;
+								break;
+							}
+						}
+						else continue;
+						_tokens ~= token;
 						break;
 					case "d":
 					case "dl":
@@ -277,15 +302,19 @@ final class Text: GuiElement {
 
 	override void update(float deltaTime) {
 		_timer.update(deltaTime);
+		_effectTimer.update(deltaTime);
 	}
 
 	override void draw() {
-		Vec2f pos = origin - Vec2f(0f, _font.ascent);
+		Vec2f pos = origin + Vec2f(0f, _font.ascent * _defaultCharScale);
 		dchar prevChar;
 		Color charColor_ = _defaultCharColor;
 		float charDelay_ = _defaultCharDelay;
 		int charScale_ = _defaultCharScale;
 		int charSpacing_ = _defaultCharSpacing;
+		Token.EffectToken.Type charEffect_ = Token.EffectToken.Type.none;
+		Vec2f totalSize_ = Vec2f.zero;
+		Timer waveTimer = _effectTimer;import std.stdio;
 		foreach(size_t index, Token token; _tokens) {
 			final switch(token.type) with(Token.Type) {
 			case character:
@@ -299,15 +328,53 @@ final class Text: GuiElement {
 				GlyphMetrics metrics = _font.getMetrics(token.character.character);
 				pos.x += _font.getKerning(prevChar, token.character.character) * charScale_;
 				Vec2f drawPos = Vec2f(pos.x + metrics.offsetX * charScale_, pos.y + metrics.offsetY * charScale_);
+
+				final switch(charEffect_) with(Token.EffectToken.Type) {
+				case none:
+					break;
+				case wave:
+					waveTimer.update(1f);
+					waveTimer.update(1f);
+					waveTimer.update(1f);
+					waveTimer.update(1f);
+					waveTimer.update(1f);
+					waveTimer.update(1f);
+					if(waveTimer.value01 < .5f)
+						drawPos.y -= lerp!float(_font.descent, _font.ascent, easeInOutSine(waveTimer.value01 * 2f));
+					else
+						drawPos.y -= lerp!float(_font.ascent, _font.descent, easeInOutSine((waveTimer.value01 - .5f) * 2f));
+					break;
+				case bounce:
+					if(_effectTimer.value01 < .5f)
+						drawPos.y -= lerp!float(_font.descent, _font.ascent, easeOutSine(_effectTimer.value01 * 2f));
+					else
+						drawPos.y -= lerp!float(_font.ascent, _font.descent, easeInSine((_effectTimer.value01 - .5f) * 2f));
+					break;
+				case shake:
+					drawPos += Vec2f(uniform01(), uniform01()) * charScale_;
+					break;
+				case rainbow:
+					break;
+				}
+
 				metrics.draw(drawPos, charScale_, charColor_);
 				pos.x += (metrics.advance + charSpacing_) * charScale_;
 				prevChar = token.character.character;
+				if((pos.x - origin.x) > totalSize_.x) {
+					totalSize_.x = (pos.x - origin.x);
+				}
+				if(((_font.ascent - _font.descent) * charScale_) > totalSize_.y) {
+					totalSize_.y = (_font.ascent - _font.descent) * charScale_;
+				}
 				break;
 			case line:
 				if(_currentIndex == index)
 					_currentIndex ++;
 				pos.x = origin.x;
 				pos.y += ((_font.ascent - _font.descent) + 1f) * charScale_;
+				if((pos.y - origin.y) > totalSize_.y) {
+					totalSize_.y = (pos.y - origin.y);
+				}
 				break;
 			case scale:
 				if(_currentIndex == index)
@@ -341,11 +408,12 @@ final class Text: GuiElement {
 			case effect:
 				if(_currentIndex == index)
 					_currentIndex ++;
-				//token.effect.type;
+				charEffect_ = token.effect.type;
 				break;
 			}
 			if(index == _currentIndex)
 				break;
 		}
+		size = totalSize_;
 	}
 }
