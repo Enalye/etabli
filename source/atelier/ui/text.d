@@ -38,6 +38,9 @@ final class Text: GuiElement {
 			return text_;
 		}
 
+		/// Is the text still being displayed ?
+		bool isPlaying() const { return _timer.isRunning() || (_currentIndex < _tokens.length); }
+
 		/// Default change color
 		Color defaultColor() const { return _defaultCharColor; }
 		/// Ditto
@@ -314,7 +317,7 @@ final class Text: GuiElement {
 		int charSpacing_ = _defaultCharSpacing;
 		Token.EffectToken.Type charEffect_ = Token.EffectToken.Type.none;
 		Vec2f totalSize_ = Vec2f.zero;
-		Timer waveTimer = _effectTimer;import std.stdio;
+		Timer waveTimer = _effectTimer;
 		foreach(size_t index, Token token; _tokens) {
 			final switch(token.type) with(Token.Type) {
 			case character:
