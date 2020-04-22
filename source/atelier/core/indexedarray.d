@@ -213,4 +213,16 @@ else {
             return false;
         return true;
     }
+
+	/// Returns the first element in the list
+	T first() {
+		assert(_dataTop > 0);
+		return _dataTable[0];
+	}
+
+	/// Returns the last element in the list
+	T last() {
+		assert(_dataTop > 0);
+		return _dataTable[_dataTop - 1];
+	}
 }
