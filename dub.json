@@ -7,8 +7,15 @@
 		"Enalye"
 	],
 	"dependencies": {
-		"derelict-sdl2": "~>2.1.4"
+		"bindbc-sdl": "~>0.15.0"
 	},
+	"versions": [
+		"SDL_2010",
+		"BindSDL_Image",
+		"SDLImage202",
+		"BindSDL_TTF",
+		"BindSDL_Mixer"
+	],
 	"targetName": "atelier",
 	"targetType": "library",
 	"targetPath": "bin",

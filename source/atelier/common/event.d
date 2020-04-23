@@ -21,7 +21,7 @@ version(Windows) {
 	import core.stdc.signal;
 }
 
-import derelict.sdl2.sdl;
+import bindbc.sdl;
 
 import atelier.render;
 import atelier.ui;
@@ -677,13 +677,13 @@ bool processEvents() {
             remapController(sdlEvent.cdevice.which);
             break;
         case SDL_CONTROLLERAXISMOTION:
-            setControllerAxis(sdlEvent.caxis.axis, sdlEvent.caxis.value);
+            setControllerAxis(cast(SDL_GameControllerAxis) sdlEvent.caxis.axis, sdlEvent.caxis.value);
             break;
         case SDL_CONTROLLERBUTTONDOWN:
-            setControllerButton(sdlEvent.cbutton.button, true);
+            setControllerButton(cast(SDL_GameControllerButton) sdlEvent.cbutton.button, true);
             break;
         case SDL_CONTROLLERBUTTONUP:
-            setControllerButton(sdlEvent.cbutton.button, false);
+            setControllerButton(cast(SDL_GameControllerButton) sdlEvent.cbutton.button, false);
             break;
 		default:
 			break;

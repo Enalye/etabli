@@ -8,7 +8,7 @@
 
 module atelier.common.controller;
 
-import derelict.sdl2.sdl;
+import bindbc.sdl;
 import atelier.core;
 import atelier.common.resource;
 

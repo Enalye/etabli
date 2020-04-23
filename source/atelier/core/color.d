@@ -13,7 +13,7 @@ import std.typecons;
 import std.random;
 public import std.algorithm.comparison: clamp;
 
-import derelict.sdl2.sdl;
+import bindbc.sdl;
 
 import atelier.core.stream;
 import atelier.core.vec4;

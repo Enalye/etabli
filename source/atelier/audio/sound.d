@@ -10,8 +10,7 @@ module atelier.audio.sound;
 
 import std.string: toStringz;
 
-import derelict.sdl2.sdl;
-import derelict.sdl2.mixer;
+import bindbc.sdl, bindbc.sdl.mixer;
 
 private {
 	uint _topChannelIndex = 0u;

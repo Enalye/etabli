@@ -7,7 +7,7 @@ module atelier.render.canvas;
 
 import std.conv: to;
 
-import derelict.sdl2.sdl;
+import bindbc.sdl;
 
 import atelier.core;
 import atelier.render.window;

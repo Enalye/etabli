@@ -9,7 +9,7 @@
 module atelier.ui.label;
 
 import std.string;
-import derelict.sdl2.sdl, derelict.sdl2.ttf;
+import bindbc.sdl, bindbc.sdl.ttf;
 import atelier.core, atelier.common, atelier.render;
 import atelier.ui.gui_element;
 

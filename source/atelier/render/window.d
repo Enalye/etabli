@@ -8,10 +8,7 @@ module atelier.render.window;
 import std.stdio;
 import std.string;
 
-import derelict.sdl2.sdl;
-import derelict.sdl2.image;
-import derelict.sdl2.mixer;
-import derelict.sdl2.ttf;
+import bindbc.sdl, bindbc.sdl.image, bindbc.sdl.mixer, bindbc.sdl.ttf;
 
 import atelier.core;
 import atelier.common;
@@ -68,29 +65,21 @@ enum DisplayMode {
 
 /// Create the application window.
 void createWindow(const Vec2u windowSize, string title) {
-	DerelictSDL2.load(SharedLibVersion(2, 0, 2));
-	DerelictSDL2Image.load();
-	if(_hasAudio)
-		DerelictSDL2Mixer.load();
-	DerelictSDL2ttf.load();
+	assert(loadSDL() >= SDLSupport.sdl202);
+	assert(loadSDLImage() >= SDLImageSupport.sdlImage200);
+	assert(loadSDLTTF() >= SDLTTFSupport.sdlTTF2012);
+	assert(loadSDLMixer() >= SDLMixerSupport.sdlMixer200);
 
 	SDL_Init(SDL_INIT_EVERYTHING);
 
-	if(-1 == TTF_Init())
-		throw new Exception("Could not initialize TTF module.");
+	assert(TTF_Init() != -1, "Could not initialize TTF module.");
+	assert(Mix_OpenAudio(44_100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024) != -1, "No audio device connected.");
+	assert(Mix_AllocateChannels(16) != -1, "Could not allocate audio channels.");
 
-	if(_hasAudio) {
-		if(-1 == Mix_OpenAudio(44_100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024))
-			throw new Exception("No audio device connected.");
-
-		if(-1 == Mix_AllocateChannels(16))
-			throw new Exception("Could not allocate audio channels.");
-	}
-
-	if(-1 == SDL_CreateWindowAndRenderer(windowSize.x, windowSize.y,
+	assert(SDL_CreateWindowAndRenderer(windowSize.x, windowSize.y,
 		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_WINDOW_RESIZABLE,
-		&_sdlWindow, &_sdlRenderer))
-		throw new Exception("Window initialization failed.");
+		&_sdlWindow, &_sdlRenderer) != -1,
+		"Window initialization failed.");
 
 	CanvasReference canvasRef;
 	canvasRef.target = null;

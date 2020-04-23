@@ -10,8 +10,7 @@ module atelier.audio.music;
 
 import std.string: toStringz;
 
-import derelict.sdl2.sdl;
-import derelict.sdl2.mixer;
+import bindbc.sdl, bindbc.sdl.mixer;
 
 /// Music
 class Music {

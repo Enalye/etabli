@@ -8,7 +8,7 @@
 
 module atelier.core.vec4;
 
-import derelict.sdl2.sdl;
+import bindbc.sdl;
 
 import atelier.core.vec2;
 

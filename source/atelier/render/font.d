@@ -7,8 +7,7 @@ module atelier.render.font;
 
 import std.string;
 
-import derelict.sdl2.sdl;
-import derelict.sdl2.ttf;
+import bindbc.sdl, bindbc.sdl.ttf;
 
 import atelier.core;
 import atelier.render.texture;

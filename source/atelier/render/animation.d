@@ -7,8 +7,7 @@ module atelier.render.animation;
 
 import std.conv;
 
-import derelict.sdl2.sdl;
-import derelict.sdl2.image;
+import bindbc.sdl, bindbc.sdl.image;
 
 import atelier.common;
 import atelier.core;

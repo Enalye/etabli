@@ -8,7 +8,7 @@
 
 module atelier.common.application;
 
-import derelict.sdl2.sdl;
+import bindbc.sdl;
 
 import core.thread;
 import std.datetime;
