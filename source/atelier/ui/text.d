@@ -5,6 +5,7 @@
  */
 module atelier.ui.text;
 
+import std.regex;
 import std.algorithm.comparison: min;
 import std.utf, std.random;
 import std.conv: to;
@@ -20,8 +21,8 @@ final class Text: GuiElement {
 		dstring _text;
 		size_t _currentIndex;
 		Token[] _tokens;
-		float _defaultCharDelay = 0f;
-		int _defaultCharSpacing = 0;
+		float _delay = 0f;
+		int _spacing = 0;
 	}
 
 	@property {
@@ -41,21 +42,51 @@ final class Text: GuiElement {
 		bool isPlaying() const { return _timer.isRunning() || (_currentIndex < _tokens.length); }
 
 		/// Default delay between each character
-		float defaultDelay() const { return _defaultCharDelay; }
+		float delay() const { return _delay; }
 		/// Ditto
-		float defaultDelay(float defaultCharDelay_) { return _defaultCharDelay = defaultCharDelay_; }
+		float delay(float delay_) { return _delay = delay_; }
+
+		/// Characters per second
+		int cps() const {
+			return (_delay <= 0f) ? 0 : cast(int) (1f / _delay);
+		}
+		/// Ditto
+		int cps(int cps_) {
+			_delay = (cps_ == 0) ? 0f : (1f / cps_);
+			return cps_;
+		}
 
 		/// Default additionnal spacing between each character
-		int defaultSpacing() const { return _defaultCharSpacing; }
+		int spacing() const { return _spacing; }
 		/// Ditto
-		int defaultSpacing(int defaultCharSpacing_) { return _defaultCharSpacing = defaultCharSpacing_; }
+		int spacing(int spacing_) { return _spacing = spacing_; }
 	}
 
-	/// Ctor
+	/// Build text with custom font
 	this(Font font_, string text_) {
 		super(Flags.notInteractable);
 		_font = font_;
 		_text = to!dstring(text_);
+		tokenize();
+		_effectTimer.mode = Timer.Mode.loop;
+		_effectTimer.start(1f);
+	}
+
+	/// Build label with default font
+	this(string text_) {
+		super(Flags.notInteractable);
+		_font = getDefaultFont();
+		_text = to!dstring(text_);
+		tokenize();
+		_effectTimer.mode = Timer.Mode.loop;
+		_effectTimer.start(1f);
+	}
+
+	/// Ditto
+	this() {
+		super(Flags.notInteractable);
+		_font = getDefaultFont();
+		_text = "";
 		tokenize();
 		_effectTimer.mode = Timer.Mode.loop;
 		_effectTimer.start(1f);
@@ -137,23 +168,25 @@ final class Text: GuiElement {
 				foreach(modifier; brackets.split(",")) {
 					if(!modifier.length)
 						continue;
-					auto parameters = modifier.split(":");
-					if(!parameters.length)
+					auto parameters = splitter(modifier, regex("[:=]"d));
+					if(parameters.empty)
 						continue;
-					switch(parameters[0]) {
+					const dstring cmd = parameters.front;
+					parameters.popFront();
+					switch(cmd) {
 					case "c":
 					case "color":
 						Token token;
 						token.type = Token.Type.color;
-						if(parameters.length > 1) {
-							if(!parameters[1].length)
+						if(!parameters.empty) {
+							if(!parameters.front.length)
 								continue;
-							if(parameters[1][0] == '#') {
+							if(parameters.front[0] == '#') {
 								continue;
 								// TODO: #FFFFFF RGB color format
 							}
 							else {
-								switch(parameters[1]) {
+								switch(parameters.front) {
 								case "clear":
 									token.color.color = Color.clear;
 									break;
@@ -223,8 +256,8 @@ final class Text: GuiElement {
 					case "sz":
 						Token token;
 						token.type = Token.Type.scale;
-						if(parameters.length > 1)
-							token.scale.scale = parameters[1].to!int;
+						if(!parameters.empty)
+							token.scale.scale = parameters.front.to!int;
 						else continue;
 						_tokens ~= token;
 						break;
@@ -242,8 +275,8 @@ final class Text: GuiElement {
 					case "pause":
 						Token token;
 						token.type = Token.Type.pause;
-						if(parameters.length > 1)
-							token.pause.duration = parameters[1].to!float;
+						if(!parameters.empty)
+							token.pause.duration = parameters.front.to!float;
 						else continue;
 						_tokens ~= token;
 						break;
@@ -252,8 +285,8 @@ final class Text: GuiElement {
 						Token token;
 						token.type = Token.Type.effect;
 						token.effect.type = Token.EffectToken.Type.none;
-						if(parameters.length > 1) {
-							switch(parameters[1]) {
+						if(!parameters.empty) {
+							switch(parameters.front) {
 							case "wave":
 								token.effect.type = Token.EffectToken.Type.wave;
 								break;
@@ -279,8 +312,18 @@ final class Text: GuiElement {
 					case "delay":
 						Token token;
 						token.type = Token.Type.delay;
-						if(parameters.length > 1)
-							token.delay.duration = parameters[1].to!float;
+						if(!parameters.empty)
+							token.delay.duration = parameters.front.to!float;
+						else continue;
+						_tokens ~= token;
+						break;
+					case "cps":
+						Token token;
+						token.type = Token.Type.delay;
+						if(!parameters.empty) {
+							const int cps = parameters.front.to!int;
+							token.delay.duration = (cps == 0) ? 0f : (1f / cps);
+						}
 						else continue;
 						_tokens ~= token;
 						break;
@@ -304,7 +347,7 @@ final class Text: GuiElement {
 		Vec2f totalSize_ = Vec2f(0f, _font.ascent - _font.descent);
 		float lineWidth = 0f;
 		dchar prevChar;
-		int charSpacing_ = _defaultCharSpacing;
+		int charSpacing_ = _spacing;
 		int charScale_ = min(cast(int) scale.x, cast(int) scale.y);
 		foreach(Token token; _tokens) {
 			final switch(token.type) with(Token.Type) {
@@ -345,9 +388,9 @@ final class Text: GuiElement {
 		Vec2f pos = origin;
 		dchar prevChar;
 		Color charColor_ = color;
-		float charDelay_ = _defaultCharDelay;
+		float charDelay_ = _delay;
 		int charScale_ = min(cast(int) scale.x, cast(int) scale.y);
-		int charSpacing_ = _defaultCharSpacing;
+		int charSpacing_ = _spacing;
 		Token.EffectToken.Type charEffect_ = Token.EffectToken.Type.none;
 		Vec2f totalSize_ = Vec2f.zero;
 		Timer waveTimer = _effectTimer;

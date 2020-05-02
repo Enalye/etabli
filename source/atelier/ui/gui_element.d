@@ -522,7 +522,7 @@ class GuiElement {
 	}
 
     /// Unregister itself from its parent or root.
-    void removeSelf() {
+    void removeSelfGui() {
         _isRegistered = false;
     }
 }

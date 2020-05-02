@@ -42,6 +42,7 @@ final class Label: GuiElement {
 		}
 	}
 
+	/// Build label with custom font
 	this(Font font, string text_) {
 		super(GuiElement.Flags.notInteractable);
         _font = font;
@@ -49,6 +50,7 @@ final class Label: GuiElement {
 		reload();
 	}
 
+	/// Build label with default font
     this(string text_) {
 		super(GuiElement.Flags.notInteractable);
         _font = getDefaultFont();
@@ -56,6 +58,7 @@ final class Label: GuiElement {
 		reload();
 	}
 
+	/// Ditto
 	this() {
 		super(GuiElement.Flags.notInteractable);
 		_font = getDefaultFont();
