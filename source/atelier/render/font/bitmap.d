@@ -15,50 +15,65 @@ final class BitmapFont: Font {
     private {
         string _name;
         Texture _texture;
-        int _size, _ascent, _descent, _charCount, _kerningCount;
-        int[] _chars, _advance, _offsetX, _offsetY,
-            _width, _height, _packX, _packY, _kerning;
+        Metrics _metrics;
     }
 
-    /// Load from config file and texture.
-    this(string jsonPath, string texturePath) {
-		import std.file: readText;
-        JSONValue json = parseJSON(readText(jsonPath));
-        _name = getJsonStr(json, "name");
-        _size = getJsonInt(json, "size");
-        _ascent = getJsonInt(json, "ascent");
-        _descent = getJsonInt(json, "descent");
-        _charCount = getJsonInt(json, "char_count");
-        _kerningCount = getJsonInt(json, "kerning_count");
-        _chars = getJsonArrayInt(json, "chars");
-        _advance = getJsonArrayInt(json, "advance");
-        _offsetX = getJsonArrayInt(json, "offset_x");
-        _offsetY = getJsonArrayInt(json, "offset_y");
-        _width = getJsonArrayInt(json, "width");
-        _height = getJsonArrayInt(json, "height");
-        _packX = getJsonArrayInt(json, "pack_x");
-        _packY = getJsonArrayInt(json, "pack_y");
-        _kerning = getJsonArrayInt(json, "kerning");
+    /// Glyphs metrics
+    struct Metrics {
+        /// Size of the font
+        int size;
+        
+        /// How much the font rises from the baseline (Positive value)
+        int ascent;
+
+        /// How much the font drops below the baseline (Negative value)
+        int descent;
+
+        /// All the characters defined in the font
+        int[] chars;
+
+        /// Horizontal distance from the origin of the current character to the next
+        int[] advance;
+
+        /// Distance from the origin of the character to draw \
+        /// Positive value = offset to the right
+        int[] offsetX;
+
+        /// Distance from the origin of the character to draw \
+        /// Positive value = offset to the top
+        int[] offsetY;
+
+        /// Total width of the character
+        int[] width;
+
+        /// Total height of the character
+        int[] height;
+
+        /// Left coordinate of the glyph in the texture
+        int[] packX;
+
+        /// Top coordinate of the glyph in the texture
+        int[] packY;
+
+        /// Array of triple values (3 times the length of kerningCount) \
+        /// Organised like this `..., PreviousChar, CurrentChar, OffsetX, ...`
+        int[] kerning;
+
+        /// The number of kerning triplets (a third of the size of the kerning array)
+        int kerningCount;
+    }
+
+    /// Load from metrics and texture.
+    this(string name_, string texturePath, Metrics metrics) {
+        _name = name_;
+        _metrics = metrics;
         _texture = new Texture(texturePath, true);
     }
 
     /// Copy ctor
     this(BitmapFont font) {
         _name = font._name;
-        _size = font._size;
-        _ascent = font._ascent;
-        _descent = font._descent;
-        _charCount = font._charCount;
-        _kerningCount = font._kerningCount;
-        _chars = font._chars;
-        _advance = font._advance;
-        _offsetX = font._offsetX;
-        _offsetY = font._offsetY;
-        _width = font._width;
-        _height = font._height;
-        _packX = font._packX;
-        _packY = font._packY;
-        _kerning = font._kerning;
+        _metrics = font._metrics;
         _texture = new Texture(font._texture);
     }
 
@@ -71,40 +86,40 @@ final class BitmapFont: Font {
         /// Font name
         string name() const { return _name; }
         /// Default font size
-        int size() const { return _size; }
+        int size() const { return _metrics.size; }
         /// Where the top is above the baseline
-        int ascent() const { return _ascent; }
+        int ascent() const { return _metrics.ascent; }
         /// Where the bottom is below the baseline
-        int descent() const { return _descent; }
+        int descent() const { return _metrics.descent; }
 		/// Distance between each baselines
-        int lineSkip() const { return (_ascent - _descent) + 1; }
+        int lineSkip() const { return (_metrics.ascent - _metrics.descent) + 1; }
     }
 
     int getKerning(dchar prevChar, dchar currChar) {
-        for(int i; i < _kerningCount; ++ i) {
+        for(int i; i < _metrics.kerningCount; ++ i) {
             const int index = i * 3;
-            if(_kerning[index] == prevChar &&
-                _kerning[index + 1] == currChar) {
-                return _kerning[index + 2];
+            if(_metrics.kerning[index] == prevChar &&
+                _metrics.kerning[index + 1] == currChar) {
+                return _metrics.kerning[index + 2];
             }
         }
         return 0;
     }
 
     Glyph getMetrics(dchar character) {
-        for(int i; i < _charCount; ++ i) {
-			if(_chars[i] == character) {
+        for(int i; i < _metrics.chars.length; ++ i) {
+			if(_metrics.chars[i] == character) {
 				Glyph metrics = Glyph(
                     true,
-                    _advance[i],
-                    _offsetX[i],
-                    _offsetY[i],
-                    _width[i],
-                    _height[i],
-                    _packX[i],
-                    _packY[i],
-                    _width[i],
-                    _height[i],
+                    _metrics.advance[i],
+                    _metrics.offsetX[i],
+                    _metrics.offsetY[i],
+                    _metrics.width[i],
+                    _metrics.height[i],
+                    _metrics.packX[i],
+                    _metrics.packY[i],
+                    _metrics.width[i],
+                    _metrics.height[i],
                     _texture
                     );
 				return metrics;
