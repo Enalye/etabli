@@ -5,6 +5,7 @@
  */
 module atelier.ui.text;
 
+import std.algorithm.comparison: min;
 import std.utf, std.random;
 import std.conv: to;
 import std.string;
@@ -14,14 +15,12 @@ import atelier.ui.gui_element;
 /// Dynamic text rendering
 final class Text: GuiElement {
 	private {
-		PixelFont _font;
+		Font _font;
 		Timer _timer, _effectTimer;
 		dstring _text;
 		size_t _currentIndex;
 		Token[] _tokens;
-		Color _defaultCharColor = Color.white;
 		float _defaultCharDelay = 0f;
-		int _defaultCharScale = 1;
 		int _defaultCharSpacing = 0;
 	}
 
@@ -41,21 +40,11 @@ final class Text: GuiElement {
 		/// Is the text still being displayed ?
 		bool isPlaying() const { return _timer.isRunning() || (_currentIndex < _tokens.length); }
 
-		/// Default change color
-		Color defaultColor() const { return _defaultCharColor; }
-		/// Ditto
-		Color defaultColor(Color defaultCharColor_) { return _defaultCharColor = defaultCharColor_; }
-
 		/// Default delay between each character
 		float defaultDelay() const { return _defaultCharDelay; }
 		/// Ditto
 		float defaultDelay(float defaultCharDelay_) { return _defaultCharDelay = defaultCharDelay_; }
 
-		/// Default character scaling
-		int defaultScale() const { return _defaultCharScale; }
-		/// Ditto
-		int defaultScale(int defaultCharScale_) { return _defaultCharScale = defaultCharScale_; }
-		
 		/// Default additionnal spacing between each character
 		int defaultSpacing() const { return _defaultCharSpacing; }
 		/// Ditto
@@ -63,7 +52,8 @@ final class Text: GuiElement {
 	}
 
 	/// Ctor
-	this(PixelFont font_, string text_) {
+	this(Font font_, string text_) {
+		super(Flags.notInteractable);
 		_font = font_;
 		_text = to!dstring(text_);
 		tokenize();
@@ -130,7 +120,13 @@ final class Text: GuiElement {
 		size_t current = 0;
 		_tokens.length = 0;
 		while(current < _text.length) {
-			if(_text[current] == '{') {
+			if(_text[current] == '\n') {
+				current ++;
+				Token token;
+				token.type = Token.Type.line;
+				_tokens ~= token;
+			}
+			else if(_text[current] == '{') {
 				current ++;
 				size_t endOfBrackets = indexOf(_text, "}", current);
 				if(endOfBrackets == -1)
@@ -301,6 +297,43 @@ final class Text: GuiElement {
 				current ++;
 			}
 		}
+		reload();
+	}
+
+	private void reload() {
+		Vec2f totalSize_ = Vec2f(0f, _font.ascent - _font.descent);
+		float lineWidth = 0f;
+		dchar prevChar;
+		int charSpacing_ = _defaultCharSpacing;
+		int charScale_ = min(cast(int) scale.x, cast(int) scale.y);
+		foreach(Token token; _tokens) {
+			final switch(token.type) with(Token.Type) {
+			case line:
+				lineWidth = 0f;
+				totalSize_.y += _font.lineSkip;
+				break;
+			case character:
+				const Glyph metrics = _font.getMetrics(token.character.character);
+				lineWidth += _font.getKerning(prevChar, token.character.character) * charScale_;
+				lineWidth += (metrics.advance + charSpacing_) * charScale_;
+				if(lineWidth > totalSize_.x)
+					totalSize_.x = lineWidth;
+				prevChar = token.character.character;
+				break;
+			case spacing:
+				charSpacing_ = token.spacing.spacing;
+				break;
+			case scale:
+				charScale_ = token.scale.scale;
+				break;
+			case pause:
+			case delay:
+			case color:
+			case effect:
+				break;
+			}
+		}
+		size = totalSize_;
 	}
 
 	override void update(float deltaTime) {
@@ -309,11 +342,11 @@ final class Text: GuiElement {
 	}
 
 	override void draw() {
-		Vec2f pos = origin + Vec2f(0f, _font.ascent * _defaultCharScale);
+		Vec2f pos = origin;
 		dchar prevChar;
-		Color charColor_ = _defaultCharColor;
+		Color charColor_ = color;
 		float charDelay_ = _defaultCharDelay;
-		int charScale_ = _defaultCharScale;
+		int charScale_ = min(cast(int) scale.x, cast(int) scale.y);
 		int charSpacing_ = _defaultCharSpacing;
 		Token.EffectToken.Type charEffect_ = Token.EffectToken.Type.none;
 		Vec2f totalSize_ = Vec2f.zero;
@@ -328,9 +361,9 @@ final class Text: GuiElement {
 						_timer.start(charDelay_);
 					_currentIndex ++;
 				}
-				GlyphMetrics metrics = _font.getMetrics(token.character.character);
+				Glyph metrics = _font.getMetrics(token.character.character);
 				pos.x += _font.getKerning(prevChar, token.character.character) * charScale_;
-				Vec2f drawPos = Vec2f(pos.x + metrics.offsetX * charScale_, pos.y + metrics.offsetY * charScale_);
+				Vec2f drawPos = Vec2f(pos.x + metrics.offsetX * charScale_, pos.y - metrics.offsetY * charScale_);
 
 				final switch(charEffect_) with(Token.EffectToken.Type) {
 				case none:
@@ -374,7 +407,7 @@ final class Text: GuiElement {
 				if(_currentIndex == index)
 					_currentIndex ++;
 				pos.x = origin.x;
-				pos.y += ((_font.ascent - _font.descent) + 1f) * charScale_;
+				pos.y += _font.lineSkip * charScale_;
 				if((pos.y - origin.y) > totalSize_.y) {
 					totalSize_.y = (pos.y - origin.y);
 				}
@@ -417,6 +450,5 @@ final class Text: GuiElement {
 			if(index == _currentIndex)
 				break;
 		}
-		size = totalSize_;
 	}
 }

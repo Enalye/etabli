@@ -76,8 +76,7 @@ class ListButton: Button {
 		if(sprite.texture)
 			sprite.draw(center);
 
-		if(label.isLoaded)
-			label.draw();
+		label.draw();
 	}
 
     override void onPosition() {
@@ -127,8 +126,7 @@ class TextButton: Button {
 			drawFilledRect(origin, size, Color.white * 0.25f);
 		else
 			drawFilledRect(origin, size, Color.white * 0.15f);
-		if(label.isLoaded)
-			label.draw();
+		label.draw();
 	}
 }
 
@@ -265,8 +263,7 @@ class ImgButton: Button {
 			else
 				drawFilledRect(center - size / 2f, size, Color.red);
 		}
-		if(label.isLoaded)
-			label.draw();
+		label.draw();
 	}
     
     override void onSize() {

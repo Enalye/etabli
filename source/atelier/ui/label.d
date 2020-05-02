@@ -1,14 +1,12 @@
-/**
-    Label
-
-    Copyright: (c) Enalye 2017
-    License: Zlib
-    Authors: Enalye
-*/
-
+/** 
+ * Copyright: Enalye
+ * License: Zlib
+ * Authors: Enalye
+ */
 module atelier.ui.label;
 
-import std.string;
+import std.algorithm.comparison: min;
+import std.string, std.conv;
 import bindbc.sdl, bindbc.sdl.ttf;
 import atelier.core, atelier.common, atelier.render;
 import atelier.ui.gui_element;
@@ -16,91 +14,96 @@ import atelier.ui.gui_element;
 /// A single line of text.
 final class Label: GuiElement {
 	private {
-		string _text;
+		dstring _text;
 		Font _font;
-		Texture _texture;
-		Sprite _sprite;
 	}
 
 	@property {
-		Vec2f spriteScale() const {
-			return _sprite.scale;
-		}
-		Vec2f spriteScale(Vec2f s) {
-			_sprite.scale = s;
-			return _sprite.scale;
-		}
-
+		/// Text
 		string text() const {
-			return _text;
+			return to!string(_text);
 		}
-		string text(string newText) {
-			_text = newText;
+		/// Ditto
+		string text(string text_) {
+			_text = to!dstring(text_);
 			reload();
-			return _text;
+			return text_;
 		}
 
+		/// Font
 		Font font() const {
-			return cast(Font)_font;
+			return cast(Font) _font;
 		}
-		Font font(Font newFont) {
-			_font = newFont;
+		/// Ditto
+		Font font(Font font_) {
+			_font = font_;
 			reload();
 			return _font;
 		}
-
-		Sprite sprite() {
-			return _sprite;
-		}
-
-		bool isLoaded() const {
-			return _sprite.texture !is null;
-		}
 	}
 
-	this(Font font, string newText) {
+	this(Font font, string text_) {
 		super(GuiElement.Flags.notInteractable);
         _font = font;
-		_text = newText;
-		_texture = _font.render(_text);
-		_sprite = new Sprite(_texture);
+		_text = to!dstring(text_);
 		reload();
 	}
 
-    this(string newText) {
+    this(string text_) {
+		super(GuiElement.Flags.notInteractable);
         _font = getDefaultFont();
-		_text = newText;
-		isInteractable = false;
-		_texture = _font.render(_text);
-		_sprite = new Sprite(_texture);
+		_text = to!dstring(text_);
 		reload();
 	}
 
 	this() {
+		super(GuiElement.Flags.notInteractable);
 		_font = getDefaultFont();
 		_text = "";
-		isInteractable = false;
-		_texture = _font.render(_text);
-		_sprite = new Sprite(_texture);
 		reload();
 	}
 
-	override void draw() {
-		if(_text.length && _texture) {
-			_sprite.color = color;
-			_sprite.scale = scale;
-			_sprite.draw(center);
+	private void reload() {
+		int scale_ = min(cast(int) scale.x, cast(int) scale.y);
+		Vec2f totalSize_ = Vec2f(0f, _font.ascent - _font.descent);
+		float lineWidth = 0f;
+		dchar prevChar;
+		foreach(dchar ch; _text) {
+			if(ch == '\n') {
+				lineWidth = 0f;
+				totalSize_.y += _font.lineSkip;
+			}
+			else {
+				const Glyph metrics = _font.getMetrics(ch);
+				lineWidth += _font.getKerning(prevChar, ch) * scale_;
+				lineWidth += metrics.advance * scale_;
+				if(lineWidth > totalSize_.x)
+					totalSize_.x = lineWidth;
+				prevChar = ch;
+			}
 		}
+		size = totalSize_;
 	}
 
-	void reload() {
-		if(_font is null)
-			return;
-
-		if ((_text.length > 0) && _font.isLoaded) {
-			_texture = _font.render(_text);
+	override void draw() {
+		int scale_ = min(cast(int) scale.x, cast(int) scale.y);
+		Vec2f pos = origin;
+		dchar prevChar;
+		const float spacing = 0f; //Temp
+		foreach(dchar ch; _text) {
+			if(ch == '\n') {
+				pos.x = origin.x;
+				pos.y += _font.lineSkip * scale_;
+				prevChar = 0;
+			}
+			else {
+				Glyph metrics = _font.getMetrics(ch);
+				pos.x += _font.getKerning(prevChar, ch) * scale_;
+				Vec2f drawPos = Vec2f(pos.x + metrics.offsetX * scale_, pos.y - metrics.offsetY * scale_);
+				metrics.draw(drawPos, scale_, color);
+				pos.x += (metrics.advance + spacing) * scale_;
+				prevChar = ch;
+			}
 		}
-		_sprite = _texture;
-		size = _sprite.size;
 	}
 }
