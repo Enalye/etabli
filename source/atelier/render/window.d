@@ -62,21 +62,21 @@ enum DisplayMode {
 	desktop,
 	windowed
 }
-
+import std.exception;
 /// Create the application window.
 void createWindow(const Vec2u windowSize, string title) {
-	assert(loadSDL() >= SDLSupport.sdl202);
-	assert(loadSDLImage() >= SDLImageSupport.sdlImage200);
-	assert(loadSDLTTF() >= SDLTTFSupport.sdlTTF2012);
-	assert(loadSDLMixer() >= SDLMixerSupport.sdlMixer200);
+	enforce(loadSDL() >= SDLSupport.sdl202);
+	enforce(loadSDLImage() >= SDLImageSupport.sdlImage200);
+	enforce(loadSDLTTF() >= SDLTTFSupport.sdlTTF2012);
+	enforce(loadSDLMixer() >= SDLMixerSupport.sdlMixer200);
 
-	SDL_Init(SDL_INIT_EVERYTHING);
+	enforce(SDL_Init(SDL_INIT_EVERYTHING) == 0, "Could not initialize SDL: " ~ fromStringz(SDL_GetError()));
 
-	assert(TTF_Init() != -1, "Could not initialize TTF module.");
-	assert(Mix_OpenAudio(44_100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024) != -1, "No audio device connected.");
-	assert(Mix_AllocateChannels(16) != -1, "Could not allocate audio channels.");
+	enforce(TTF_Init() != -1, "Could not initialize TTF module.");
+	enforce(Mix_OpenAudio(44_100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024) != -1, "No audio device connected.");
+	enforce(Mix_AllocateChannels(16) != -1, "Could not allocate audio channels.");
 
-	assert(SDL_CreateWindowAndRenderer(windowSize.x, windowSize.y,
+	enforce(SDL_CreateWindowAndRenderer(windowSize.x, windowSize.y,
 		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_WINDOW_RESIZABLE,
 		&_sdlWindow, &_sdlRenderer) != -1,
 		"Window initialization failed.");
