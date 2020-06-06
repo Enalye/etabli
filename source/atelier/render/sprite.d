@@ -108,6 +108,11 @@ final class Sprite: Drawable {
 		size = to!Vec2f(clip.zw).fit(size_);
 	}
 
+	/// Set the sprite's size to contain the specified size.
+	void contain(Vec2f size_) {
+		size = to!Vec2f(clip.zw).contain(size_);
+	}
+
 	/// Render the sprite there.
 	void draw(const Vec2f position) {
 		assert(texture, "Texture is null");

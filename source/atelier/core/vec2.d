@@ -321,6 +321,16 @@ struct Vec2(T) {
 			Vec2!T(v.x, y * v.x / x);
 	}
 
+	/// While conserving the x/y ratio, returns the smallest vector possible that can contain the other vector. (like a size) \
+	/// Does not modify this vector. \
+	/// Must be non-null.
+	Vec2!T contain(const Vec2!T v) const {
+		assert(v != Vec2!T.zero, "Null vector");
+		return (x / y) < (v.x / v.y) ?
+			Vec2!T(v.x, y * v.x / x):
+			Vec2!T(x * v.y / y, v.y);
+	}
+
 	/// Linear interpolation to approach a target
 	Vec2!T approach(const Vec2!T target, const Vec2!T step) {
 		import std.algorithm.comparison: min, max;
