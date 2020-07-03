@@ -6,7 +6,7 @@
 module atelier.render.font.glyph;
 
 import atelier.core;
-import atelier.render.texture;
+import atelier.render.texture, atelier.render.window;
 
 /// Information about a single character
 struct Glyph {
@@ -41,10 +41,11 @@ struct Glyph {
 
 	/// Render glyph
 	void draw(Vec2f position, int scale, Color color) {
+		const Vec2f finalSize = Vec2f(_width, _height) * scale * transformScale();
 		_texture.setColorMod(color, Blend.alpha);
 		_texture.draw(
-			position,
-			Vec2f(_width, _height) * scale,
+			transformRenderSpace(position),
+			finalSize,
 			Vec4i(_packX, _packY, _packWidth, _packHeight),
 			Vec2f.zero);
 	}

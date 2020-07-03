@@ -145,6 +145,7 @@ class DropDownList: GuiElement {
 			auto gui = cast(DropDownListSubElement)(guis[_list.selected]);
             _label.text = gui.label.text;
 		}
+		drawFilledRect(origin, size, Color.black);
 		drawRect(origin, size, Color.white);
 	}
 
