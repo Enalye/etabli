@@ -10,7 +10,7 @@
 		"bindbc-sdl": "~>0.15.0"
 	},
 	"versions": [
-		"SDL_2010",
+		"SDL_202",
 		"BindSDL_Image",
 		"SDLImage202",
 		"BindSDL_TTF",
