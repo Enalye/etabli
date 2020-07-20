@@ -90,6 +90,7 @@ class InputField: GuiElement {
 					_text = _text[0U.._caretIndex] ~ textInput ~ _text[_caretIndex..$];
 				_caretIndex ++;
 				_label.text = to!string(_text);
+				triggerCallback();
 				break;
 			case keyDelete:
 				if(_text.length) {
@@ -112,6 +113,7 @@ class InputField: GuiElement {
 					}
 					_label.text = to!string(_text);
 				}
+				triggerCallback();
 				break;
 			case keyDir:
 				if(event.keyMove.direction.x > 0f && _caretIndex < _text.length)
@@ -120,7 +122,7 @@ class InputField: GuiElement {
 					_caretIndex --;
 				break;
 			case keyEnter:
-				triggerCallback();
+				//triggerCallback();
 				break;
 			default:
 				break;
