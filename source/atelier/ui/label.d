@@ -42,27 +42,11 @@ final class Label: GuiElement {
 		}
 	}
 
-	/// Build label with custom font
-	this(Font font, string text_) {
+	/// Build label
+	this(string text_ = "", Font font = getDefaultFont()) {
 		super(GuiElement.Flags.notInteractable);
         _font = font;
 		_text = to!dstring(text_);
-		reload();
-	}
-
-	/// Build label with default font
-    this(string text_) {
-		super(GuiElement.Flags.notInteractable);
-        _font = getDefaultFont();
-		_text = to!dstring(text_);
-		reload();
-	}
-
-	/// Ditto
-	this() {
-		super(GuiElement.Flags.notInteractable);
-		_font = getDefaultFont();
-		_text = "";
 		reload();
 	}
 

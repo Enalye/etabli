@@ -24,7 +24,7 @@ private class DropDownListSubElement: Button {
 
     this(string title, Vec2f sz) {
         size = sz;
-        label = new Label(getDefaultFont(), title);
+        label = new Label(title);
         label.setAlign(GuiAlignX.center, GuiAlignY.center);
         if((label.size.x + 20) > size.x) {
             size = Vec2f(label.size.x + 20, size.y);
@@ -72,7 +72,7 @@ class DropDownList: GuiElement {
         _cancelTrigger.size = size;
         _cancelTrigger.setCallback(this, "cancel");
 
-        _label = new Label(getDefaultFont(), "");
+        _label = new Label;
         _label.setAlign(GuiAlignX.center, GuiAlignY.center);
 
         _timer.mode = Timer.Mode.bounce;

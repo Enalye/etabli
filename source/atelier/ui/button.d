@@ -25,7 +25,7 @@ class Button: GuiElement {
         triggerCallback();
     }
 }
-
+/*
 class ListButton: Button {
 	protected Sprite _sprite;
 	Label label;
@@ -42,13 +42,13 @@ class ListButton: Button {
 		}
 	}
 
-	this(Font font, string text) {
+	this(string text, Font font = getDefaultFont()) {
 		label = new Label(font, text);
 		size = label.size;
 	}
 
 	this(Sprite newSprite) {
-		label = new Label(getDefaultFont(), "");
+		label = new Label;
 		_sprite = newSprite;
 		reload();
 	}
@@ -93,7 +93,7 @@ class ListButton: Button {
 			_sprite.fit(size);
 		}
 	}
-}
+}*/
 
 /// Button with a label.
 class TextButton: Button {
@@ -106,15 +106,11 @@ class TextButton: Button {
 	}
 
 	/// Ctor
-	this(Font font, string text) {
-		label = new Label(font, text);
+	this(string text, Font font = getDefaultFont()) {
+		label = new Label(text, font);
         label.setAlign(GuiAlignX.center, GuiAlignY.center);
 		size = label.size;
         addChildGui(label);
-	}
-
-	override void update(float deltaTime) {
-		super.update(deltaTime);
 	}
 
 	override void draw() {
@@ -126,10 +122,9 @@ class TextButton: Button {
 			drawFilledRect(origin, size, Color.white * 0.25f);
 		else
 			drawFilledRect(origin, size, Color.white * 0.15f);
-		label.draw();
 	}
 }
-
+/*
 class ImgButton: Button {
 	Label label;
 
@@ -277,4 +272,4 @@ class ImgButton: Button {
         if(_lockedSprite.texture)
             setToSize(_lockedSprite);
     }
-}
+}*/

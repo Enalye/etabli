@@ -131,8 +131,8 @@ private final class HintWindow: GuiElement {
 	}
 
 	this() {
-		title = new Label(getDefaultFont(), "");
-		text = new Label(getDefaultFont(), "");
+		title = new Label;
+		text = new Label;
 	}
 
 	override void update(float deltaTime) {
