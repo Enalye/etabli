@@ -21,19 +21,18 @@ private {
 }
 
 /// Create a Hint for a gui element.
-Hint makeHint(string title, string text) {
-	return new Hint(title, text);
+Hint makeHint(string text) {
+	return new Hint(text);
 }
 
 /// Displays text next to the cursor when hovering over a gui.
 class Hint {
 	/// The title is rendered above the text.
-	string title, text;
+	string text;
 
 	/// Ctor
-	this(string newTitle, string newText) {
-		title = newTitle;
-		text = newText;
+	this(string text_) {
+		text = text_;
 	}
 }
 
@@ -119,39 +118,33 @@ private final class HintWindow: GuiElement {
 	private {
 		bool _isRendered;
 	}
-	Label title;
 	Label text;
 
 	@property void hint(Hint hint) {
 		_isRendered = hint !is null;
 		if(_isRendered) {
-			title.text = hint.title;
 			text.text = hint.text;
 		}
 	}
 
 	this() {
-		title = new Label;
 		text = new Label;
 	}
 
 	override void update(float deltaTime) {
 		if(!_isRendered)
 			return;
-		size = Vec2f(max(title.size.x, text.size.x) + 25f, title.size.y + text.size.y);
+		size = Vec2f(text.size.x + 25f, text.size.y);
 		
         //They aren't processed by the gui manager, so we use setScreenCoords directly.
         setScreenCoords(getMousePos() + size / 2f + Vec2f(20f, 10f));
-        title.setScreenCoords(center + Vec2f(0f, (title.size.y - size.y) / 2f));
-		text.setScreenCoords(center + Vec2f(0f, title.size.y + (text.size.y - size.y) / 2f));
+        text.setScreenCoords(center + Vec2f(0f, (text.size.y - size.y) / 2f));
 	}
 
 	override void draw() {
 		if(!_isRendered)
 			return;
-		drawFilledRect(origin, size, Color.white * .21f);
-		drawFilledRect(origin, Vec2f(size.x, title.size.y), Color.white * .11f);
-		title.draw();
+		drawFilledRect(origin, size, Color.white * .11f);
 		text.draw();
 	}
 }

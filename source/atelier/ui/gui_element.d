@@ -331,8 +331,8 @@ class GuiElement {
 	}
 
     /// Update the hint (Text that appear when hovering the gui) of the gui.
-	final void setHint(string title, string text = "") {
-		_hint = makeHint(title, text);
+	final void setHint(string text) {
+		_hint = makeHint(text);
 	}
 
     /// Set an id that will be sent to the specified gui when **triggerCallback()** is fired.
