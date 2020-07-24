@@ -27,6 +27,10 @@ class Checkbox: GuiElement {
 		}
 	}
 
+	this() {
+		size(Vec2f(25f, 25f));
+	}
+
 	override void onSubmit() {
 		if(isLocked)
 			return;
