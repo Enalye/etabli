@@ -51,7 +51,11 @@ final class Animation : Drawable {
 		float duration(float v) { return _timer.duration = v; }
 
 		/// The current frame being used.
-		int currentFrameID() const { return _currentFrameId; }
+		int currentFrame() const {
+			if(_currentFrameId >= frames.length)
+				return 0;
+			return frames[_currentFrameId];
+		}
 
 		/// Texture.
 		Texture texture(Texture texture_) { return _texture = texture_; }
@@ -60,7 +64,10 @@ final class Animation : Drawable {
 	}
 
 	/// Texture regions (the source size) for each frames.
-	Vec4i[] frames;
+	Vec4i[] clips;
+
+	/// The order in which each frames is played.
+	int[] frames;
 
     /// Destination size.
 	Vec2f size;
@@ -83,14 +90,21 @@ final class Animation : Drawable {
 	/// Blending algorithm.
     Blend blend = Blend.alpha;
 
+	/// Number of directions.
+    int dirs = 1, maxDirs = 1;
+
+	/// Clip offset for each direction.
+    Vec2i dirOffset = Vec2i.zero;
+
 	/// Empty animation.
 	this() {}
 
 	/// Create an animation from a series of clips.
-    this(Texture tex, const Vec2f size_, Vec4i[] frames_) {
+    this(Texture tex, const Vec2f size_, Vec4i[] clips_, int[] frames_) {
 		assert(tex, "Null texture");
 		_texture = tex;
 		size = size_;
+		clips = clips_;
 		frames = frames_;
 	}
 
@@ -110,10 +124,11 @@ final class Animation : Drawable {
 					startTileClip.y + y * (startTileClip.w + margin.y),
 					startTileClip.z,
 					startTileClip.w);
-				frames ~= currentClip;
+				clips ~= currentClip;
+				frames ~= count;
 
+				count ++;
 				if(maxcount > 0) {
-					count ++;
 					if(count >= maxcount)
 						return;
 				}
@@ -125,6 +140,7 @@ final class Animation : Drawable {
 	this(Animation animation) {
 		_timer = animation._timer;
 		_texture = animation._texture;
+		clips = animation.clips;
 		frames = animation.frames;
 		size = animation.size;
 		anchor = animation.anchor;
@@ -133,6 +149,11 @@ final class Animation : Drawable {
 		color = animation.color;
 		blend = animation.blend;
 		mode = animation.mode;
+	}
+
+	/// Resets the frames to the default order.
+	void setDefaultFrames() {
+
 	}
 
 	/// Starts the animation from the beginning.
@@ -258,12 +279,57 @@ final class Animation : Drawable {
 		if(_currentFrameId < 0 || !frames.length)
 			return;
 		assert(_texture, "No texture loaded.");
-		assert(_currentFrameId < frames.length, "Animation frame id out of bounds.");
-		
-		const Vec4i currentClip = frames[_currentFrameId];
+		if(_currentFrameId >= frames.length)
+			_currentFrameId = 0;
+		const int currentClip = frames[_currentFrameId];
+		if(currentClip >= clips.length)
+			return;
 		const Vec2f finalSize = size * transformScale();
         _texture.setColorMod(color, blend);
-        _texture.draw(transformRenderSpace(position), finalSize, currentClip, angle, flip, anchor);
+        _texture.draw(transformRenderSpace(position), finalSize, clips[currentClip], angle, flip, anchor);
+        _texture.setColorMod(Color.white);
+	}
+
+	/// Render the current frame with a direction information.
+	void draw(const Vec2f position, int currentDir) {
+		if(_currentFrameId < 0 || !frames.length)
+			return;
+		assert(_texture, "No texture loaded.");
+		if(_currentFrameId >= frames.length)
+			_currentFrameId = 0;
+		const int currentClip = frames[_currentFrameId];
+		if(currentClip >= clips.length)
+			return;
+		Vec4i texClip = clips[currentClip];
+
+		Flip currentFlip = flip;
+		if(currentDir >= maxDirs || currentDir < 0)
+			return;
+		if(currentDir < dirs) {
+			texClip.xy = texClip.xy + (dirOffset * currentDir);
+		}
+		else {
+			currentDir = dirs - ((currentDir + 2) - dirs);
+			texClip.xy = texClip.xy + (dirOffset * currentDir);
+			final switch(flip) with(Flip) {
+			case none:
+				currentFlip = Flip.horizontal;
+				break;
+			case horizontal:
+				currentFlip = Flip.none;
+				break;
+			case vertical:
+				currentFlip = Flip.both;
+				break;
+			case both:
+				currentFlip = Flip.vertical;
+				break;
+			}
+		}
+
+		const Vec2f finalSize = size * transformScale();
+        _texture.setColorMod(color, blend);
+        _texture.draw(transformRenderSpace(position), finalSize, texClip, angle, currentFlip, anchor);
         _texture.setColorMod(Color.white);
 	}
 }
