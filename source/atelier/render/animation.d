@@ -153,7 +153,9 @@ final class Animation : Drawable {
 
 	/// Resets the frames to the default order.
 	void setDefaultFrames() {
-
+		frames.length = 0;
+		for(int i; i < clips.length; ++ i)
+			frames ~= i;
 	}
 
 	/// Starts the animation from the beginning.
