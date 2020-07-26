@@ -149,6 +149,9 @@ final class Animation : Drawable {
 		color = animation.color;
 		blend = animation.blend;
 		mode = animation.mode;
+		dirs = animation.dirs;
+		maxDirs = animation.maxDirs;
+		dirOffset = animation.dirOffset;
 	}
 
 	/// Resets the frames to the default order.
