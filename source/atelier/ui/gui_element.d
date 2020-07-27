@@ -30,6 +30,8 @@ struct GuiState {
     Vec2f scale = Vec2f.one;
     /// Color of the GUI. (White = Default)
     Color color = Color.white;
+    /// Blend of the canvas if present (Alpha blending = Default)
+    Blend blend = Blend.alpha;
     /// Angle of the GUI. (0 = Default)
     float angle = 0f;
     /// Time (in seconds) to get to this state with **doTransitionState()**.

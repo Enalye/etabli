@@ -233,7 +233,7 @@ class VSlider: Slider {
 		//Gauge
 		const float sliderHeight = clamp(getSliderPosition().y - origin.y, 0f, size.y);
 		const Vec2f sliderSize = Vec2f(size.x, sliderHeight);
-		drawFilledRect(origin + Vec2f(0f, size.y - sliderHeight), sliderSize, Color.white);
+		drawFilledRect(origin + Vec2f(0f, size.y - sliderHeight), sliderSize,color);
 	}
 
     override void onSize() {
@@ -255,7 +255,7 @@ class HSlider: Slider {
 		//Gauge
 		const float sliderWidth = clamp(getSliderPosition().x - origin.x, 0f, size.x);
 		const Vec2f sliderSize = Vec2f(sliderWidth, size.y);
-		drawFilledRect(origin, sliderSize, Color.white);
+		drawFilledRect(origin, sliderSize, color);
 	}
 
     override void onSize() {

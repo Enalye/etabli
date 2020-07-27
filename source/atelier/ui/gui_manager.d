@@ -262,7 +262,7 @@ package(atelier) void updateGuiElements(GuiElement gui, GuiElement parent) {
 void drawGuiElements(GuiElement gui) {
     if(gui.hasCanvas && gui.canvas !is null) {
         auto canvas = gui.canvas;
-        canvas.setColorMod(gui._currentState.color, Blend.alpha);
+        canvas.setColor(gui._currentState.color);
         pushCanvas(canvas, true);
         gui.draw();
         foreach(GuiElement child; gui.children) {

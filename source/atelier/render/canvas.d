@@ -130,6 +130,18 @@ final class Canvas: Drawable {
 		SDL_SetTextureAlphaMod(_renderTexture, sdlColor.a);
 	}
 
+	/// Change the blending algorithm.
+	void setBlend(Blend blend) {
+		SDL_SetTextureBlendMode(_renderTexture, getSDLBlend(blend));
+	}
+
+	/// Apply a color filter.
+	void setColor(const Color color) {
+		auto sdlColor = color.toSDL();
+		SDL_SetTextureColorMod(_renderTexture, sdlColor.r, sdlColor.g, sdlColor.b);
+		SDL_SetTextureAlphaMod(_renderTexture, sdlColor.a);
+	}
+
 	/// Transparency (1 = visible, 0 = hidden).
     void setAlpha(float alpha) {
 		SDL_SetTextureAlphaMod(_renderTexture, cast(ubyte)(clamp(alpha, 0f, 1f) * 255f));
