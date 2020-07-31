@@ -269,7 +269,7 @@ void drawGuiElements(GuiElement gui) {
             drawGuiElements(child);
         }
         popCanvas();
-        canvas.draw(gui._screenCoords);
+        canvas.draw(gui._screenCoords, gui._currentState.angle);
         const auto origin = gui._origin;
         const auto center = gui._center;
         gui._origin = gui._screenCoords - (gui._size * gui._currentState.scale) / 2f;

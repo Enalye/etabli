@@ -147,8 +147,12 @@ final class Canvas: Drawable {
 		SDL_SetTextureAlphaMod(_renderTexture, cast(ubyte)(clamp(alpha, 0f, 1f) * 255f));
 	}
 
-	/// Draw the texture at the specified location.
 	void draw(const Vec2f renderPosition) const {
+		draw(renderPosition, 0f);
+	}
+
+	/// Draw the texture at the specified location.
+	void draw(const Vec2f renderPosition, float angle) const {
 		const Vec2f pos = transformRenderSpace(renderPosition);
 		const Vec2f scale = transformScale();
 
@@ -159,7 +163,10 @@ final class Canvas: Drawable {
 			cast(uint)(_renderSize.y * scale.y)
 		};
 
-		SDL_RenderCopy(_sdlRenderer, cast(SDL_Texture*)_renderTexture, null, &destRect);
+		SDL_RenderCopyEx(
+			_sdlRenderer, cast(SDL_Texture*)_renderTexture,
+			null, &destRect,
+			angle, null, SDL_FLIP_NONE);
 	}
 
 	/// Draw the texture at the specified location while scaling it.
