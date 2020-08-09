@@ -145,7 +145,7 @@ package(atelier) void handleGuiElementEvent(Event event) {
     case quit:
         dispatchQuitEvent(null);
         if(isModalGui()) {
-            stopModalGui();
+            stopAllModalGuis();
             dispatchQuitEvent(null);
         }
         break;
