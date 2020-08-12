@@ -16,6 +16,7 @@ final class Label: GuiElement {
 	private {
 		dstring _text;
 		Font _font;
+		int _spacing = 0;
 	}
 
 	@property {
@@ -40,6 +41,11 @@ final class Label: GuiElement {
 			reload();
 			return _font;
 		}
+
+		/// Additionnal spacing between each character
+		int spacing() const { return _spacing; }
+		/// Ditto
+		int spacing(int spacing_) { return _spacing = spacing_; }
 	}
 
 	/// Build label
@@ -76,7 +82,6 @@ final class Label: GuiElement {
 		int scale_ = min(cast(int) scale.x, cast(int) scale.y);
 		Vec2f pos = origin;
 		dchar prevChar;
-		const float spacing = 0f; //Temp
 		foreach(dchar ch; _text) {
 			if(ch == '\n') {
 				pos.x = origin.x;
@@ -88,7 +93,7 @@ final class Label: GuiElement {
 				pos.x += _font.getKerning(prevChar, ch) * scale_;
 				Vec2f drawPos = Vec2f(pos.x + metrics.offsetX * scale_, pos.y - metrics.offsetY * scale_);
 				metrics.draw(drawPos, scale_, color);
-				pos.x += (metrics.advance + spacing) * scale_;
+				pos.x += (metrics.advance + _spacing) * scale_;
 				prevChar = ch;
 			}
 		}

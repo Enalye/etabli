@@ -38,6 +38,18 @@ final class Text: GuiElement {
 			return text_;
 		}
 
+		/// Font
+		Font font() const {
+			return cast(Font) _font;
+		}
+		/// Ditto
+		Font font(Font font_) {
+			_font = font_;
+			restart();
+			tokenize();
+			return _font;
+		}
+
 		/// Is the text still being displayed ?
 		bool isPlaying() const { return _timer.isRunning() || (_currentIndex < _tokens.length); }
 
