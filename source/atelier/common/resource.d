@@ -59,6 +59,14 @@ T fetch(T)(string name) {
 	return (cast(ResourceCache!T)*cache).get(name);
 }
 
+/// Returns a stored resource.
+T fetchPrototype(T)(string name) {
+	static assert(!__traits(isAbstractClass, T), "Fetch cannot instanciate the abstract class " ~ T.stringof);
+	auto cache = T.stringof in _caches;
+	assert(cache, "No cache declared of type "  ~ T.stringof);
+	return (cast(ResourceCache!T)*cache).getPrototype(name);
+}
+
 /// Returns all resources of a set.
 T[] fetchPack(T)(string name = ".") {
 	static assert(!__traits(isAbstractClass, T), "Fetch cannot instanciate the abstract class " ~ T.stringof);
@@ -125,6 +133,12 @@ class ResourceCache(T) {
 		foreach(i; *p)
 			result ~= new T(_data[i][0]);
 		return result;
+	}
+
+	T getPrototype(string name) {
+		auto p = (name in _ids);
+		assert(p, "Resource: no \'" ~ name ~ "\' loaded");
+		return _data[*p][0];
 	}
 
 	string[] getPackNames(string pack = ".") {

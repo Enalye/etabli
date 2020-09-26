@@ -73,9 +73,9 @@ final class Texture {
 	}
 
 	/// Ctor
-	this(Texture texture) {
+	this(const Texture texture) {
         _isLoaded = texture._isLoaded;
-		_texture = texture._texture;
+		_texture = cast(SDL_Texture*) texture._texture;
 		_width = texture._width;
         _height = texture._height;
         _ownData = false;

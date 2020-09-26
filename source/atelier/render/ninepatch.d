@@ -118,7 +118,7 @@ final class NinePatch: Drawable {
 	
     /// Ctor
     this(string textureId, Vec4i newClip, int newTop, int newBottom, int newLeft, int newRight) {
-        this(fetch!Texture(textureId), newClip, newTop, newBottom, newLeft, newRight);
+        this(fetchPrototype!Texture(textureId), newClip, newTop, newBottom, newLeft, newRight);
     }
 
     /// Ctor
