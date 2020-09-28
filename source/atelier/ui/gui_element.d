@@ -30,16 +30,18 @@ struct GuiState {
     Vec2f scale = Vec2f.one;
     /// Color of the GUI. (White = Default)
     Color color = Color.white;
+    /// Opacity of the GUI (1 = Default)
+    float alpha = 1f;
     /// Blend of the canvas if present (Alpha blending = Default)
     Blend blend = Blend.alpha;
     /// Angle of the GUI. (0 = Default)
     float angle = 0f;
     /// Time (in seconds) to get to this state with **doTransitionState()**.
     float time = .5f;
-    /// When fully in this state, **onCallback()** will be called with **callbackId**.
-    string callbackId;
+    /// When fully in this state, **onCallback()** will be called with **callback**.
+    string callback;
     /// The easing algorithm used to get to this state.
-    EasingFunction easingFunction = &easeLinear;
+    EasingFunction easing = &easeLinear;
 }
 
 /// Base class of all GUI elements.
@@ -278,6 +280,18 @@ class GuiElement {
             return _currentState.color;
         }
 
+        /// Alpha of the actual state (GuiState) of the gui. \
+        /// Call **onAlpha()** on change.
+        final float alpha() const { return _currentState.alpha; }
+        /// Ditto
+		final float alpha(float alpha_) {
+            if(alpha_ != _currentState.alpha) {
+                _currentState.alpha = alpha_;
+                onAlpha();
+            }
+            return _currentState.alpha;
+        }
+
         /// Angle of the actual state (GuiState) of the gui.
 		final float angle() const { return _currentState.angle; }
 		/*final float angle(float newAngle) {
@@ -338,9 +352,9 @@ class GuiElement {
 	}
 
     /// Set an id that will be sent to the specified gui when **triggerCallback()** is fired.
-	final void setCallback(GuiElement callbackGuiElement, string callbackId) {
+	final void setCallback(GuiElement callbackGuiElement, string callback) {
 		_callbackGuiElement = callbackGuiElement;
-		_callbackId = callbackId;
+		_callbackId = callback;
 	}
 
     /// Send a previously set (with **setCallback()**) id to the previously specified gui.
@@ -490,6 +504,10 @@ class GuiElement {
 
         /// Called when the color change.
         void onColor() {}
+
+        /// Called when the opacity change.
+        void onAlpha() {}
+
         //void onAngle() {}
 
         /// Any callback set to this gui will call this.

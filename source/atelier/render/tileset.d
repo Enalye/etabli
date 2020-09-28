@@ -63,6 +63,9 @@ final class Tileset {
 	/// Color added to the tile.
     Color color = Color.white;
 
+    /// Opacity of the tile.
+    float alpha = 1f;
+
 	/// Blending algorithm.
     Blend blend = Blend.alpha;
 
@@ -82,6 +85,7 @@ final class Tileset {
         flip = tileset.flip;
         anchor = tileset.anchor;
         color = tileset.color;
+        alpha = tileset.alpha;
         blend = tileset.blend;
     }
 
@@ -107,6 +111,7 @@ final class Tileset {
         sprite.flip = flip;
         sprite.blend = blend;
         sprite.color = color;
+        sprite.alpha = alpha;
         sprite.anchor = anchor;
         sprite.angle = angle;
         sprite.size = size;
@@ -145,8 +150,10 @@ final class Tileset {
             clip.y + coord.y * (clip.w + margin.y),
             clip.z, clip.w);
         texture.setColorMod(color, blend);
+        texture.setAlpha(alpha);
         texture.draw(transformRenderSpace(position - dist), finalSize, currentClip, angle, flip);
         texture.setColorMod(Color.white);
+        texture.setAlpha(1f);
 	}
 
     /// Ditto
@@ -165,7 +172,9 @@ final class Tileset {
             clip.y + coord.y * (clip.w + margin.y),
             clip.z, clip.w);
         texture.setColorMod(color, blend);
+        texture.setAlpha(alpha);
         texture.draw(transformRenderSpace(position), finalSize, currentClip, angle, flip, anchor);
         texture.setColorMod(Color.white);
+        texture.setAlpha(1f);
 	}
 }

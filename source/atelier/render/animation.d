@@ -87,6 +87,9 @@ final class Animation : Drawable {
 	/// Color added to the tile.
     Color color = Color.white;
 
+	/// Alpha
+	float alpha = 1f;
+
 	/// Blending algorithm.
     Blend blend = Blend.alpha;
 
@@ -147,6 +150,7 @@ final class Animation : Drawable {
 		angle = animation.angle;
 		flip = animation.flip;
 		color = animation.color;
+		alpha = animation.alpha;
 		blend = animation.blend;
 		mode = animation.mode;
 		dirs = animation.dirs;
@@ -291,8 +295,10 @@ final class Animation : Drawable {
 			return;
 		const Vec2f finalSize = size * transformScale();
         _texture.setColorMod(color, blend);
+        _texture.setAlpha(alpha);
         _texture.draw(transformRenderSpace(position), finalSize, clips[currentClip], angle, flip, anchor);
         _texture.setColorMod(Color.white);
+		_texture.setAlpha(1f);
 	}
 
 	/// Render the current frame with a direction information.
@@ -336,5 +342,6 @@ final class Animation : Drawable {
         _texture.setColorMod(color, blend);
         _texture.draw(transformRenderSpace(position), finalSize, texClip, angle, currentFlip, anchor);
         _texture.setColorMod(Color.white);
+		_texture.setAlpha(1f);
 	}
 }

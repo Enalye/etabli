@@ -48,6 +48,9 @@ final class Sprite: Drawable {
 	/// Color added to the sprite.
     Color color = Color.white;
 
+	/// Alpha
+	float alpha = 1f;
+
 	/// Blending algorithm.
     Blend blend = Blend.alpha;
 
@@ -64,6 +67,7 @@ final class Sprite: Drawable {
         clip = sprite.clip;
         angle = sprite.angle;
         color = sprite.color;
+		alpha = sprite.alpha;
         blend = sprite.blend;
     }
 
@@ -118,9 +122,11 @@ final class Sprite: Drawable {
 		assert(texture, "Texture is null");
 		Vec2f finalSize = size * scale * transformScale();
 		//if (isVisible(position, finalSize)) {
-            texture.setColorMod(color, blend);
-			texture.draw(transformRenderSpace(position), finalSize, clip, angle, flip, anchor);
-            texture.setColorMod(Color.white);
+		texture.setColorMod(color, blend);
+		texture.setAlpha(alpha);
+		texture.draw(transformRenderSpace(position), finalSize, clip, angle, flip, anchor);
+		texture.setColorMod(Color.white);
+		texture.setAlpha(1f);
 		//}
 	}
 
@@ -129,8 +135,10 @@ final class Sprite: Drawable {
 		assert(texture, "Texture is null");
 		Vec2f finalSize = size * scale * transformScale();
         texture.setColorMod(color, blend);
+		texture.setAlpha(alpha);
 		texture.draw(transformRenderSpace(position), finalSize, clip, angle, flip, anchor);
         texture.setColorMod(Color.white);
+		texture.setAlpha(1f);
 	}
 	
 	/// Ditto
@@ -140,8 +148,10 @@ final class Sprite: Drawable {
 		Vec2f dist = (anchor - Vec2f.half) * size * scale;
 		dist.rotate(angle);
         texture.setColorMod(color, blend);
+		texture.setAlpha(alpha);
 		texture.draw(transformRenderSpace(position - dist), finalSize, clip, angle, flip);
         texture.setColorMod(Color.white);
+		texture.setAlpha(1f);
 	}
 
 	/// Ditto
@@ -149,10 +159,12 @@ final class Sprite: Drawable {
 		assert(texture, "Texture is null");
 		Vec2f finalSize = size * scale * transformScale();
         texture.setColorMod(color, blend);
+		texture.setAlpha(alpha);
 		texture.draw(
 			transformRenderSpace(pivot + Vec2f.angled(pivotAngle) * pivotDistance),
 			finalSize, clip, angle, flip, anchor);
         texture.setColorMod(Color.white);
+		texture.setAlpha(1f);
 	}
 
 	/// Ditto
@@ -160,10 +172,12 @@ final class Sprite: Drawable {
 		assert(texture, "Texture is null");
 		Vec2f finalSize = size * scale * transformScale();
         texture.setColorMod(color, blend);
+		texture.setAlpha(alpha);
 		texture.draw(
 			transformRenderSpace(pivot + pivotOffset.rotated(pivotAngle)),
 			finalSize, clip, angle, flip, anchor);
         texture.setColorMod(Color.white);
+		texture.setAlpha(1f);
 	}
 
 	/// Is this inside the sprite region ? \

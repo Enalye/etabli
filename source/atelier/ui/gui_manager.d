@@ -163,7 +163,7 @@ package(atelier) void updateGuiElements(GuiElement gui, GuiElement parent) {
     //Calculate transitions
     if(gui._timer.isRunning) {
         gui._timer.update(_deltaTime);
-        const float t = gui._targetState.easingFunction(gui._timer.value01);
+        const float t = gui._targetState.easing(gui._timer.value01);
         gui._currentState.offset = lerp(
             gui._initState.offset,
             gui._targetState.offset,
@@ -182,6 +182,12 @@ package(atelier) void updateGuiElements(GuiElement gui, GuiElement parent) {
             t
         );
 
+        gui._currentState.alpha = lerp(
+            gui._initState.alpha,
+            gui._targetState.alpha,
+            t
+        );
+
         gui._currentState.angle = lerp(
             gui._initState.angle,
             gui._targetState.angle,
@@ -189,8 +195,8 @@ package(atelier) void updateGuiElements(GuiElement gui, GuiElement parent) {
         );
         gui.onColor();
         if(!gui._timer.isRunning) {
-            if(gui._targetState.callbackId.length)
-                gui.onCallback(gui._targetState.callbackId);
+            if(gui._targetState.callback.length)
+                gui.onCallback(gui._targetState.callback);
         }
     }
 
@@ -263,6 +269,7 @@ void drawGuiElements(GuiElement gui) {
     if(gui.hasCanvas && gui.canvas !is null) {
         auto canvas = gui.canvas;
         canvas.setColor(gui._currentState.color);
+        canvas.setAlpha(gui._currentState.alpha);
         pushCanvas(canvas, true);
         gui.draw();
         foreach(GuiElement child; gui.children) {

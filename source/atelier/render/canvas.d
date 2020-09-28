@@ -58,7 +58,9 @@ final class Canvas: Drawable {
 	/// (only change the render position, not the view).
 	bool isCentered = true;
 	/// The base color when nothing is rendered.
-	Color clearColor = Color.clear;
+	Color color = Color.black;
+	/// The base opacity when nothing is rendered.
+	float alpha = 0f;
 
 	/// Ctor
 	this(Vec2f newRenderSize) {
@@ -127,7 +129,6 @@ final class Canvas: Drawable {
 		
 		auto sdlColor = color.toSDL();
 		SDL_SetTextureColorMod(_renderTexture, sdlColor.r, sdlColor.g, sdlColor.b);
-		SDL_SetTextureAlphaMod(_renderTexture, sdlColor.a);
 	}
 
 	/// Change the blending algorithm.
@@ -139,7 +140,6 @@ final class Canvas: Drawable {
 	void setColor(const Color color) {
 		auto sdlColor = color.toSDL();
 		SDL_SetTextureColorMod(_renderTexture, sdlColor.r, sdlColor.g, sdlColor.b);
-		SDL_SetTextureAlphaMod(_renderTexture, sdlColor.a);
 	}
 
 	/// Transparency (1 = visible, 0 = hidden).

@@ -16,13 +16,11 @@ public import std.algorithm.comparison: clamp;
 import bindbc.sdl;
 
 import atelier.core.stream;
-import atelier.core.vec4;
+import atelier.core.vec3;
 
-/// An RGBA color structure.
+/// An RGB color structure.
 struct Color {
 	/// Basic color.
-	static const Color clear = Color(0f, 0f, 0f, 0f);
-	/// Ditto
 	static const Color red = Color(1f, 0f, 0f);
 	/// Ditto
 	static const Color lime = Color(0f, 1f, 0f);
@@ -64,26 +62,17 @@ struct Color {
 	static @property {
 		/// Random RGB color.
 		Color random() {
-			return Color(uniform01(), uniform01(), uniform01(), 1f);
+			return Color(uniform01(), uniform01(), uniform01());
 		}
 	}
 
     static {
 		/// Take a 0xFFFFFF color format.
-        Color fromRGB(int rgbValue) {
+        Color fromHex(int rgbValue) {
             return Color(
                 (rgbValue >> 16) & 0xFF,
                 (rgbValue >> 8) & 0xFF,
                 rgbValue & 0xFF);
-        }
-
-		/// Take a 0xFFFFFFFF color format.
-        Color fromRGBA(int rgbaValue) {
-            return Color(
-                (rgbaValue >> 24) & 0xFF,
-                (rgbaValue >> 16) & 0xFF,
-                (rgbaValue >> 8) & 0xFF,
-                rgbaValue & 0xFF);
         }
     }
 
@@ -109,86 +98,67 @@ struct Color {
 			return _b = clamp(blue, 0f, 1f);
 		}
 
-		/// Opacity component, between 0 and 1.
-		float a() const { return _a; }
-		/// Ditto
-		float a(float alpha) {
-			return _a = clamp(alpha, 0f, 1f);
-		}
-
-		/// To a vector format.
-		Vec4f rgba() const { return Vec4f(_r, _g, _b, _a); }
-		/// Ditto
-		Vec4f rgba(Vec4f v) {
-			set(v.x, v.y, v.z, v.w);
-			return v;
-		}
-
-		/+ Todo: Need Vec3
+		/// Convert to Vec3
 		Vec3f rgb() const { return Vec3f(_r, _g, _b); }
+		/// Convert from Vec3
 		Vec3f rgb(Vec3f v) {
 			set(v.x, v.y, v.z);
 			return v;
-		}+/
+		}
 	}
 
 	private {
-		float _r = 0f, _g = 0f, _b = 0f, _a = 0f;
+		float _r = 0f, _g = 0f, _b = 0f;
 	}
 
-	/// Sets the RGBA values, between 0 and 1.
-	this(float red, float green, float blue, float alpha = 1f) {
+	/// Sets the RGB values, between 0 and 1.
+	this(float red, float green, float blue) {
 		_r = clamp(red, 0f, 1f);
 		_g = clamp(green, 0f, 1f);
 		_b = clamp(blue, 0f, 1f);
-		_a = clamp(alpha, 0f, 1f);
 	}
 
-	/// Sets the RGBA values, between 0 and 1.
-	this(Vec4f v) {
+	/// Sets the RGB values, between 0 and 1.
+	this(Vec3f v) {
 		_r = clamp(v.x, 0f, 1f);
 		_g = clamp(v.y, 0f, 1f);
 		_b = clamp(v.z, 0f, 1f);
-		_a = clamp(v.w, 0f, 1f);
 	}
 
-	/// Sets the RGBA values, between 0 and 255.
-    this(int red, int green, int blue, int alpha = 255) {
+	/// Sets the RGB values, between 0 and 255.
+    this(int red, int green, int blue) {
         _r = clamp(red, 0, 255) / 255f;
         _g = clamp(green, 0, 255) / 255f;
         _b = clamp(blue, 0, 255) / 255f;
-        _a = clamp(alpha, 0, 255) / 255f;
     }
 
-	/// Sets the RGBA values, between 0 and 1.
-	void set(float red, float green, float blue, float alpha = 1f) {
+	/// Sets the RGB values, between 0 and 1.
+	void set(float red, float green, float blue) {
 		_r = clamp(red, 0f, 1f);
 		_g = clamp(green, 0f, 1f);
 		_b = clamp(blue, 0f, 1f);
-		_a = clamp(alpha, 0f, 1f);
 	}
 
-	/// Sets the RGBA values, between 0 and 255.
-    void set(int red, int green, int blue, int alpha = 255) {
+	/// Sets the RGB values, between 0 and 255.
+    void set(int red, int green, int blue) {
         _r = clamp(red, 0, 255) / 255f;
         _g = clamp(green, 0, 255) / 255f;
         _b = clamp(blue, 0, 255) / 255f;
-        _a = clamp(alpha, 0, 255) / 255f;
     }
 
 	/// Binary operations
 	Color opBinary(string op)(const Color c) const {
-		return mixin("Color(_r " ~ op ~ " c._r, _g " ~ op ~ " c._g, _b " ~ op ~ " c._b, _a " ~ op ~ " c._a)");
+		return mixin("Color(_r " ~ op ~ " c._r, _g " ~ op ~ " c._g, _b " ~ op ~ " c._b)");
 	}
 
 	/// Binary operations
 	Color opBinary(string op)(float s) const {
-		return mixin("Color(_r " ~ op ~ " s, _g " ~ op ~ " s, _b " ~ op ~ " s, _a " ~ op ~ " s)");
+		return mixin("Color(_r " ~ op ~ " s, _g " ~ op ~ " s, _b " ~ op ~ " s)");
 	}
 
 	/// Binary operations
 	Color opBinaryRight(string op)(float s) const {
-		return mixin("Color(s " ~ op ~ " _r, s " ~ op ~ " _g, s " ~ op ~ " _b, s " ~ op ~ " _a)");
+		return mixin("Color(s " ~ op ~ " _r, s " ~ op ~ " _g, s " ~ op ~ " _b)");
 	}
 
 	/// Binary operations
@@ -197,14 +167,13 @@ struct Color {
 			_r = clamp(_r " ~ op ~ "c._r, 0f, 1f);
 			_g = clamp(_g " ~ op ~ "c._g, 0f, 1f);
 			_b = clamp(_b " ~ op ~ "c._b, 0f, 1f);
-			_a = clamp(_a " ~ op ~ "c._a, 0f, 1f);
 			");
 		return this;
 	}
 
 	/// Assignment
 	Color opOpAssign(string op)(float s) {
-		mixin("s = clamp(s, 0f, 1f);_r = _r" ~ op ~ "s;_g = _g" ~ op ~ "s;_b = _b" ~ op ~ "s;_a = _a" ~ op ~ "s;");
+		mixin("s = clamp(s, 0f, 1f);_r = _r" ~ op ~ "s;_g = _g" ~ op ~ "s;_b = _b" ~ op ~ "s;");
 		return this;
 	}
 
@@ -213,7 +182,6 @@ struct Color {
 		_r = stream.read!float;
 		_g = stream.read!float;
 		_b = stream.read!float;
-		_a = stream.read!float;
 	}
 
 	/// Write to an OutStream.
@@ -221,7 +189,6 @@ struct Color {
 		stream.write!float(_r);
 		stream.write!float(_g);
 		stream.write!float(_b);
-		stream.write!float(_a);
 	}
 
 	/// Get the SDL struct format for colors.
@@ -229,8 +196,7 @@ struct Color {
 		SDL_Color sdlColor = {
 			cast(ubyte)(_r * 255f),
 			cast(ubyte)(_g * 255f),
-			cast(ubyte)(_b * 255f),
-			cast(ubyte)(_a * 255f)
+			cast(ubyte)(_b * 255f)
 		};
 		return sdlColor;
 	}
@@ -238,5 +204,5 @@ struct Color {
 
 /// Mix 50% of one color with 50% of another.
 Color mix(Color c1, Color c2) {
-	return Color((c1._r + c2._r) / 2f, (c1._g + c2._g) / 2f, (c1._b + c2._b) / 2f, (c1._a + c2._a) / 2f);
+	return Color((c1._r + c2._r) / 2f, (c1._g + c2._g) / 2f, (c1._b + c2._b) / 2f);
 }

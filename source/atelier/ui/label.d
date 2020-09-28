@@ -92,7 +92,7 @@ final class Label: GuiElement {
 				Glyph metrics = _font.getMetrics(ch);
 				pos.x += _font.getKerning(prevChar, ch) * scale_;
 				Vec2f drawPos = Vec2f(pos.x + metrics.offsetX * scale_, pos.y - metrics.offsetY * scale_);
-				metrics.draw(drawPos, scale_, color);
+				metrics.draw(drawPos, scale_, color, alpha);
 				pos.x += (metrics.advance + _spacing) * scale_;
 				prevChar = ch;
 			}

@@ -129,7 +129,6 @@ final class Texture {
 		
 		auto sdlColor = color.toSDL();
 		SDL_SetTextureColorMod(_texture, sdlColor.r, sdlColor.g, sdlColor.b);
-		SDL_SetTextureAlphaMod(_texture, sdlColor.a);
 	}
 
 	void setAlpha(float alpha) {

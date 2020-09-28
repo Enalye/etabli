@@ -199,9 +199,6 @@ final class Text: GuiElement {
 							}
 							else {
 								switch(parameters.front) {
-								case "clear":
-									token.color.color = Color.clear;
-									break;
 								case "red":
 									token.color.color = Color.red;
 									break;
@@ -448,7 +445,7 @@ final class Text: GuiElement {
 					break;
 				}
 
-				metrics.draw(drawPos, charScale_, charColor_);
+				metrics.draw(drawPos, charScale_, charColor_, 1f);
 				pos.x += (metrics.advance + charSpacing_) * charScale_;
 				prevChar = token.character.character;
 				if((pos.x - origin.x) > totalSize_.x) {

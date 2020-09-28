@@ -16,7 +16,7 @@ import atelier.core.util;
 alias EasingFunction = float function(float);
 
 /// Easing behaviour.
-enum EasingAlgorithm {
+enum Ease {
 	linear,
 	sineIn,
 	sineOut,
@@ -51,8 +51,8 @@ enum EasingAlgorithm {
 }
 
 /// Returns an easing function.
-EasingFunction getEasingFunction(EasingAlgorithm algorithm = EasingAlgorithm.linear) {
-    final switch(algorithm) with(EasingAlgorithm) {
+EasingFunction getEasingFunction(Ease ease = Ease.linear) {
+    final switch(ease) with(Ease) {
     case linear: return &easeLinear;
     case sineIn: return &easeInSine;
     case sineOut: return &easeOutSine;

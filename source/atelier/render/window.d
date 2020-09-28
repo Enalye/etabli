@@ -260,7 +260,7 @@ void pushCanvas(Canvas canvas, bool clear = true) {
 	_canvases ~= canvasRef;
 
 	SDL_SetRenderTarget(_sdlRenderer, cast(SDL_Texture*)canvasRef.target);
-	setRenderColor(canvas.clearColor);
+	setRenderColor(canvas.color, canvas.alpha);
 	if(clear)
 		SDL_RenderClear(_sdlRenderer);
 }
@@ -317,32 +317,34 @@ bool isVisible(const Vec2f targetPosition, const Vec2f targetSize) {
 }
 
 /// Change the draw color, used internally. Don't bother use it.
-void setRenderColor(const Color color) {
+void setRenderColor(const Color color, float alpha = 1f) {
 	const auto sdlColor = color.toSDL();
-	SDL_SetRenderDrawColor(_sdlRenderer, sdlColor.r, sdlColor.g, sdlColor.b, sdlColor.a);
+	SDL_SetRenderDrawColor(_sdlRenderer,
+		sdlColor.r, sdlColor.g, sdlColor.b,
+		cast(ubyte)(clamp(alpha, 0f, 1f) * 255f));
 }
 
 /// Draw a single point.
-void drawPoint(const Vec2f position, const Color color) {
+void drawPoint(const Vec2f position, const Color color, float alpha = 1f) {
 	if (isVisible(position, Vec2f(.0f, .0f))) {
 		const Vec2f rpos = transformRenderSpace(position);
 
-		setRenderColor(color);
+		setRenderColor(color, alpha);
 		SDL_RenderDrawPoint(_sdlRenderer, cast(int)rpos.x, cast(int)rpos.y);
 	}
 }
 
 /// Draw a line between the two positions.
-void drawLine(const Vec2f startPosition, const Vec2f endPosition, const Color color) {
+void drawLine(const Vec2f startPosition, const Vec2f endPosition, const Color color, float alpha = 1f) {
 	const Vec2f pos1 = transformRenderSpace(startPosition);
 	const Vec2f pos2 = transformRenderSpace(endPosition);
 
-	setRenderColor(color);
+	setRenderColor(color, alpha);
 	SDL_RenderDrawLine(_sdlRenderer, cast(int)pos1.x, cast(int)pos1.y, cast(int)pos2.x, cast(int)pos2.y);
 }
 
 /// Draw an arrow with its head pointing at the end position.
-void drawArrow(const Vec2f startPosition, const Vec2f endPosition, const Color color) {
+void drawArrow(const Vec2f startPosition, const Vec2f endPosition, const Color color, float alpha = 1f) {
 	const Vec2f pos1 = transformRenderSpace(startPosition);
 	const Vec2f pos2 = transformRenderSpace(endPosition);
 	const Vec2f dir = (pos2 - pos1).normalized;
@@ -350,21 +352,21 @@ void drawArrow(const Vec2f startPosition, const Vec2f endPosition, const Color c
 	const Vec2f pos3 = arrowBase + dir.normal * 20f;
 	const Vec2f pos4 = arrowBase - dir.normal * 20f;
 
-	setRenderColor(color);
+	setRenderColor(color, alpha);
 	SDL_RenderDrawLine(_sdlRenderer, cast(int)pos1.x, cast(int)pos1.y, cast(int)pos2.x, cast(int)pos2.y);
 	SDL_RenderDrawLine(_sdlRenderer, cast(int)pos2.x, cast(int)pos2.y, cast(int)pos3.x, cast(int)pos3.y);
 	SDL_RenderDrawLine(_sdlRenderer, cast(int)pos2.x, cast(int)pos2.y, cast(int)pos4.x, cast(int)pos4.y);
 }
 
 /// Draw a vertical cross (like this: +) with the indicated size.
-void drawCross(const Vec2f center, float length, const Color color) {
+void drawCross(const Vec2f center, float length, const Color color, float alpha = 1f) {
 	const float halfLength = length / 2f;
-	drawLine(center + Vec2f(-halfLength, 0f), center + Vec2f(halfLength, 0f), color);
-	drawLine(center + Vec2f(0f, -halfLength), center + Vec2f(0f, halfLength), color);
+	drawLine(center + Vec2f(-halfLength, 0f), center + Vec2f(halfLength, 0f), color, alpha);
+	drawLine(center + Vec2f(0f, -halfLength), center + Vec2f(0f, halfLength), color, alpha);
 }
 
 /// Draw a rectangle border.
-void drawRect(const Vec2f origin, const Vec2f size, const Color color) {
+void drawRect(const Vec2f origin, const Vec2f size, const Color color, float alpha = 1f) {
 	const Vec2f pos1 = transformRenderSpace(origin);
 	const Vec2f pos2 = size * transformScale();
 
@@ -375,12 +377,12 @@ void drawRect(const Vec2f origin, const Vec2f size, const Color color) {
 		cast(int)pos2.y
 	};
 
-	setRenderColor(color);
+	setRenderColor(color, alpha);
 	SDL_RenderDrawRect(_sdlRenderer, &rect);
 }
 
 /// Draw a fully filled rectangle.
-void drawFilledRect(const Vec2f origin, const Vec2f size, const Color color) {
+void drawFilledRect(const Vec2f origin, const Vec2f size, const Color color, float alpha = 1f) {
 	const Vec2f pos1 = transformRenderSpace(origin);
 	const Vec2f pos2 = size * transformScale();
 
@@ -391,12 +393,12 @@ void drawFilledRect(const Vec2f origin, const Vec2f size, const Color color) {
 		cast(int)pos2.y
 	};
 
-	setRenderColor(color);
+	setRenderColor(color, alpha);
 	SDL_RenderFillRect(_sdlRenderer, &rect);
 }
 
 /// Draw a rectangle with a size of 1.
-void drawPixel(const Vec2f position, const Color color) {
+void drawPixel(const Vec2f position, const Color color, float alpha = 1f) {
 	const Vec2f pos = transformRenderSpace(position);
 
 	const SDL_Rect rect = {
@@ -405,6 +407,6 @@ void drawPixel(const Vec2f position, const Color color) {
 		1, 1
 	};
 
-	setRenderColor(color);
+	setRenderColor(color, alpha);
 	SDL_RenderFillRect(_sdlRenderer, &rect);
 }
