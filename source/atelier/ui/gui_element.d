@@ -294,11 +294,11 @@ class GuiElement {
 
         /// Angle of the actual state (GuiState) of the gui.
 		final float angle() const { return _currentState.angle; }
-		/*final float angle(float newAngle) {
-            _angle = newAngle;
+		final float angle(float angle_) {
+            _currentState.angle = angle_;
             onAngle();
-            return _angle;
-        }*/
+            return _currentState.angle;
+        }
 	}
 
     /// Gui initialization options
@@ -508,7 +508,8 @@ class GuiElement {
         /// Called when the opacity change.
         void onAlpha() {}
 
-        //void onAngle() {}
+        /// Called when the angle change.
+        void onAngle() {}
 
         /// Any callback set to this gui will call this.
         void onCallback(string id) { cast(void) id; }

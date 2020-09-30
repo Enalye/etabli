@@ -16,6 +16,7 @@ public {
 	import atelier.core.color;
 	import atelier.core.timer;
 	import atelier.core.tween;
+	import atelier.core.simplex;
 	import atelier.core.stream;
 	import atelier.core.indexedarray;
 	import atelier.core.singleton;
