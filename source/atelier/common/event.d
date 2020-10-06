@@ -706,3 +706,24 @@ bool processEvents() {
 
 	return true;
 }
+
+/// Check if the clipboard isn't empty
+bool hasClipboard() {
+	return cast(bool) SDL_HasClipboardText();
+}
+
+/// Returns the content of the clipboard
+string getClipboard() {
+	auto clipboard = SDL_GetClipboardText();
+	if(clipboard) {
+		string text = to!string(fromStringz(clipboard));
+		SDL_free(clipboard);
+		return text;
+	}
+	return "";
+}
+
+/// Fill the clipboard
+void setClipboard(string text) {
+	SDL_SetClipboardText(toStringz(text));
+}

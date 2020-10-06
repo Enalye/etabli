@@ -18,11 +18,12 @@ import atelier.ui.gui_element, atelier.ui.label;
 class InputField: GuiElement {
 	private {
 		Label _label;
-		Color _borderColor, _caretColor;
+		Color _borderColor;
+		float _caretAlpha = 1f;
 		dstring _text, _allowedCharacters;
 		Timer _timer;
-		uint _caretIndex = 0U;
-		Vec2f _caretPosition = Vec2f.zero;
+		uint _caretIndex = 0U, _selectionIndex = 0u;
+		Vec2f _caretPosition = Vec2f.zero, _selectionPosition = Vec2f.zero;
 		uint _limit = 80u;
 	}
 
@@ -66,9 +67,102 @@ class InputField: GuiElement {
 		_label.text = to!string(_text);
 
 		_borderColor = Color.white;
-		_caretColor = Color.white;
+		_caretAlpha = 1f;
 		_timer.mode = Timer.Mode.bounce;
 		_timer.start(1f);
+	}
+
+	private void insertText(dstring textInput) {
+		if(_caretIndex == _selectionIndex) {
+			if(_caretIndex == _text.length)
+				_text ~= textInput;
+			else if(_caretIndex == 0U)
+				_text = textInput ~ _text;
+			else
+				_text = _text[0U.._caretIndex] ~ textInput ~ _text[_caretIndex..$];
+			_caretIndex += textInput.length;
+		}
+		else {
+			const int minSelect = min(_caretIndex, _selectionIndex);
+			const int maxSelect = max(_caretIndex, _selectionIndex);
+			if(minSelect == 0U && maxSelect == _text.length) {
+				_text = textInput;
+				_caretIndex = cast(uint) _text.length;
+			}
+			else if(minSelect == 0U) {
+				_text = textInput ~ _text[maxSelect..$];
+				_caretIndex = cast(uint) textInput.length;
+			}
+			else if(maxSelect == _text.length) {
+				_text = _text[0U..minSelect] ~ textInput;
+				_caretIndex = cast(uint) _text.length;
+			}
+			else {
+				_text = _text[0U..minSelect] ~ textInput ~ _text[maxSelect..$];
+				_caretIndex = minSelect + cast(uint) textInput.length;
+			}
+		}
+		_label.text = to!string(_text);
+		_selectionIndex = _caretIndex;
+		triggerCallback();
+	}
+
+	private void removeSelection(int direction) {
+		if(_text.length) {
+			if(_caretIndex == _selectionIndex) {
+				if(direction > 0) {
+					if(_caretIndex == 0U)
+						_text = _text[1U..$];
+					else if(_caretIndex != _text.length) {
+						_text = _text[0U.._caretIndex] ~ _text[_caretIndex + 1..$];
+					}
+				}
+				else {
+					if(_caretIndex == _text.length) {
+						_text.length --;
+						_caretIndex --;
+					}
+					else if(_caretIndex != 0U) {
+						_text = _text[0U.._caretIndex - 1] ~ _text[_caretIndex..$];
+						_caretIndex --;
+					}
+				}
+			}
+			else {
+				const int minSelect = min(_caretIndex, _selectionIndex);
+				const int maxSelect = max(_caretIndex, _selectionIndex);
+				if(minSelect == 0 && maxSelect == _text.length) {
+					_text.length = 0;
+					_caretIndex = 0;
+				}
+				else if(minSelect == 0) {
+					_text = _text[maxSelect..$];
+					_caretIndex = 0;
+				}
+				else if(maxSelect == _text.length) {
+					_text = _text[0..minSelect];
+					_caretIndex = minSelect;
+				}
+				else {
+					_text = _text[0..minSelect] ~ _text[maxSelect..$];
+					_caretIndex = minSelect;
+				}
+			}
+			_label.text = to!string(_text);
+			_selectionIndex = _caretIndex;
+		}
+		triggerCallback();
+	}
+
+	private string getSelection() {
+		dstring txt = to!dstring(_label.text);
+		if(_selectionIndex == _caretIndex || (txt.length == 0)) {
+			return "";
+		}
+		const int minIndex = min(_selectionIndex, _caretIndex);
+		const int maxIndex = max(_selectionIndex, _caretIndex);
+		txt = txt[minIndex..maxIndex];
+		return to!string(txt);
 	}
 
 	override void onEvent(Event event) {
@@ -82,56 +176,17 @@ class InputField: GuiElement {
                     if(indexOf(_allowedCharacters, textInput) == -1)
                         break;
                 }
-				if(_caretIndex == _text.length)
-					_text ~= textInput;
-				else if(_caretIndex == 0U)
-					_text = textInput ~ _text;
-				else
-					_text = _text[0U.._caretIndex] ~ textInput ~ _text[_caretIndex..$];
-				_caretIndex ++;
-				_label.text = to!string(_text);
-				triggerCallback();
-				break;
-			case keyDelete:
-				if(_text.length) {
-					if(event.textDelete.direction > 0) {
-						if(_caretIndex == 0U)
-							_text = _text[1U..$];
-						else if(_caretIndex != _text.length) {
-							_text = _text[0U.._caretIndex] ~ _text[_caretIndex + 1..$];
-						}
-					}
-					else {
-						if(_caretIndex == _text.length) {
-							_text.length --;
-							_caretIndex --;
-						}
-						else if(_caretIndex != 0U) {
-							_text = _text[0U.._caretIndex - 1] ~ _text[_caretIndex..$];
-							_caretIndex --;
-						}
-					}
-					_label.text = to!string(_text);
-				}
-				triggerCallback();
-				break;
-			case keyDir:
-				if(event.keyMove.direction.x > 0f && _caretIndex < _text.length)
-					_caretIndex ++;
-				if(event.keyMove.direction.x < 0f && _caretIndex > 0U)
-					_caretIndex --;
-				break;
-			case keyEnter:
-				//triggerCallback();
+				insertText(textInput);
 				break;
 			default:
 				break;
-			}	
+			}
 		}
 	}
 
 	override void update(float deltaTime) {
 		_caretPosition = Vec2f(_label.position.x + (_label.size.x / _text.length) * _caretIndex, _label.origin.y);
+		_selectionPosition = Vec2f(_label.position.x + (_label.size.x / _text.length) * _selectionIndex, _label.origin.y);
 		_label.position = Vec2f(10f, 0f);
 
 		if(_caretPosition.x > canvas.position.x + canvas.size.x / 2f - 10f)
@@ -145,12 +200,74 @@ class InputField: GuiElement {
 			_borderColor = lerp(_borderColor, Color.white * .21f, deltaTime * .1f);
 
 		_timer.update(deltaTime);
-		_caretColor = lerp(Color.white, Color.white * .21f, _timer.value01);
+		_caretAlpha = lerp(1f, .21f, _timer.value01);
+
+		if(hasFocus()) {
+			if(getButtonDown(KeyButton.right)) {
+				if(_caretIndex < _text.length)
+					_caretIndex ++;
+				if(!isButtonDown(KeyButton.leftShift) && !isButtonDown(KeyButton.rightShift)) {
+					_selectionIndex = _caretIndex;
+				}
+			}
+			else if(getButtonDown(KeyButton.left)) {
+				if(_caretIndex > 0U)
+					_caretIndex --;
+				if(!isButtonDown(KeyButton.leftShift) && !isButtonDown(KeyButton.rightShift)) {
+					_selectionIndex = _caretIndex;
+				}
+			}
+			if(getButtonDown(KeyButton.remove)) {
+				removeSelection(1);
+			}
+			else if(getButtonDown(KeyButton.backspace)) {
+				removeSelection(-1);
+			}
+			if(isButtonDown(KeyButton.leftControl) || isButtonDown(KeyButton.rightControl)) {
+				if(getButtonDown(KeyButton.v)) {
+					if(hasClipboard()) {
+						insertText(to!dstring(getClipboard()));
+					}
+				}
+				else if(getButtonDown(KeyButton.c)) {
+					setClipboard(getSelection());
+				}
+				else if(getButtonDown(KeyButton.x)) {
+					setClipboard(getSelection());
+					removeSelection(0);
+				}
+				else if(getButtonDown(KeyButton.a)) {
+					_caretIndex = cast(uint) _text.length;
+					_selectionIndex = 0U;
+				}
+			}
+			if(getButtonDown(KeyButton.end)) {
+				_caretIndex = cast(uint) _text.length;
+				if(!isButtonDown(KeyButton.leftShift) && !isButtonDown(KeyButton.rightShift)) {
+					_selectionIndex = _caretIndex;
+				}
+			}
+			else if(getButtonDown(KeyButton.home)) {
+				_caretIndex = 0;
+				if(!isButtonDown(KeyButton.leftShift) && !isButtonDown(KeyButton.rightShift)) {
+					_selectionIndex = _caretIndex;
+				}
+			}
+		}
 	}
 
 	override void draw() {
-		if(_text.length && hasFocus)
-			drawFilledRect(_caretPosition, Vec2f(2f, _label.size.y), _caretColor);
+		if(_text.length && hasFocus) {
+			if(_caretIndex != _selectionIndex) {
+				const float minPos = min(_selectionPosition.x, _caretPosition.x);
+				const float selectionSize = abs(_selectionPosition.x - _caretPosition.x);
+				drawFilledRect(
+					Vec2f(minPos, _selectionPosition.y),
+					Vec2f(selectionSize, _label.size.y),
+					Color(.23f, .30f, .37f), .7f);
+			}
+			drawFilledRect(_caretPosition, Vec2f(2f, _label.size.y), Color.white, _caretAlpha);
+		}
 	}
 
     override void drawOverlay() {
@@ -161,6 +278,7 @@ class InputField: GuiElement {
 	void clear() {
 		_text.length = 0L;
 		_caretIndex = 0u;
+		_selectionIndex = 0u;
 		_label.text = "";
 	}
 
