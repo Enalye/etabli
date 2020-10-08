@@ -14,5 +14,4 @@ public {
 	import atelier.render;
 	import atelier.audio;
 	import atelier.ui;
-	import atelier.net;
 }
