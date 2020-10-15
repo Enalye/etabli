@@ -50,7 +50,6 @@ struct Timer {
 		float duration() const { return _duration; }
 		/// Ditto
 		float duration(float v) {
-			assert(v > 0, "Timer duration cannot be null or negative.");
 			return _duration = v;
 		}
 
@@ -129,11 +128,16 @@ struct Timer {
 	void update(float deltaTime) {
         if(!_isRunning)
             return;
-        const float stepInterval = 1f / (getNominalFPS() * _duration);
+		if(_duration <= 0f) {
+			_time = _isReversed ? 0f : 1f;
+			_isRunning = false;
+			return;
+		}
+        const float stepInterval = deltaTime / (getNominalFPS() * _duration);
 		final switch(_mode) with(Mode) {
 		case once:
             if(_time < 1f)
-                _time += stepInterval * deltaTime;
+                _time += stepInterval;
             if(_time >= 1f) {
                 _time = 1f;
                 _isRunning = false;
@@ -141,7 +145,7 @@ struct Timer {
 			break;
         case reverse:
             if(_time > 0f)
-                _time -= stepInterval * deltaTime;
+                _time -= stepInterval;
             if(_time <= 0f) {
                 _time = 0f;
                 _isRunning = false;
@@ -149,30 +153,30 @@ struct Timer {
             break;
 		case loop:
 			if(_time < 1f)
-				_time += stepInterval * deltaTime;
+				_time += stepInterval;
 			if(_time >= 1f)
-				_time = (_time - 1f) + (stepInterval * deltaTime);
+				_time = (_time - 1f) + stepInterval;
 			break;
         case loopReverse:
 			if(_time > 0f)
-                _time -= stepInterval * deltaTime;
+                _time -= stepInterval;
             if(_time <= 0f)
-				_time = (1f - _time) - (stepInterval * deltaTime);
+				_time = (1f - _time) - stepInterval;
 			break;
 		case bounce:
 			if(_isReversed) {
 				if(_time > 0f)
-					_time -= stepInterval * deltaTime;
+					_time -= stepInterval;
 				if(_time <= 0f) {
-					_time = -(_time - (stepInterval * deltaTime));
+					_time = -(_time - stepInterval);
 					_isReversed = false;
 				}
 			}
 			else {
 				if(_time < 1f)
-					_time += stepInterval * deltaTime;
+					_time += stepInterval;
 				if(_time >= 1f) {
-					_time = 1f - ((_time - 1f) + (stepInterval * deltaTime));
+					_time = 1f - ((_time - 1f) + stepInterval);
 					_isReversed = true;
 				}
 			}
@@ -180,17 +184,17 @@ struct Timer {
         case bounceReverse:
 			if(_isReversed) {
 				if(_time < 1f)
-					_time += stepInterval * deltaTime;
+					_time += stepInterval;
 				if(_time >= 1f) {
-					_time = 1f - ((_time - 1f) + (stepInterval * deltaTime));
+					_time = 1f - ((_time - 1f) + stepInterval);
 					_isReversed = false;
 				}
 			}
 			else {
                 if(_time > 0f)
-					_time -= stepInterval * deltaTime;
+					_time -= stepInterval;
 				if(_time <= 0f) {
-					_time = -(_time - (stepInterval * deltaTime));
+					_time = -(_time - stepInterval);
 					_isReversed = true;
 				}
 			}
