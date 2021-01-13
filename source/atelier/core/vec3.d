@@ -234,7 +234,8 @@ struct Vec3(T) {
 
 	/// Transform this vector in a unit vector.
 	void normalize() {
-		assert(this != Vec3!T.zero, "Null vector");
+		if(this == Vec3!T.zero)
+			return this;
 		static if(__traits(isFloating, T))
 			const T len = std.math.sqrt(x * x + y * y + z * z);
 		else
@@ -247,7 +248,8 @@ struct Vec3(T) {
 
 	/// Returns a unit vector from this one without modifying this one.
 	Vec3!T normalized() const  {
-		assert(this != Vec3!T.zero, "Null vector");
+		if(this == Vec3!T.zero)
+			return this;
 		static if(__traits(isFloating, T))
 			const T len = std.math.sqrt(x * x + y * y + z * z);
 		else

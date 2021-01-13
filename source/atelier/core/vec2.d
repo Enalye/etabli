@@ -253,24 +253,29 @@ struct Vec2(T) {
 
 	/// Transform this vector in a unit vector.
 	void normalize() {
-		assert(this != Vec2!T.zero, "Null vector");
 		static if(__traits(isFloating, T))
 			const T len = std.math.sqrt(x * x + y * y);
 		else
 			const T len = cast(T)std.math.sqrt(cast(float)(x * x + y * y));
 
+		if(len == 0) {
+			x = len;
+			y = len;
+			return;
+		}
 		x /= len;
 		y /= len;
 	}
 
 	/// Returns a unit vector from this one without modifying this one.
 	Vec2!T normalized() const  {
-		assert(this != Vec2!T.zero, "Null vector");
 		static if(__traits(isFloating, T))
 			const T len = std.math.sqrt(x * x + y * y);
 		else
 			const T len = cast(T)std.math.sqrt(cast(float)(x * x + y * y));
-
+		if(len == 0) {
+			return zero;
+		}
 		return Vec2!T(x / len, y / len);
 	}
 
@@ -312,20 +317,20 @@ struct Vec2(T) {
 	}
 
 	/// While conserving the x/y ratio, returns the largest vector possible that fits inside the other vector. (like a size) \
-	/// Does not modify this vector. \
-	/// Must be non-null.
+	/// Does not modify this vector.
 	Vec2!T fit(const Vec2!T v) const {
-		assert(v != Vec2!T.zero, "Null vector");
+		if(v == Vec2!T.zero)
+			return v;
 		return (x / y) < (v.x / v.y) ?
 			Vec2!T(x * v.y / y, v.y):
 			Vec2!T(v.x, y * v.x / x);
 	}
 
 	/// While conserving the x/y ratio, returns the smallest vector possible that can contain the other vector. (like a size) \
-	/// Does not modify this vector. \
-	/// Must be non-null.
+	/// Does not modify this vector.
 	Vec2!T contain(const Vec2!T v) const {
-		assert(v != Vec2!T.zero, "Null vector");
+		if(v == Vec2!T.zero)
+			return v;
 		return (x / y) < (v.x / v.y) ?
 			Vec2!T(v.x, y * v.x / x):
 			Vec2!T(x * v.y / y, v.y);
