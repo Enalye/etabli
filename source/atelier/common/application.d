@@ -21,6 +21,8 @@ import atelier.common.event;
 import atelier.common.settings;
 import atelier.common.resource;
 
+alias ApplicationUpdate = void function(float);
+
 private {
     float _deltatime = 1f;
     float _currentFps;
@@ -32,6 +34,8 @@ private {
 
     bool _isInitialized;
     uint _nominalFPS = 60u;
+
+    ApplicationUpdate[] _applicationUpdates;
 }
 
 /// Actual framerate divided by the nominal framerate
@@ -65,6 +69,9 @@ void runApplication() {
     
     while(processEvents()) {
         updateEvents(_deltatime);
+        foreach(applicationUpdate; _applicationUpdates) {
+            applicationUpdate(_deltatime);
+        }
         processModalBack();
         processOverlayBack();
         updateGuiElements(_deltatime);
@@ -88,4 +95,9 @@ void runApplication() {
 void destroyApplication() {
     destroyEvents();
 	destroyWindow();
+}
+
+/// Add a callback function called for each game loop
+void addApplicationUpdate(ApplicationUpdate applicationUpdate) {
+    _applicationUpdates ~= applicationUpdate;
 }
