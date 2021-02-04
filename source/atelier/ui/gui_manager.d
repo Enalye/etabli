@@ -400,7 +400,6 @@ private void dispatchMouseUpdateEvent(GuiElement gui, Vec2f cursorPosition) {
 
     if(gui !is null) {
         wasHovered = gui.isHovered;
-        gui.isHovered = false;
 
         if(gui.isInteractable && gui == _grabbedGuiElement) {
             if(!gui._isMovable) {
