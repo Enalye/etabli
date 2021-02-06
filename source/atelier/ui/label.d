@@ -92,7 +92,6 @@ final class Label : GuiElement {
 
     override void draw() {
         Vec2f pos = origin;
-        pos.y += _font.ascent * _charScale;
         dchar prevChar;
         foreach (dchar ch; _text) {
             if (ch == '\n') {
