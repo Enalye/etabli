@@ -203,6 +203,8 @@ class GuiElement {
 
         /// The scale of the gui (changed by GuiState).
 		final Vec2f scale() const { return _currentState.scale; }
+        /// Ditto
+		final Vec2f scale(Vec2f scale_) { return _currentState.scale = scale_; }
         /// The total size (size + scale) of the gui.
 		final Vec2f scaledSize() const { return _size * _currentState.scale; }
 
