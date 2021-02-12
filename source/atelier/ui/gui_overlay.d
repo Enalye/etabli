@@ -52,12 +52,12 @@ bool isOverlay() {
 void setOverlay(GuiElement gui) {
 	if(!_isOverlay) {
 		_isOverlay = true;
-		_backupGuis = getRootGuis();
-		removeRootGuis();
+		_backupGuis = getRoots();
+		removeRoots();
 	}
 
 	_overlayGuiElements ~= gui;
-	addRootGui(gui);
+	appendRoot(gui);
 }
 
 /// Remove the current overlay gui.
@@ -65,7 +65,7 @@ void stopOverlay() {
 	if(!_isOverlay)
 		return;
 	_isOverlay = false;
-	setRootGuis(_backupGuis);
+	setRoots(_backupGuis);
 	_backupGuis.length = 0L;
 	_overlayGuiElements.length = 0L;
 }
@@ -94,8 +94,8 @@ package void processOverlayEvent(Event event) {
 /// Updates and renders guis that are behind.
 package(atelier) void processOverlayBack() {
 	foreach(gui; _backupGuis) {
-		updateGuiElements(gui, null);	
-		drawGuiElements(gui);
+		updateRoots(gui, null);	
+		drawRoots(gui);
 	}
 }
 

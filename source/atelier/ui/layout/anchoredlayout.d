@@ -24,8 +24,8 @@ class AnchoredLayout: GuiElement {
 		size = newSize;
 	}
 
-	override void addChildGui(GuiElement gui) {
-		super.addChildGui(gui);
+	override void appendChild(GuiElement gui) {
+		super.appendChild(gui);
 		_childrenPositions ~= Vec2f.half;
 		_childrenSizes ~= Vec2f.one;
 		resize();
@@ -39,16 +39,16 @@ class AnchoredLayout: GuiElement {
         resize();
     }
 
-	void addChildGui(GuiElement gui, Vec2f position, Vec2f size) {
+	void appendChild(GuiElement gui, Vec2f position, Vec2f size) {
         gui.setAlign(GuiAlignX.left, GuiAlignY.top);
-		super.addChildGui(gui);
+		super.appendChild(gui);
 		_childrenPositions ~= position;
 		_childrenSizes ~= size;
 		resize();
 	}
 
-	override void removeChildrenGuis() {
-		super.removeChildrenGuis();
+	override void removeChildren() {
+		super.removeChildren();
 		_childrenPositions.length = 0L;
 		_childrenSizes.length = 0L;
 	}

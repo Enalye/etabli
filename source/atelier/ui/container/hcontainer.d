@@ -31,9 +31,9 @@ class HContainer: GuiElement {
 	/// Ctor
 	this() {}
 
-	override void addChildGui(GuiElement gui) {
+	override void appendChild(GuiElement gui) {
         gui.setAlign(GuiAlignX.left, _childAlignY);
-		super.addChildGui(gui);
+		super.appendChild(gui);
 		resize();
 	}
 

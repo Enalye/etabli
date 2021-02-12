@@ -31,9 +31,9 @@ class VContainer: GuiElement {
 	/// Ctor
 	this() {}
 
-	override void addChildGui(GuiElement gui) {
+	override void appendChild(GuiElement gui) {
         gui.setAlign(_childAlignX, GuiAlignY.top);
-		super.addChildGui(gui);
+		super.appendChild(gui);
 		resize();
 	}
 

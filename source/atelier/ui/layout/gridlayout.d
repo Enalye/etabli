@@ -34,9 +34,9 @@ class GridLayout: GuiElement {
 		size = newSize;
 	}
 
-	override void addChildGui(GuiElement gui) {
+	override void appendChild(GuiElement gui) {
         gui.setAlign(GuiAlignX.left, GuiAlignY.top);
-		super.addChildGui(gui);
+		super.appendChild(gui);
 		resize();
 	}
 

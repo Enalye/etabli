@@ -13,12 +13,16 @@ import atelier.ui.gui_overlay;
 
 /// Alignment on the horizontal axis relative to its parent.
 enum GuiAlignX {
-    left, center, right
+    left,
+    center,
+    right
 }
 
 /// Alignment on the vertical axis relative to its parent.
 enum GuiAlignY {
-    top, center, bottom
+    top,
+    center,
+    bottom
 }
 
 /// Single state of a GUI. \
@@ -52,14 +56,15 @@ class GuiElement {
     }
 
     package {
-		GuiElement[] _children;
-		Hint _hint;
+        GuiElement[] _children;
+        Hint _hint;
         bool _isRegistered = true;
-		bool _isLocked, _isMovable, _isHovered, _isClicked, _isSelected, _hasFocus, _isInteractable = true, _hasEventHook;
-		Vec2f _position = Vec2f.zero, _size = Vec2f.zero, _anchor = Vec2f.half,
+        bool _isLocked, _isMovable, _isHovered, _isClicked, _isSelected,
+            _hasFocus, _isInteractable = true, _hasEventHook;
+        Vec2f _position = Vec2f.zero, _size = Vec2f.zero, _anchor = Vec2f.half,
             _padding = Vec2f.zero, _center = Vec2f.zero, _origin = Vec2f.zero;
-		GuiElement _callbackGuiElement;
-		string _callbackId;
+        GuiElement _callbackGuiElement;
+        string _callbackId;
 
         //Iteration
         bool _isIterating, _isWarping = true;
@@ -75,11 +80,11 @@ class GuiElement {
         GuiState _currentState, _targetState, _initState;
         GuiState[string] _states;
         Timer _timer;
-	}
+    }
 
     package void setScreenCoords(Vec2f screenCoords) {
         _screenCoords = screenCoords;
-        if(_hasCanvas && _canvas !is null) {
+        if (_hasCanvas && _canvas !is null) {
             _center = _size / 2f;
             _origin = Vec2f.zero;
         }
@@ -89,137 +94,190 @@ class GuiElement {
         }
     }
 
-	@property {
+    @property {
         /// If set, the canvas used to be rendered on.
-        final Canvas canvas() { return _canvas; }
+        final Canvas canvas() {
+            return _canvas;
+        }
         /// Is this GUI using a canvas ?
-        final bool hasCanvas() const { return _hasCanvas; }
+        final bool hasCanvas() const {
+            return _hasCanvas;
+        }
 
         /// The hint window to be shown when hovering this GUI.
-        final Hint hint() { return _hint; }
+        final Hint hint() {
+            return _hint;
+        }
 
         /// The list of all its children.
-        const(GuiElement[]) children() const { return _children; }
+        const(GuiElement[]) children() const {
+            return _children;
+        }
         /// Ditto
-		GuiElement[] children() { return _children; }
+        GuiElement[] children() {
+            return _children;
+        }
+
+        /// Return the first child gui.
+        GuiElement firstChild() {
+            if (!_children.length)
+                return null;
+            return _children[0];
+        }
+
+        /// Return the last child gui.
+        GuiElement lastChild() {
+            if (!_children.length)
+                return null;
+            return _children[$ - 1];
+        }
+
+        /// The number of children it currently has.
+        size_t childCount() const {
+            return _children.length;
+        }
 
         /// Is this gui locked ? \
         /// Call **onLock()** on change.
-		final bool isLocked() const { return _isLocked; }
+        final bool isLocked() const {
+            return _isLocked;
+        }
         /// Ditto
-		final bool isLocked(bool newIsLocked) {
-            if(newIsLocked != _isLocked) {
-                _isLocked = newIsLocked;
+        final bool isLocked(bool isLocked_) {
+            if (isLocked_ != _isLocked) {
+                _isLocked = isLocked_;
                 onLock();
                 return _isLocked;
             }
-            return _isLocked = newIsLocked;
+            return _isLocked = isLocked_;
         }
 
         /// Is this gui movable ? \
         /// Call **onMovable()** on change.
-		final bool isMovable() const { return _isMovable; }
+        final bool isMovable() const {
+            return _isMovable;
+        }
         /// Ditto
-		final bool isMovable(bool newIsMovable) {
-            if(newIsMovable != _isMovable) {
-                _isMovable = newIsMovable;
+        final bool isMovable(bool isMovable_) {
+            if (isMovable_ != _isMovable) {
+                _isMovable = isMovable_;
                 onMovable();
                 return _isMovable;
             }
-            return _isMovable = newIsMovable;
+            return _isMovable = isMovable_;
         }
 
         /// Is this gui hovered ? \
         /// Call **onHover()** on change. (<- Not for now)
-		final bool isHovered() const { return _isHovered; }
+        final bool isHovered() const {
+            return _isHovered;
+        }
         /// Ditto
-		final bool isHovered(bool newIsHovered) {
-            if(newIsHovered != _isHovered) {
-                _isHovered = newIsHovered;
+        final bool isHovered(bool isHovered_) {
+            if (isHovered_ != _isHovered) {
+                _isHovered = isHovered_;
                 onHover();
                 return _isHovered;
             }
-            return _isHovered = newIsHovered;
+            return _isHovered = isHovered_;
         }
 
         /// Is this gui clicked ?
-        final bool isClicked() const { return _isClicked; }
+        final bool isClicked() const {
+            return _isClicked;
+        }
         /// Ditto
-		final bool isClicked(bool newIsClicked) {
-            return _isClicked = newIsClicked;
+        final bool isClicked(bool isClicked_) {
+            return _isClicked = isClicked_;
         }
 
         /// Is this gui selected ? \
         /// Call **onSelect()** on change.
-		final bool isSelected() const { return _isSelected; }
+        final bool isSelected() const {
+            return _isSelected;
+        }
         /// Ditto
-		final bool isSelected(bool newIsSelected) {
-            if(newIsSelected != _isSelected) {
-                _isSelected = newIsSelected;
+        final bool isSelected(bool isSelected_) {
+            if (isSelected_ != _isSelected) {
+                _isSelected = isSelected_;
                 onSelect();
                 return _isSelected;
             }
-            return _isSelected = newIsSelected;
+            return _isSelected = isSelected_;
         }
 
         /// Does this gui has focus ? \
         /// Call **onFocus()** on change.
-		final bool hasFocus() const { return _hasFocus; }
+        final bool hasFocus() const {
+            return _hasFocus;
+        }
         /// Ditto
-		final bool hasFocus(bool newHasFocus) {
-            if(newHasFocus != _hasFocus) {
-                _hasFocus = newHasFocus;
+        final bool hasFocus(bool hasFocus_) {
+            if (hasFocus_ != _hasFocus) {
+                _hasFocus = hasFocus_;
                 onFocus();
                 return _hasFocus;
             }
-            return _hasFocus = newHasFocus;
+            return _hasFocus = hasFocus_;
         }
 
         /// Is this gui interactable ? \
         /// Call **onInteractable()** on change.
-		final bool isInteractable() const { return _isInteractable; }
+        final bool isInteractable() const {
+            return _isInteractable;
+        }
         /// Ditto
-		final bool isInteractable(bool newIsInteractable) {
-            if(newIsInteractable != _isInteractable) {
-                _isInteractable = newIsInteractable;
+        final bool isInteractable(bool isInteractable_) {
+            if (isInteractable_ != _isInteractable) {
+                _isInteractable = isInteractable_;
                 onInteractable();
                 return _isInteractable;
             }
-            return _isInteractable = newIsInteractable;
+            return _isInteractable = isInteractable_;
         }
 
         /// The gui position relative to its parent and alignment. \
         /// Call **onPosition()** and **onDeltaPosition()** and **onCenter()** on change.
-		final Vec2f position() { return _position; }
+        final Vec2f position() {
+            return _position;
+        }
         /// Ditto
-		final Vec2f position(Vec2f newPosition) {
+        final Vec2f position(Vec2f position_) {
             auto oldPosition = _position;
-            _position = newPosition;
-            onDeltaPosition(newPosition - oldPosition);
+            _position = position_;
+            onDeltaPosition(position_ - oldPosition);
             onPosition();
             onCenter();
             return _position;
         }
 
         /// The scale of the gui (changed by GuiState).
-		final Vec2f scale() const { return _currentState.scale; }
+        final Vec2f scale() const {
+            return _currentState.scale;
+        }
         /// Ditto
-		final Vec2f scale(Vec2f scale_) { return _currentState.scale = scale_; }
+        final Vec2f scale(Vec2f scale_) {
+            return _currentState.scale = scale_;
+        }
         /// The total size (size + scale) of the gui.
-		final Vec2f scaledSize() const { return _size * _currentState.scale; }
+        final Vec2f scaledSize() const {
+            return _size * _currentState.scale;
+        }
 
         /// The unscaled size of the gui. \
         /// Call **onSize()** and **onDeltaSize()** and **onCenter()** on change. \
         /// Resize the canvas if it was set (It reallocate the canvas, so be careful).
-		final Vec2f size() const { return _size; }
+        final Vec2f size() const {
+            return _size;
+        }
         /// Ditto
-		final Vec2f size(Vec2f newSize) {
+        final Vec2f size(Vec2f size_) {
             auto oldSize = _size;
-            _size = newSize - _padding;
+            _size = size_ - _padding;
 
-            if(_hasCanvas && oldSize != newSize) {
+            if (_hasCanvas && oldSize != size_) {
                 Canvas newCanvas;
-                if(_size.x > 2f && _size.y > 2f)
+                if (_size.x > 2f && _size.y > 2f)
                     newCanvas = new Canvas(_size);
                 else
                     newCanvas = new Canvas(Vec2u.one * 2);
@@ -228,7 +286,7 @@ class GuiElement {
                 _canvas.position = _canvas.size / 2f;
             }
 
-            onDeltaSize(_size - oldSize);         
+            onDeltaSize(_size - oldSize);
             onSize();
             onCenter();
             return _size;
@@ -236,12 +294,14 @@ class GuiElement {
 
         /// The anchor of the gui. (I don't think it's used right now). \
         /// Call **onAnchor()** and **onDeltaAnchor()** and **onCenter()** on change.
-		final Vec2f anchor() const { return _anchor; }
+        final Vec2f anchor() const {
+            return _anchor;
+        }
         /// Ditto
-		final Vec2f anchor(Vec2f newAnchor) {
+        final Vec2f anchor(Vec2f anchor_) {
             auto oldAnchor = _anchor;
-            _anchor = newAnchor;
-            onDeltaAnchor(newAnchor - oldAnchor);
+            _anchor = anchor_;
+            onDeltaAnchor(anchor_ - oldAnchor);
             onAnchor();
             onCenter();
             return _anchor;
@@ -254,29 +314,37 @@ class GuiElement {
 
         /// Center of the gui. \
         /// If the canvas is set, only drawOverlay have the coordinate of its parent, the rest are in a relative coordinate.
-		final Vec2f center() const { return _center; }
+        final Vec2f center() const {
+            return _center;
+        }
         /// The top left corner of the gui. \
         /// If the canvas is set, only drawOverlay have the coordinate of its parent, the rest are in a relative coordinate.
-		final Vec2f origin() const { return _origin; }
+        final Vec2f origin() const {
+            return _origin;
+        }
 
         /// Extra space on top of its size. \
         /// Call **onPadding()** and update the gui size.
-		final Vec2f padding() const { return _padding; }
+        final Vec2f padding() const {
+            return _padding;
+        }
         /// Ditto
-		final Vec2f padding(Vec2f newPadding) {
-            _padding = newPadding;
-			size(_size);
+        final Vec2f padding(Vec2f padding_) {
+            _padding = padding_;
+            size(_size);
             onPadding();
             return _padding;
         }
 
         /// Color of the actual state (GuiState) of the gui. \
         /// Call **onColor()** on change.
-        final Color color() const { return _currentState.color; }
+        final Color color() const {
+            return _currentState.color;
+        }
         /// Ditto
-		final Color color(Color newColor) {
-            if(newColor != _currentState.color) {
-                _currentState.color = newColor;
+        final Color color(Color color_) {
+            if (color_ != _currentState.color) {
+                _currentState.color = color_;
                 onColor();
             }
             return _currentState.color;
@@ -284,10 +352,12 @@ class GuiElement {
 
         /// Alpha of the actual state (GuiState) of the gui. \
         /// Call **onAlpha()** on change.
-        final float alpha() const { return _currentState.alpha; }
+        final float alpha() const {
+            return _currentState.alpha;
+        }
         /// Ditto
-		final float alpha(float alpha_) {
-            if(alpha_ != _currentState.alpha) {
+        final float alpha(float alpha_) {
+            if (alpha_ != _currentState.alpha) {
                 _currentState.alpha = alpha_;
                 onAlpha();
             }
@@ -295,16 +365,19 @@ class GuiElement {
         }
 
         /// Angle of the actual state (GuiState) of the gui.
-		final float angle() const { return _currentState.angle; }
-		final float angle(float angle_) {
+        final float angle() const {
+            return _currentState.angle;
+        }
+        /// Ditto
+        final float angle(float angle_) {
             _currentState.angle = angle_;
             onAngle();
             return _currentState.angle;
         }
-	}
+    }
 
     /// Gui initialization options
-    enum Flags {
+    enum Init {
         /// Default
         none = 0x0,
         /// Initialize the gui with its own render canvas
@@ -318,17 +391,17 @@ class GuiElement {
     }
 
     /// Default ctor.
-	this(int flags = Flags.none) {
-        if(flags & Flags.canvas)
+    this(int flags = Init.none) {
+        if (flags & Init.canvas)
             initCanvas();
-        _isLocked = cast(bool) (flags & Flags.locked);
-        _isMovable = cast(bool) (flags & Flags.movable);
-        _isInteractable = cast(bool) !(flags & Flags.notInteractable);
+        _isLocked = cast(bool)(flags & Init.locked);
+        _isMovable = cast(bool)(flags & Init.movable);
+        _isInteractable = cast(bool) !(flags & Init.notInteractable);
     }
 
     private final initCanvas() {
         _hasCanvas = true;
-        if(_size.x > 2f && _size.y > 2f)
+        if (_size.x > 2f && _size.y > 2f)
             _canvas = new Canvas(_size);
         else
             _canvas = new Canvas(Vec2u.one * 2);
@@ -336,40 +409,40 @@ class GuiElement {
     }
 
     /// Is it inside the gui ?
-	bool isInside(const Vec2f pos) const {
+    bool isInside(const Vec2f pos) const {
         return (_screenCoords - pos).isBetween(-_size / 2f, _size / 2f);
-	}
+    }
 
     /// Is it inside the gui and the gui is interactable ? \
     /// Used to capture events.
-	final bool isOnInteractableGuiElement(Vec2f pos) const {
-		if(isInside(pos))
-			return _isInteractable;
-		return false;
-	}
+    final bool isOnInteractableGuiElement(Vec2f pos) const {
+        if (isInside(pos))
+            return _isInteractable;
+        return false;
+    }
 
     /// Update the hint (Text that appear when hovering the gui) of the gui.
-	final void setHint(string text) {
-		_hint = makeHint(text);
-	}
+    final void setHint(string text) {
+        _hint = makeHint(text);
+    }
 
     /// Set an id that will be sent to the specified gui when **triggerCallback()** is fired.
-	final void setCallback(GuiElement callbackGuiElement, string callback) {
-		_callbackGuiElement = callbackGuiElement;
-		_callbackId = callback;
-	}
+    final void setCallback(GuiElement callbackGuiElement, string callback) {
+        _callbackGuiElement = callbackGuiElement;
+        _callbackId = callback;
+    }
 
     /// Send a previously set (with **setCallback()**) id to the previously specified gui.
-	final protected void triggerCallback() {
-		if(_callbackGuiElement !is null) {
-			_callbackGuiElement.onCallback(_callbackId);
-		}
-	}
+    final protected void triggerCallback() {
+        if (_callbackGuiElement !is null) {
+            _callbackGuiElement.onCallback(_callbackId);
+        }
+    }
 
     /// Start a transition from the current state to the specified state.
     final void doTransitionState(string stateName) {
         const auto ptr = stateName in _states;
-        if(!(ptr))
+        if (!(ptr))
             throw new Exception("No state " ~ stateName ~ " in GuiElement");
         _currentStateName = stateName;
         _initState = _currentState;
@@ -380,7 +453,7 @@ class GuiElement {
     /// The gui is set *immediately* to the specified state without transition.
     final void setState(string stateName) {
         const auto ptr = stateName in _states;
-        if(!(ptr))
+        if (!(ptr))
             throw new Exception("No state " ~ stateName ~ " in GuiElement");
         _currentStateName = stateName;
         _initState = *ptr;
@@ -416,136 +489,183 @@ class GuiElement {
     /// Ideally, it's equal to 1.
     /// ___
     /// If the canvas is set, the coordinate are those *inside* the canvas.
-	void update(float deltaTime) { cast(void) deltaTime; }
+    void update(float deltaTime) {
+        cast(void) deltaTime;
+    }
 
     /// Override this to render the gui itself. \
     /// If the canvas is set, the coordinate are those *inside* the canvas.
-	void draw() {}
+    void draw() {
+    }
 
     /// Override this to render things above the gui. \
     /// If the canvas is set, the coordinate are those *outside* the canvas.
-	void drawOverlay() {}
+    void drawOverlay() {
+    }
 
     /// With the eventHook, receive all events. \
     /// Useful if you want to control like for text input. 
-	void onEvent(Event event) { cast(void) event; }
+    void onEvent(Event event) {
+        cast(void) event;
+    }
 
     /// Fired when clicked on.
-    void onSubmit() {}
+    void onSubmit() {
+    }
 
     /// Fired upon cancelling.
-    void onCancel() {}
+    void onCancel() {
+    }
 
     /// Fired on the next tab event.
-    void onNextTab() {}
+    void onNextTab() {
+    }
 
     /// Fired on the previous tab event.
-    void onPreviousTab() {}
+    void onPreviousTab() {
+    }
 
     /// Fired when going up.
-    void onUp() {}
+    void onUp() {
+    }
 
     /// Fired when going down.
-    void onDown() {}
+    void onDown() {
+    }
 
     /// Fired when going left.
-    void onLeft() {}
+    void onLeft() {
+    }
 
     /// Fired when going right.
-    void onRight() {}
+    void onRight() {
+    }
 
     /// Fired when the application is exiting. \
     /// Every gui in the tree receive this.
-    void onQuit() {}
+    void onQuit() {
+    }
 
     public {
         /// Called when the lock state is changed.
-        void onLock() {}
+        void onLock() {
+        }
 
         /// Called when the movable state is changed.
-        void onMovable() {}
+        void onMovable() {
+        }
 
         /// Called when the hover state is changed.
-        void onHover() {}
+        void onHover() {
+        }
 
         /// Called when the select state is changed.
-        void onSelect() {}
+        void onSelect() {
+        }
 
         /// Called when the focus state is changed.
-        void onFocus() {}
+        void onFocus() {
+        }
 
         /// Called when the interactable state is changed.
-        void onInteractable() {}
+        void onInteractable() {
+        }
 
         /// Called when the position is changed. \
         /// The delta value is the difference with the last position.
-        void onDeltaPosition(Vec2f delta) { cast(void) delta; }
+        void onDeltaPosition(Vec2f delta) {
+            cast(void) delta;
+        }
 
         /// Called when the position is changed.
-        void onPosition() {}
+        void onPosition() {
+        }
 
         /// Called when the size is changed. \
         /// The delta value is the difference with the last size.
-        void onDeltaSize(Vec2f delta) { cast(void) delta; }
+        void onDeltaSize(Vec2f delta) {
+            cast(void) delta;
+        }
 
         /// Called when the size is changed.
-        void onSize() {}
+        void onSize() {
+        }
 
         /// Called when the anchor is changed. \
         /// The delta value is the difference with the last anchor.
-        void onDeltaAnchor(Vec2f delta) { cast(void) delta; }
+        void onDeltaAnchor(Vec2f delta) {
+            cast(void) delta;
+        }
 
         /// Called when the anchor is changed.
-        void onAnchor() {}
+        void onAnchor() {
+        }
 
         /// Called when the center of the gui moved.
-        void onCenter() {}
+        void onCenter() {
+        }
 
         /// Called when the padding change.
-        void onPadding() {}
+        void onPadding() {
+        }
 
         /// Called when the color change.
-        void onColor() {}
+        void onColor() {
+        }
 
         /// Called when the opacity change.
-        void onAlpha() {}
+        void onAlpha() {
+        }
 
         /// Called when the angle change.
-        void onAngle() {}
+        void onAngle() {
+        }
 
         /// Any callback set to this gui will call this.
-        void onCallback(string id) { cast(void) id; }
+        void onCallback(string id) {
+            cast(void) id;
+        }
     }
 
     /// Add a gui as a child of this one.
-    void addChildGui(GuiElement widget) {
-		_children ~= widget;
-	}
+    void prependChild(GuiElement child) {
+        _children = child ~ _children;
+    }
+
+    /// Add a gui as a child of this one.
+    void appendChild(GuiElement child) {
+        _children ~= child;
+    }
 
     /// Remove all the children.
-	void removeChildrenGuis() {
-		_children.length = 0uL;
-	}
-
-    /// The number of children it currently has.
-	int getChildrenGuisCount() {
-		return cast(int)(_children.length);
-	}
+    void removeChildren() {
+        _children.length = 0uL;
+    }
 
     /// Remove the child at the specified index.
-	void removeChildGui(size_t index) {
-		if(!_children.length)
-			return;
-		if(index + 1u == _children.length)
-			_children.length --;
-		else if(index == 0u)
-			_children = _children[1..$];
-		else
-			_children = _children[0..index]  ~ _children[index + 1..$];
-	}
+    void removeChild(size_t index) {
+        if (!_children.length)
+            return;
+        if (index + 1u == _children.length)
+            _children.length--;
+        else if (index == 0u)
+            _children = _children[1 .. $];
+        else
+            _children = _children[0 .. index] ~ _children[index + 1 .. $];
+    }
+
+    /// Remove the specified child.
+    void removeChild(GuiElement gui) {
+        foreach (size_t i, GuiElement child; _children) {
+            if (child is gui) {
+                removeChild(i);
+                return;
+            }
+        }
+    }
 
     /// Unregister itself from its parent or root.
-    void removeSelfGui() {
+    void removeSelf() {
         _isRegistered = false;
     }
 }

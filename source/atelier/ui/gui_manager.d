@@ -14,71 +14,86 @@ import atelier.ui.gui_element, atelier.ui.gui_overlay, atelier.ui.gui_modal;
 
 private {
 	bool _isGuiElementDebug = false;
-    GuiElement[] _rootGuis;
+    GuiElement[] _rootElements;
     float _deltaTime;
 }
 
 //-- Public ---
 
 /// Add a gui as a top gui (not a child of anything).
-void addRootGui(GuiElement widget) {
-	_rootGuis ~= widget;
+void prependRoot(GuiElement gui) {
+	_rootElements = gui ~ _rootElements;
+}
+
+/// Add a gui as a top gui (not a child of anything).
+void appendRoot(GuiElement gui) {
+	_rootElements ~= gui;
 }
 
 /// Remove all the top gui (that aren't a child of anything).
-void removeRootGuis() {
+void removeRoots() {
 	//_isChildGrabbed = false;
-	_rootGuis.length = 0uL;
+	_rootElements.length = 0uL;
 }
 
 /// Set those gui as the top guis (replacing the previous ones).
-void setRootGuis(GuiElement[] widgets) {
-	_rootGuis = widgets;
+void setRoots(GuiElement[] widgets) {
+	_rootElements = widgets;
 }
 
-/// Get all the top guis.
-GuiElement[] getRootGuis() {
-    return _rootGuis;
+/// Get all the root gui.
+GuiElement[] getRoots() {
+    return _rootElements;
 }
 
-/// Show every gui as boxes.
+/// Show every the hitbox of every gui element.
 void setDebugGui(bool isDebug) {
 	_isGuiElementDebug = isDebug;
 }
 
-//-- Internal ---
-
-/// Remove the gui at the specified index.
-private void removeRootGui(size_t index) {
-    if(!_rootGuis.length)
-        return;
-    if(index + 1u == _rootGuis.length)
-        _rootGuis.length --;
-    else if(index == 0u)
-        _rootGuis = _rootGuis[1..$];
-    else
-        _rootGuis = _rootGuis[0..index]  ~ _rootGuis[index + 1..$];
+/// Remove the specified gui from roots.
+void removeRoot(GuiElement gui) {
+    foreach (size_t i, GuiElement child; _rootElements) {
+        if (child is gui) {
+            removeRoot(i);
+            return;
+        }
+    }
 }
 
+/// Remove the gui at the specified index from roots.
+void removeRoot(size_t index) {
+    if(!_rootElements.length)
+        return;
+    if(index + 1u == _rootElements.length)
+        _rootElements.length --;
+    else if(index == 0u)
+        _rootElements = _rootElements[1..$];
+    else
+        _rootElements = _rootElements[0..index]  ~ _rootElements[index + 1..$];
+}
+
+//-- Internal ---
+
 /// Update all the guis from the root.
-package(atelier) void updateGuiElements(float deltaTime) {
+package(atelier) void updateRoots(float deltaTime) {
     _deltaTime = deltaTime;
     size_t index = 0;
-    while(index < _rootGuis.length) {
-        if(_rootGuis[index]._isRegistered) {
-            updateGuiElements(_rootGuis[index], null);
+    while(index < _rootElements.length) {
+        if(_rootElements[index]._isRegistered) {
+            updateRoots(_rootElements[index], null);
             index ++;
         }
         else {
-            removeRootGui(index);
+            removeRoot(index);
         }
     }
 }
 
 /// Draw all the guis from the root.
-package(atelier) void drawGuiElements() {
-    foreach_reverse(GuiElement widget; _rootGuis) {
-        drawGuiElements(widget);
+package(atelier) void drawRoots() {
+    foreach_reverse(GuiElement widget; _rootElements) {
+        drawRoots(widget);
     }
 }
 
@@ -144,8 +159,8 @@ package(atelier) void handleGuiElementEvent(Event event) {
         break;
     case quit:
         dispatchQuitEvent(null);
-        if(isModalGui()) {
-            stopAllModalGuis();
+        if(isModal()) {
+            stopAllModals();
             dispatchQuitEvent(null);
         }
         break;
@@ -157,7 +172,7 @@ package(atelier) void handleGuiElementEvent(Event event) {
 
 /// Update all children of a gui. \
 /// Called by the application itself.
-package(atelier) void updateGuiElements(GuiElement gui, GuiElement parent) {
+package(atelier) void updateRoots(GuiElement gui, GuiElement parent) {
     Vec2f coords = Vec2f.zero;
 
     //Calculate transitions
@@ -255,17 +270,17 @@ package(atelier) void updateGuiElements(GuiElement gui, GuiElement parent) {
     size_t childIndex = 0;
     while(childIndex < gui.children.length) {
         if(gui.children[childIndex]._isRegistered) {
-            updateGuiElements(gui.children[childIndex], gui);
+            updateRoots(gui.children[childIndex], gui);
             childIndex ++;
         }
         else {
-            gui.removeChildGui(childIndex);
+            gui.removeChild(childIndex);
         }
     }
 }
 
 /// Renders a gui and all its children.
-void drawGuiElements(GuiElement gui) {
+void drawRoots(GuiElement gui) {
     if(gui.hasCanvas && gui.canvas !is null) {
         auto canvas = gui.canvas;
         canvas.setColor(gui._currentState.color);
@@ -273,7 +288,7 @@ void drawGuiElements(GuiElement gui) {
         pushCanvas(canvas, true);
         gui.draw();
         foreach(GuiElement child; gui.children) {
-            drawGuiElements(child);
+            drawRoots(child);
         }
         popCanvas();
         canvas.draw(gui._screenCoords, gui._currentState.angle);
@@ -290,7 +305,7 @@ void drawGuiElements(GuiElement gui) {
     else {
         gui.draw();
         foreach(GuiElement child; gui.children) {
-            drawGuiElements(child);
+            drawRoots(child);
         }
         gui.drawOverlay();
         if(gui.isHovered && gui.hint !is null)
@@ -304,7 +319,7 @@ void drawGuiElements(GuiElement gui) {
 
 /// Process a mouse down event down the tree.
 private void dispatchMouseDownEvent(GuiElement gui, Vec2f cursorPosition) {
-    auto children = (gui is null) ? _rootGuis : gui.children;
+    auto children = (gui is null) ? _rootElements : gui.children;
     bool hasCanvas;
 
     if(gui !is null) {
@@ -345,7 +360,7 @@ private void dispatchMouseDownEvent(GuiElement gui, Vec2f cursorPosition) {
 
 /// Process a mouse up event down the tree.
 private void dispatchMouseUpEvent(GuiElement gui, Vec2f cursorPosition) {
-    auto children = (gui is null) ? _rootGuis : gui.children;
+    auto children = (gui is null) ? _rootElements : gui.children;
     bool hasCanvas;
 
     if(gui !is null) {
@@ -395,7 +410,7 @@ private void dispatchMouseUpEvent(GuiElement gui, Vec2f cursorPosition) {
 
 /// Process a mouse update event down the tree.
 private void dispatchMouseUpdateEvent(GuiElement gui, Vec2f cursorPosition) {
-    auto children = (gui is null) ? _rootGuis : gui.children;
+    auto children = (gui is null) ? _rootElements : gui.children;
     bool hasCanvas, wasHovered;
 
     if(gui !is null) {
@@ -444,12 +459,12 @@ private void dispatchMouseUpdateEvent(GuiElement gui, Vec2f cursorPosition) {
             }
         }
         else {
-            void unHoverGuiElements(GuiElement gui) {
+            void unHoverRoots(GuiElement gui) {
                 gui.isHovered = false;
                 foreach(child; gui.children)
-                    unHoverGuiElements(child);
+                    unHoverRoots(child);
             }
-            unHoverGuiElements(gui);
+            unHoverRoots(gui);
             return;
         }
     }
@@ -490,7 +505,7 @@ private void dispatchQuitEvent(GuiElement gui) {
         gui.onQuit();
     }
     else {
-        foreach(GuiElement widget; _rootGuis)
+        foreach(GuiElement widget; _rootElements)
             dispatchQuitEvent(widget);
     }
 }
@@ -504,7 +519,7 @@ private void dispatchGenericEvents(GuiElement gui, Event event) {
         }
     }
     else {
-        foreach(GuiElement widget; _rootGuis) {
+        foreach(GuiElement widget; _rootElements) {
             dispatchGenericEvents(widget, event);
         }
     }

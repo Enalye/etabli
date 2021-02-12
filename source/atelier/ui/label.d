@@ -63,14 +63,14 @@ final class Label : GuiElement {
 
     /// Build label
     this(string text_ = "", Font font = getDefaultFont()) {
-        super(GuiElement.Flags.notInteractable);
+        super(Init.notInteractable);
         _font = font;
         _text = to!dstring(text_);
         reload();
     }
 
     private void reload() {
-        Vec2f totalSize_ = Vec2f(0f, _font.ascent) * _charScale;
+        Vec2f totalSize_ = Vec2f(0f, _font.ascent - _font.descent) * _charScale;
         float lineWidth = 0f;
         dchar prevChar;
         foreach (dchar ch; _text) {

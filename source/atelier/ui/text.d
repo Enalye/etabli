@@ -74,31 +74,11 @@ final class Text: GuiElement {
 		int spacing(int spacing_) { return _spacing = spacing_; }
 	}
 
-	/// Build text with custom font
-	this(Font font_, string text_) {
-		super(Flags.notInteractable);
+	/// Build text with default font
+	this(string text_ = "", Font font_ = getDefaultFont()) {
+		super(Init.notInteractable);
 		_font = font_;
 		_text = to!dstring(text_);
-		tokenize();
-		_effectTimer.mode = Timer.Mode.loop;
-		_effectTimer.start(1f);
-	}
-
-	/// Build label with default font
-	this(string text_) {
-		super(Flags.notInteractable);
-		_font = getDefaultFont();
-		_text = to!dstring(text_);
-		tokenize();
-		_effectTimer.mode = Timer.Mode.loop;
-		_effectTimer.start(1f);
-	}
-
-	/// Ditto
-	this() {
-		super(Flags.notInteractable);
-		_font = getDefaultFont();
-		_text = "";
 		tokenize();
 		_effectTimer.mode = Timer.Mode.loop;
 		_effectTimer.start(1f);

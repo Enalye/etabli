@@ -74,8 +74,8 @@ void runApplication() {
         }
         processModalBack();
         processOverlayBack();
-        updateGuiElements(_deltatime);
-        drawGuiElements();
+        updateRoots(_deltatime);
+        drawRoots();
         processOverlayFront(_deltatime);
         renderWindow();
         endOverlay();
