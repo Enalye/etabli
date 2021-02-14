@@ -24,8 +24,8 @@ Font getDefaultFont() {
 
 /// Font that renders text to texture.
 interface Font {
-	@property {
-		/// Font name
+    @property {
+        /// Font name
         string name() const;
         /// Default font size
         int size() const;
@@ -33,9 +33,9 @@ interface Font {
         int ascent() const;
         /// Where the bottom is below the baseline
         int descent() const;
-		/// Distance between each baselines
+        /// Distance between each baselines
         int lineSkip() const;
-	}
+    }
 
     int getKerning(dchar prevChar, dchar currChar);
 

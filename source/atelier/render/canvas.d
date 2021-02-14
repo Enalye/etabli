@@ -52,8 +52,8 @@ final class Canvas : Drawable {
     }
 
     /// The view position inside the canvas.
-    Vec2f position = Vec2f.zero,/// The size of the view inside of the canvas.
-    size = Vec2f.zero;
+    Vec2f position = Vec2f.zero, /// The size of the view inside of the canvas.
+        size = Vec2f.zero;
     /// Is the Canvas rendered from its center or from the top left corner ? \
     /// (only change the render position, not the view).
     bool isCentered = true;
@@ -172,8 +172,8 @@ final class Canvas : Drawable {
         };
 
         SDL_RendererFlip rendererFlip = getSDLFlip(flip);
-        SDL_RenderCopyEx(cast(SDL_Renderer*) _sdlRenderer, cast(SDL_Texture*) _renderTexture,
-                null, &destRect, 0f, null, rendererFlip);
+        SDL_RenderCopyEx(cast(SDL_Renderer*) _sdlRenderer,
+                cast(SDL_Texture*) _renderTexture, null, &destRect, 0f, null, rendererFlip);
     }
 
     /// Check if a (outside) position is on the canvas rendering area. \

@@ -16,213 +16,220 @@ import std.typecons;
 	Special Array that remove fragmentation while keeping indexes valid.
 */
 class IndexedArray(T, uint _capacity, bool _useParallelism = false) {
-	private uint _dataTop = 0u;
-	private uint _availableIndexesTop = 0u;
-	private uint _removeTop = 0u;
+    private uint _dataTop = 0u;
+    private uint _availableIndexesTop = 0u;
+    private uint _removeTop = 0u;
 
-	private T[_capacity] _dataTable;
-	private uint[_capacity] _availableIndexes;
-	private uint[_capacity] _translationTable;
-	private uint[_capacity] _reverseTranslationTable;
-	private uint[_capacity] _removeTable;
+    private T[_capacity] _dataTable;
+    private uint[_capacity] _availableIndexes;
+    private uint[_capacity] _translationTable;
+    private uint[_capacity] _reverseTranslationTable;
+    private uint[_capacity] _removeTable;
 
-	@property {
-		uint length() const { return _dataTop; }
-		uint capacity() const { return _capacity; }
-		ref T[_capacity] data() { return _dataTable; }
-	}
+    @property {
+        uint length() const {
+            return _dataTop;
+        }
 
-	uint push(T value) {
-		uint index;
+        uint capacity() const {
+            return _capacity;
+        }
 
-		if((_dataTop + 1u) == _capacity) {
-			throw new Exception("IndexedArray overload");
-		}
+        ref T[_capacity] data() {
+            return _dataTable;
+        }
+    }
 
-		if(_availableIndexesTop) {
-			//Take out the last available index on the list.
-			_availableIndexesTop--;
-			index = _availableIndexes[_availableIndexesTop];
-		}
-		else {
-			//Or use a new id.
-			index = _dataTop;
-		}
+    uint push(T value) {
+        uint index;
 
-		//Add the value to the data stack.
-		_dataTable[_dataTop] = value;
-		_translationTable[index] = _dataTop;
-		_reverseTranslationTable[_dataTop] = index;
+        if ((_dataTop + 1u) == _capacity) {
+            throw new Exception("IndexedArray overload");
+        }
 
-		++_dataTop;
+        if (_availableIndexesTop) {
+            //Take out the last available index on the list.
+            _availableIndexesTop--;
+            index = _availableIndexes[_availableIndexesTop];
+        }
+        else {
+            //Or use a new id.
+            index = _dataTop;
+        }
 
-		return index;
-	}
+        //Add the value to the data stack.
+        _dataTable[_dataTop] = value;
+        _translationTable[index] = _dataTop;
+        _reverseTranslationTable[_dataTop] = index;
 
-	void pop(uint index) {
-		uint valueIndex = _translationTable[index];
+        ++_dataTop;
 
-		//Push the index on the available indexes stack.
-		_availableIndexes[_availableIndexesTop] = index;
-		_availableIndexesTop++;
+        return index;
+    }
 
-		//Invalidate the index.
-		_translationTable[index] = -1;
+    void pop(uint index) {
+        uint valueIndex = _translationTable[index];
 
-		//Take the top value on the stack and fill the gap.
-		_dataTop--;
-		if (valueIndex < _dataTop) {
-			uint userIndex = _reverseTranslationTable[_dataTop];
-			_dataTable[valueIndex] = _dataTable[_dataTop];
-			_translationTable[userIndex] = valueIndex;
-			_reverseTranslationTable[valueIndex] = userIndex;
-		}
-	}
+        //Push the index on the available indexes stack.
+        _availableIndexes[_availableIndexesTop] = index;
+        _availableIndexesTop++;
 
-	void reset() {
-		_dataTop = 0u;
-		_availableIndexesTop = 0u;
-		_removeTop = 0u;
-	}
+        //Invalidate the index.
+        _translationTable[index] = -1;
 
-	void markInternalForRemoval(uint index) {
-		synchronized {
-			_removeTable[_removeTop] = _reverseTranslationTable[index];
-			_removeTop ++;
-		}
-	}
+        //Take the top value on the stack and fill the gap.
+        _dataTop--;
+        if (valueIndex < _dataTop) {
+            uint userIndex = _reverseTranslationTable[_dataTop];
+            _dataTable[valueIndex] = _dataTable[_dataTop];
+            _translationTable[userIndex] = valueIndex;
+            _reverseTranslationTable[valueIndex] = userIndex;
+        }
+    }
 
-	void markForRemoval(uint index) {
-		_removeTable[_removeTop] = index;
-		_removeTop ++;
-	}
+    void reset() {
+        _dataTop = 0u;
+        _availableIndexesTop = 0u;
+        _removeTop = 0u;
+    }
 
+    void markInternalForRemoval(uint index) {
+        synchronized {
+            _removeTable[_removeTop] = _reverseTranslationTable[index];
+            _removeTop++;
+        }
+    }
 
-	void sweepMarkedData() {
-		for(uint i = 0u; i < _removeTop; i++) {
-			pop(_removeTable[i]);
-		}
-		_removeTop = 0u;
-	}
+    void markForRemoval(uint index) {
+        _removeTable[_removeTop] = index;
+        _removeTop++;
+    }
 
-static if(_useParallelism) {
-	int opApply(int delegate(ref T) dlg) {
-		int result;
+    void sweepMarkedData() {
+        for (uint i = 0u; i < _removeTop; i++) {
+            pop(_removeTable[i]);
+        }
+        _removeTop = 0u;
+    }
 
-		foreach(i; parallel(iota(_dataTop))) {
-			result = dlg(_dataTable[i]);
+    static if (_useParallelism) {
+        int opApply(int delegate(ref T) dlg) {
+            int result;
 
-			if(result)
-				break;
-		}
+            foreach (i; parallel(iota(_dataTop))) {
+                result = dlg(_dataTable[i]);
 
-		return result;
-	}
-}
-else {
-	int opApply(int delegate(ref T) dlg) {
-		int result;
+                if (result)
+                    break;
+            }
 
-		foreach(i; 0u .. _dataTop) {
-			result = dlg(_dataTable[i]);
+            return result;
+        }
+    }
+    else {
+        int opApply(int delegate(ref T) dlg) {
+            int result;
 
-			if(result)
-				break;
-		}
+            foreach (i; 0u .. _dataTop) {
+                result = dlg(_dataTable[i]);
 
-		return result;
-	}
-}
+                if (result)
+                    break;
+            }
 
-	int opApply(int delegate(const ref T) dlg) const {
-		int result;
+            return result;
+        }
+    }
 
-		foreach(i;  0u .. _dataTop) {
-			result = dlg(_dataTable[i]);
+    int opApply(int delegate(const ref T) dlg) const {
+        int result;
 
-			if(result)
-				break;
-		}
+        foreach (i; 0u .. _dataTop) {
+            result = dlg(_dataTable[i]);
 
-		return result;
-	}
+            if (result)
+                break;
+        }
 
-static if(_useParallelism) {
-	int opApply(int delegate(ref T, uint) dlg) {
-		int result;
+        return result;
+    }
 
-		foreach(i; parallel(iota(_dataTop))) {
-			result = dlg(_dataTable[i], i);
+    static if (_useParallelism) {
+        int opApply(int delegate(ref T, uint) dlg) {
+            int result;
 
-			if(result)
-				break;
-		}
+            foreach (i; parallel(iota(_dataTop))) {
+                result = dlg(_dataTable[i], i);
 
-		return result;
-	}
-}
-else {
-	int opApply(int delegate(ref T, uint) dlg) {
-		int result;
+                if (result)
+                    break;
+            }
 
-		foreach(i; 0u .. _dataTop) {
-			result = dlg(_dataTable[i], i);
+            return result;
+        }
+    }
+    else {
+        int opApply(int delegate(ref T, uint) dlg) {
+            int result;
 
-			if(result)
-				break;
-		}
+            foreach (i; 0u .. _dataTop) {
+                result = dlg(_dataTable[i], i);
 
-		return result;
-	}
-}
+                if (result)
+                    break;
+            }
 
-	int opApply(int delegate(const ref T, uint) dlg) const {
-		int result;
+            return result;
+        }
+    }
 
-		foreach(i; 0u .. _dataTop) {
-			result = dlg(_dataTable[i], i);
+    int opApply(int delegate(const ref T, uint) dlg) const {
+        int result;
 
-			if(result)
-				break;
-		}
+        foreach (i; 0u .. _dataTop) {
+            result = dlg(_dataTable[i], i);
 
-		return result;
-	}
+            if (result)
+                break;
+        }
 
-	int opApply(int delegate(const Tuple!(const uint, const T)) dlg) const {
-		int result;
+        return result;
+    }
 
-		foreach(i; 0u .. _dataTop) {
-			result = dlg(tuple!(const uint, const T)(_reverseTranslationTable[i], _dataTable[i]));
+    int opApply(int delegate(const Tuple!(const uint, const T)) dlg) const {
+        int result;
 
-			if(result)
-				break;
-		}
+        foreach (i; 0u .. _dataTop) {
+            result = dlg(tuple!(const uint, const T)(_reverseTranslationTable[i], _dataTable[i]));
 
-		return result;
-	}
+            if (result)
+                break;
+        }
 
-	T opIndex(uint index) {
-		return _dataTable[_translationTable[index]];
-	}
+        return result;
+    }
+
+    T opIndex(uint index) {
+        return _dataTable[_translationTable[index]];
+    }
 
     bool has(uint index) {
-        if(index > _dataTop)
+        if (index > _dataTop)
             return false;
-        if(_translationTable[index] == -1)
+        if (_translationTable[index] == -1)
             return false;
         return true;
     }
 
-	/// Returns the first element in the list
-	T first() {
-		assert(_dataTop > 0);
-		return _dataTable[0];
-	}
+    /// Returns the first element in the list
+    T first() {
+        assert(_dataTop > 0);
+        return _dataTable[0];
+    }
 
-	/// Returns the last element in the list
-	T last() {
-		assert(_dataTop > 0);
-		return _dataTable[_dataTop - 1];
-	}
+    /// Returns the last element in the list
+    T last() {
+        assert(_dataTop > 0);
+        return _dataTable[_dataTop - 1];
+    }
 }

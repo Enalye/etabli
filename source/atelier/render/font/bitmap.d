@@ -11,7 +11,7 @@ import atelier.render.texture;
 import atelier.render.font.font, atelier.render.font.glyph;
 
 /// Font from a texture atlas.
-final class BitmapFont: Font {
+final class BitmapFont : Font {
     private {
         string _name;
         Texture _texture;
@@ -22,7 +22,7 @@ final class BitmapFont: Font {
     struct Metrics {
         /// Size of the font
         int size;
-        
+
         /// How much the font rises from the baseline (Positive value)
         int ascent;
 
@@ -84,22 +84,31 @@ final class BitmapFont: Font {
 
     @property {
         /// Font name
-        string name() const { return _name; }
+        string name() const {
+            return _name;
+        }
         /// Default font size
-        int size() const { return _metrics.size; }
+        int size() const {
+            return _metrics.size;
+        }
         /// Where the top is above the baseline
-        int ascent() const { return _metrics.ascent; }
+        int ascent() const {
+            return _metrics.ascent;
+        }
         /// Where the bottom is below the baseline
-        int descent() const { return _metrics.descent; }
-		/// Distance between each baselines
-        int lineSkip() const { return (_metrics.ascent - _metrics.descent) + 1; }
+        int descent() const {
+            return _metrics.descent;
+        }
+        /// Distance between each baselines
+        int lineSkip() const {
+            return (_metrics.ascent - _metrics.descent) + 1;
+        }
     }
 
     int getKerning(dchar prevChar, dchar currChar) {
-        for(int i; i < _metrics.kerningCount; ++ i) {
+        for (int i; i < _metrics.kerningCount; ++i) {
             const int index = i * 3;
-            if(_metrics.kerning[index] == prevChar &&
-                _metrics.kerning[index + 1] == currChar) {
+            if (_metrics.kerning[index] == prevChar && _metrics.kerning[index + 1] == currChar) {
                 return _metrics.kerning[index + 2];
             }
         }
@@ -107,24 +116,15 @@ final class BitmapFont: Font {
     }
 
     Glyph getMetrics(dchar character) {
-        for(int i; i < _metrics.chars.length; ++ i) {
-			if(_metrics.chars[i] == character) {
-				Glyph metrics = Glyph(
-                    true,
-                    _metrics.advance[i],
-                    _metrics.offsetX[i],
-                    _metrics.offsetY[i],
-                    _metrics.width[i],
-                    _metrics.height[i],
-                    _metrics.packX[i],
-                    _metrics.packY[i],
-                    _metrics.width[i],
-                    _metrics.height[i],
-                    _texture
-                    );
-				return metrics;
-			}
-		}
-		return Glyph();
+        for (int i; i < _metrics.chars.length; ++i) {
+            if (_metrics.chars[i] == character) {
+                Glyph metrics = Glyph(true, _metrics.advance[i], _metrics.offsetX[i],
+                        _metrics.offsetY[i], _metrics.width[i],
+                        _metrics.height[i], _metrics.packX[i], _metrics.packY[i],
+                        _metrics.width[i], _metrics.height[i], _texture);
+                return metrics;
+            }
+        }
+        return Glyph();
     }
 }

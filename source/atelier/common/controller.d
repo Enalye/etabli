@@ -40,12 +40,12 @@ enum ControllerButton {
 /// List of controller axis.
 enum ControllerAxis {
     unknown = SDL_CONTROLLER_AXIS_INVALID,
-	leftX = SDL_CONTROLLER_AXIS_LEFTX,
-	leftY = SDL_CONTROLLER_AXIS_LEFTY,
-	rightX = SDL_CONTROLLER_AXIS_RIGHTX,
-	rightY = SDL_CONTROLLER_AXIS_RIGHTY,
-	leftTrigger = SDL_CONTROLLER_AXIS_TRIGGERLEFT,
-	rightTrigger = SDL_CONTROLLER_AXIS_TRIGGERRIGHT
+    leftX = SDL_CONTROLLER_AXIS_LEFTX,
+    leftY = SDL_CONTROLLER_AXIS_LEFTY,
+    rightX = SDL_CONTROLLER_AXIS_RIGHTX,
+    rightY = SDL_CONTROLLER_AXIS_RIGHTY,
+    leftTrigger = SDL_CONTROLLER_AXIS_TRIGGERLEFT,
+    rightTrigger = SDL_CONTROLLER_AXIS_TRIGGERRIGHT
 }
 
 private struct Controller {
@@ -173,7 +173,7 @@ void remapController(int joystickId) {
 
 /// Change the value of a controller axis.
 void setControllerAxis(SDL_GameControllerAxis axis, short value) {
-    if(axis > ControllerAxis.max)
+    if (axis > ControllerAxis.max)
         return;
     const auto v = rlerp(-32_768, 32_767, cast(float) value) * 2f - 1f;
     _axis[axis] = v;
@@ -200,7 +200,7 @@ private bool updateAnalogTimer(int axisIndex, float x, float y) {
 
 /// Change the value of a controller button.
 void setControllerButton(SDL_GameControllerButton button, bool state) {
-    if(button > ControllerButton.max)
+    if (button > ControllerButton.max)
         return;
     _buttons[button] = state;
 }
@@ -208,7 +208,7 @@ void setControllerButton(SDL_GameControllerButton button, bool state) {
 /// Check whether the button associated with the ID is pressed. \
 /// Do not reset the value.
 bool isButtonDown(ControllerButton button) {
-	return _buttons[button];
+    return _buttons[button];
 }
 
 /// Check whether the button associated with the ID is pressed. \
@@ -216,12 +216,12 @@ bool isButtonDown(ControllerButton button) {
 bool getButtonDown(ControllerButton button) {
     const bool value = _buttons[button];
     _buttons[button] = false;
-	return value;
+    return value;
 }
 
 /// Return the current state of the axis.
 float getAxis(ControllerAxis axis) {
-	return _axis[axis];
+    return _axis[axis];
 }
 /+
 /// Returns the left stick x-axis as a button.

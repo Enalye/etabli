@@ -8,12 +8,12 @@
 
 module atelier.ui.gui_manager;
 
-import std.conv: to;
+import std.conv : to;
 import atelier.core, atelier.common, atelier.render;
 import atelier.ui.gui_element, atelier.ui.gui_overlay, atelier.ui.gui_modal;
 
 private {
-	bool _isGuiElementDebug = false;
+    bool _isGuiElementDebug = false;
     GuiElement[] _rootElements;
     float _deltaTime;
 }
@@ -22,23 +22,23 @@ private {
 
 /// Add a gui as a top gui (not a child of anything).
 void prependRoot(GuiElement gui) {
-	_rootElements = gui ~ _rootElements;
+    _rootElements = gui ~ _rootElements;
 }
 
 /// Add a gui as a top gui (not a child of anything).
 void appendRoot(GuiElement gui) {
-	_rootElements ~= gui;
+    _rootElements ~= gui;
 }
 
 /// Remove all the top gui (that aren't a child of anything).
 void removeRoots() {
-	//_isChildGrabbed = false;
-	_rootElements.length = 0uL;
+    //_isChildGrabbed = false;
+    _rootElements.length = 0uL;
 }
 
 /// Set those gui as the top guis (replacing the previous ones).
 void setRoots(GuiElement[] widgets) {
-	_rootElements = widgets;
+    _rootElements = widgets;
 }
 
 /// Get all the root gui.
@@ -48,7 +48,7 @@ GuiElement[] getRoots() {
 
 /// Show every the hitbox of every gui element.
 void setDebugGui(bool isDebug) {
-	_isGuiElementDebug = isDebug;
+    _isGuiElementDebug = isDebug;
 }
 
 /// Remove the specified gui from roots.
@@ -63,14 +63,14 @@ void removeRoot(GuiElement gui) {
 
 /// Remove the gui at the specified index from roots.
 void removeRoot(size_t index) {
-    if(!_rootElements.length)
+    if (!_rootElements.length)
         return;
-    if(index + 1u == _rootElements.length)
-        _rootElements.length --;
-    else if(index == 0u)
-        _rootElements = _rootElements[1..$];
+    if (index + 1u == _rootElements.length)
+        _rootElements.length--;
+    else if (index == 0u)
+        _rootElements = _rootElements[1 .. $];
     else
-        _rootElements = _rootElements[0..index]  ~ _rootElements[index + 1..$];
+        _rootElements = _rootElements[0 .. index] ~ _rootElements[index + 1 .. $];
 }
 
 //-- Internal ---
@@ -79,10 +79,10 @@ void removeRoot(size_t index) {
 package(atelier) void updateRoots(float deltaTime) {
     _deltaTime = deltaTime;
     size_t index = 0;
-    while(index < _rootElements.length) {
-        if(_rootElements[index]._isRegistered) {
+    while (index < _rootElements.length) {
+        if (_rootElements[index]._isRegistered) {
             updateRoots(_rootElements[index], null);
-            index ++;
+            index++;
         }
         else {
             removeRoot(index);
@@ -92,7 +92,7 @@ package(atelier) void updateRoots(float deltaTime) {
 
 /// Draw all the guis from the root.
 package(atelier) void drawRoots() {
-    foreach_reverse(GuiElement widget; _rootElements) {
+    foreach_reverse (GuiElement widget; _rootElements) {
         drawRoots(widget);
     }
 }
@@ -113,21 +113,21 @@ private {
 /// Dispatch global events on the guis from the root. \
 /// Called by the main event loop.
 package(atelier) void handleGuiElementEvent(Event event) {
-    if(isOverlay()) {
+    if (isOverlay()) {
         processOverlayEvent(event);
     }
 
     _hasClicked = false;
-    switch (event.type) with(EventType) {
+    switch (event.type) with (EventType) {
     case mouseDown:
         _tempGrabbedGuiElement = null;
         dispatchMouseDownEvent(null, event.mouse.position);
 
-        if(_tempGrabbedGuiElement) {
+        if (_tempGrabbedGuiElement) {
             _grabbedGuiElement = _tempGrabbedGuiElement;
         }
 
-        if(_hasClicked && _clickedGuiElement !is null) {
+        if (_hasClicked && _clickedGuiElement !is null) {
             _clickedGuiElement.isClicked = true;
             Event guiEvent = EventType.mouseDown;
             guiEvent.mouse.position = _clickedGuiElementEventPosition;
@@ -142,10 +142,10 @@ package(atelier) void handleGuiElementEvent(Event event) {
         _hookedGuis.length = 0;
         dispatchMouseUpdateEvent(null, event.mouse.position);
 
-        if(_hasClicked && _hoveredGuiElement !is null) {
+        if (_hasClicked && _hoveredGuiElement !is null) {
             _hoveredGuiElement.isHovered = true;
 
-            if(!_wasHoveredGuiElementAlreadyHovered)
+            if (!_wasHoveredGuiElementAlreadyHovered)
                 _hoveredGuiElement.onHover();
 
             //Compatibility
@@ -159,7 +159,7 @@ package(atelier) void handleGuiElementEvent(Event event) {
         break;
     case quit:
         dispatchQuitEvent(null);
-        if(isModal()) {
+        if (isModal()) {
             stopAllModals();
             dispatchQuitEvent(null);
         }
@@ -167,7 +167,7 @@ package(atelier) void handleGuiElementEvent(Event event) {
     default:
         dispatchGenericEvents(null, event);
         break;
-    }    
+    }
 }
 
 /// Update all children of a gui. \
@@ -176,90 +176,75 @@ package(atelier) void updateRoots(GuiElement gui, GuiElement parent) {
     Vec2f coords = Vec2f.zero;
 
     //Calculate transitions
-    if(gui._timer.isRunning) {
+    if (gui._timer.isRunning) {
         gui._timer.update(_deltaTime);
         const float t = gui._targetState.easing(gui._timer.value01);
-        gui._currentState.offset = lerp(
-            gui._initState.offset,
-            gui._targetState.offset,
-            t
-        );
+        gui._currentState.offset = lerp(gui._initState.offset, gui._targetState.offset, t);
 
-        gui._currentState.scale = lerp(
-            gui._initState.scale,
-            gui._targetState.scale,
-            t
-        );
+        gui._currentState.scale = lerp(gui._initState.scale, gui._targetState.scale, t);
 
-        gui._currentState.color = lerp(
-            gui._initState.color,
-            gui._targetState.color,
-            t
-        );
+        gui._currentState.color = lerp(gui._initState.color, gui._targetState.color, t);
 
-        gui._currentState.alpha = lerp(
-            gui._initState.alpha,
-            gui._targetState.alpha,
-            t
-        );
+        gui._currentState.alpha = lerp(gui._initState.alpha, gui._targetState.alpha, t);
 
-        gui._currentState.angle = lerp(
-            gui._initState.angle,
-            gui._targetState.angle,
-            t
-        );
+        gui._currentState.angle = lerp(gui._initState.angle, gui._targetState.angle, t);
         gui.onColor();
-        if(!gui._timer.isRunning) {
-            if(gui._targetState.callback.length)
+        if (!gui._timer.isRunning) {
+            if (gui._targetState.callback.length)
                 gui.onCallback(gui._targetState.callback);
         }
     }
 
     //Calculate gui location
-    const Vec2f offset = gui._position + (gui._size * gui._currentState.scale / 2f) + gui._currentState.offset;
-    if(parent !is null) {
-        if(parent.hasCanvas && parent.canvas !is null) {
-            if(gui._alignX == GuiAlignX.left)
+    const Vec2f offset = gui._position + (
+            gui._size * gui._currentState.scale / 2f) + gui._currentState.offset;
+    if (parent !is null) {
+        if (parent.hasCanvas && parent.canvas !is null) {
+            if (gui._alignX == GuiAlignX.left)
                 coords.x = offset.x;
-            else if(gui._alignX == GuiAlignX.right)
+            else if (gui._alignX == GuiAlignX.right)
                 coords.x = (parent._size.x * parent._currentState.scale.x) - offset.x;
             else
-                coords.x = (parent._size.x * parent._currentState.scale.x) / 2f + gui._currentState.offset.x + gui.position.x;
+                coords.x = (parent._size.x * parent._currentState.scale.x) / 2f
+                    + gui._currentState.offset.x + gui.position.x;
 
-            if(gui._alignY == GuiAlignY.top)
+            if (gui._alignY == GuiAlignY.top)
                 coords.y = offset.y;
-            else if(gui._alignY == GuiAlignY.bottom)
+            else if (gui._alignY == GuiAlignY.bottom)
                 coords.y = (parent._size.y * parent._currentState.scale.y) - offset.y;
             else
-                coords.y = (parent._size.y * parent._currentState.scale.y) / 2f + gui._currentState.offset.y + gui.position.y;
+                coords.y = (parent._size.y * parent._currentState.scale.y) / 2f
+                    + gui._currentState.offset.y + gui.position.y;
         }
         else {
-            if(gui._alignX == GuiAlignX.left)
+            if (gui._alignX == GuiAlignX.left)
                 coords.x = parent.origin.x + offset.x;
-            else if(gui._alignX == GuiAlignX.right)
-                coords.x = parent.origin.x + (parent._size.x * parent._currentState.scale.x) - offset.x;
+            else if (gui._alignX == GuiAlignX.right)
+                coords.x = parent.origin.x + (
+                        parent._size.x * parent._currentState.scale.x) - offset.x;
             else
                 coords.x = parent.center.x + gui._currentState.offset.x + gui.position.x;
 
-            if(gui._alignY == GuiAlignY.top)
+            if (gui._alignY == GuiAlignY.top)
                 coords.y = parent.origin.y + offset.y;
-            else if(gui._alignY == GuiAlignY.bottom)
-                coords.y = parent.origin.y + (parent._size.y * parent._currentState.scale.y) - offset.y;
+            else if (gui._alignY == GuiAlignY.bottom)
+                coords.y = parent.origin.y + (
+                        parent._size.y * parent._currentState.scale.y) - offset.y;
             else
                 coords.y = parent.center.y + gui._currentState.offset.y + gui.position.y;
         }
     }
     else {
-        if(gui._alignX == GuiAlignX.left)
+        if (gui._alignX == GuiAlignX.left)
             coords.x = offset.x;
-        else if(gui._alignX == GuiAlignX.right)
+        else if (gui._alignX == GuiAlignX.right)
             coords.x = screenWidth - offset.x;
         else
             coords.x = centerScreen.x + gui._currentState.offset.x + gui.position.x;
 
-        if(gui._alignY == GuiAlignY.top)
+        if (gui._alignY == GuiAlignY.top)
             coords.y = offset.y;
-        else if(gui._alignY == GuiAlignY.bottom)
+        else if (gui._alignY == GuiAlignY.bottom)
             coords.y = screenHeight - offset.y;
         else
             coords.y = centerScreen.y + gui._currentState.offset.y + gui.position.y;
@@ -268,10 +253,10 @@ package(atelier) void updateRoots(GuiElement gui, GuiElement parent) {
     gui.update(_deltaTime);
 
     size_t childIndex = 0;
-    while(childIndex < gui.children.length) {
-        if(gui.children[childIndex]._isRegistered) {
+    while (childIndex < gui.children.length) {
+        if (gui.children[childIndex]._isRegistered) {
             updateRoots(gui.children[childIndex], gui);
-            childIndex ++;
+            childIndex++;
         }
         else {
             gui.removeChild(childIndex);
@@ -281,13 +266,13 @@ package(atelier) void updateRoots(GuiElement gui, GuiElement parent) {
 
 /// Renders a gui and all its children.
 void drawRoots(GuiElement gui) {
-    if(gui.hasCanvas && gui.canvas !is null) {
+    if (gui.hasCanvas && gui.canvas !is null) {
         auto canvas = gui.canvas;
         canvas.setColor(gui._currentState.color);
         canvas.setAlpha(gui._currentState.alpha);
         pushCanvas(canvas, true);
         gui.draw();
-        foreach(GuiElement child; gui.children) {
+        foreach (GuiElement child; gui.children) {
             drawRoots(child);
         }
         popCanvas();
@@ -299,21 +284,22 @@ void drawRoots(GuiElement gui) {
         gui.drawOverlay();
         gui._origin = origin;
         gui._center = center;
-        if(gui.isHovered && gui.hint !is null)
-			openHintWindow(gui.hint);
+        if (gui.isHovered && gui.hint !is null)
+            openHintWindow(gui.hint);
     }
     else {
         gui.draw();
-        foreach(GuiElement child; gui.children) {
+        foreach (GuiElement child; gui.children) {
             drawRoots(child);
         }
         gui.drawOverlay();
-        if(gui.isHovered && gui.hint !is null)
-			openHintWindow(gui.hint);
+        if (gui.isHovered && gui.hint !is null)
+            openHintWindow(gui.hint);
     }
-    if(_isGuiElementDebug) {
-        drawRect(gui.center - (gui._size * gui._currentState.scale) / 2f, gui._size * gui._currentState.scale,
-            gui.isHovered ? Color.red : (gui.children.length ? Color.blue : Color.green));
+    if (_isGuiElementDebug) {
+        drawRect(gui.center - (gui._size * gui._currentState.scale) / 2f,
+                gui._size * gui._currentState.scale, gui.isHovered ? Color.red
+                : (gui.children.length ? Color.blue : Color.green));
     }
 }
 
@@ -322,12 +308,12 @@ private void dispatchMouseDownEvent(GuiElement gui, Vec2f cursorPosition) {
     auto children = (gui is null) ? _rootElements : gui.children;
     bool hasCanvas;
 
-    if(gui !is null) {
-        if(gui.isInteractable && gui.isInside(cursorPosition)) {
+    if (gui !is null) {
+        if (gui.isInteractable && gui.isInside(cursorPosition)) {
             _clickedGuiElement = gui;
             _tempGrabbedGuiElement = null;
 
-            if(gui.hasCanvas && gui.canvas !is null) {
+            if (gui.hasCanvas && gui.canvas !is null) {
                 hasCanvas = true;
                 pushCanvas(gui.canvas, false);
                 cursorPosition = transformCanvasSpace(cursorPosition, gui._screenCoords);
@@ -336,13 +322,13 @@ private void dispatchMouseDownEvent(GuiElement gui, Vec2f cursorPosition) {
             _clickedGuiElementEventPosition = cursorPosition;
             _hasClicked = true;
 
-            if(gui._hasEventHook) {
+            if (gui._hasEventHook) {
                 Event guiEvent = EventType.mouseDown;
                 guiEvent.mouse.position = cursorPosition;
                 gui.onEvent(guiEvent);
             }
 
-            if(gui._isMovable && !_grabbedGuiElement) {
+            if (gui._isMovable && !_grabbedGuiElement) {
                 _tempGrabbedGuiElement = gui;
                 _grabbedGuiElementEventPosition = _clickedGuiElementEventPosition;
             }
@@ -350,11 +336,11 @@ private void dispatchMouseDownEvent(GuiElement gui, Vec2f cursorPosition) {
         else
             return;
     }
-    
-    foreach(child; children)
+
+    foreach (child; children)
         dispatchMouseDownEvent(child, cursorPosition);
 
-    if(hasCanvas)
+    if (hasCanvas)
         popCanvas();
 }
 
@@ -363,15 +349,15 @@ private void dispatchMouseUpEvent(GuiElement gui, Vec2f cursorPosition) {
     auto children = (gui is null) ? _rootElements : gui.children;
     bool hasCanvas;
 
-    if(gui !is null) {
-        if(gui.isInteractable && gui.isInside(cursorPosition)) {
-            if(gui.hasCanvas && gui.canvas !is null) {
+    if (gui !is null) {
+        if (gui.isInteractable && gui.isInside(cursorPosition)) {
+            if (gui.hasCanvas && gui.canvas !is null) {
                 hasCanvas = true;
                 pushCanvas(gui.canvas, false);
                 cursorPosition = transformCanvasSpace(cursorPosition, gui._screenCoords);
             }
 
-            if(gui._hasEventHook) {
+            if (gui._hasEventHook) {
                 Event guiEvent = EventType.mouseUp;
                 guiEvent.mouse.position = cursorPosition;
                 gui.onEvent(guiEvent);
@@ -380,16 +366,16 @@ private void dispatchMouseUpEvent(GuiElement gui, Vec2f cursorPosition) {
         else
             return;
     }
-    
-    foreach(child; children)
+
+    foreach (child; children)
         dispatchMouseUpEvent(child, cursorPosition);
 
-    if(hasCanvas)
+    if (hasCanvas)
         popCanvas();
-    
-    if(gui !is null && _clickedGuiElement == gui) {
+
+    if (gui !is null && _clickedGuiElement == gui) {
         //The previous widget is now unfocused.
-        if(_focusedGuiElement !is null) {
+        if (_focusedGuiElement !is null) {
             _focusedGuiElement.hasFocus = false;
         }
 
@@ -404,7 +390,7 @@ private void dispatchMouseUpEvent(GuiElement gui, Vec2f cursorPosition) {
         event.mouse.position = cursorPosition;
         gui.onEvent(event);
     }
-    if(_clickedGuiElement !is null)
+    if (_clickedGuiElement !is null)
         _clickedGuiElement.isClicked = false;
 }
 
@@ -413,33 +399,33 @@ private void dispatchMouseUpdateEvent(GuiElement gui, Vec2f cursorPosition) {
     auto children = (gui is null) ? _rootElements : gui.children;
     bool hasCanvas, wasHovered;
 
-    if(gui !is null) {
+    if (gui !is null) {
         wasHovered = gui.isHovered;
 
-        if(gui.isInteractable && gui == _grabbedGuiElement) {
-            if(!gui._isMovable) {
+        if (gui.isInteractable && gui == _grabbedGuiElement) {
+            if (!gui._isMovable) {
                 _grabbedGuiElement = null;
             }
             else {
-                if(gui.hasCanvas && gui.canvas !is null) {
+                if (gui.hasCanvas && gui.canvas !is null) {
                     pushCanvas(gui.canvas, false);
                     cursorPosition = transformCanvasSpace(cursorPosition, gui._screenCoords);
                 }
                 Vec2f deltaPosition = (cursorPosition - _grabbedGuiElementEventPosition);
-                if(gui._alignX == GuiAlignX.right)
+                if (gui._alignX == GuiAlignX.right)
                     deltaPosition.x = -deltaPosition.x;
-                if(gui._alignY == GuiAlignY.bottom)
+                if (gui._alignY == GuiAlignY.bottom)
                     deltaPosition.y = -deltaPosition.y;
                 gui._position += deltaPosition;
-                if(gui.hasCanvas && gui.canvas !is null)
+                if (gui.hasCanvas && gui.canvas !is null)
                     popCanvas();
                 else
                     _grabbedGuiElementEventPosition = cursorPosition;
             }
         }
 
-        if(gui.isInteractable && gui.isInside(cursorPosition)) {
-            if(gui.hasCanvas && gui.canvas !is null) {
+        if (gui.isInteractable && gui.isInside(cursorPosition)) {
+            if (gui.hasCanvas && gui.canvas !is null) {
                 hasCanvas = true;
                 pushCanvas(gui.canvas, false);
                 cursorPosition = transformCanvasSpace(cursorPosition, gui._screenCoords);
@@ -451,7 +437,7 @@ private void dispatchMouseUpdateEvent(GuiElement gui, Vec2f cursorPosition) {
             _hoveredGuiElementEventPosition = cursorPosition;
             _hasClicked = true;
 
-            if(gui._hasEventHook) {
+            if (gui._hasEventHook) {
                 Event guiEvent = EventType.mouseUpdate;
                 guiEvent.mouse.position = cursorPosition;
                 gui.onEvent(guiEvent);
@@ -461,18 +447,19 @@ private void dispatchMouseUpdateEvent(GuiElement gui, Vec2f cursorPosition) {
         else {
             void unHoverRoots(GuiElement gui) {
                 gui.isHovered = false;
-                foreach(child; gui.children)
+                foreach (child; gui.children)
                     unHoverRoots(child);
             }
+
             unHoverRoots(gui);
             return;
         }
     }
-    
-    foreach(child; children)
+
+    foreach (child; children)
         dispatchMouseUpdateEvent(child, cursorPosition);
 
-    if(hasCanvas)
+    if (hasCanvas)
         popCanvas();
 }
 
@@ -481,17 +468,17 @@ private void dispatchMouseWheelEvent(Vec2f scroll) {
     Event scrollEvent = EventType.mouseWheel;
     scrollEvent.scroll.delta = scroll;
 
-    foreach(gui; _hookedGuis) {
+    foreach (gui; _hookedGuis) {
         gui.onEvent(scrollEvent);
     }
 
-    if(_clickedGuiElement !is null) {
-        if(_clickedGuiElement.isClicked) {
+    if (_clickedGuiElement !is null) {
+        if (_clickedGuiElement.isClicked) {
             _clickedGuiElement.onEvent(scrollEvent);
             return;
         }
     }
-    if(_hoveredGuiElement !is null) {
+    if (_hoveredGuiElement !is null) {
         _hoveredGuiElement.onEvent(scrollEvent);
         return;
     }
@@ -499,27 +486,27 @@ private void dispatchMouseWheelEvent(Vec2f scroll) {
 
 /// Notify every gui in the tree that we are leaving.
 private void dispatchQuitEvent(GuiElement gui) {
-    if(gui !is null) {
-        foreach(GuiElement child; gui.children)
+    if (gui !is null) {
+        foreach (GuiElement child; gui.children)
             dispatchQuitEvent(child);
         gui.onQuit();
     }
     else {
-        foreach(GuiElement widget; _rootElements)
+        foreach (GuiElement widget; _rootElements)
             dispatchQuitEvent(widget);
     }
 }
 
 /// Every other event that doesn't have a specific behavior like mouse events.
 private void dispatchGenericEvents(GuiElement gui, Event event) {
-    if(gui !is null) {
+    if (gui !is null) {
         gui.onEvent(event);
-        foreach(GuiElement child; gui.children) {
+        foreach (GuiElement child; gui.children) {
             dispatchGenericEvents(child, event);
         }
     }
     else {
-        foreach(GuiElement widget; _rootElements) {
+        foreach (GuiElement widget; _rootElements) {
             dispatchGenericEvents(widget, event);
         }
     }

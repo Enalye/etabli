@@ -39,7 +39,7 @@ class Sound {
         Mix_Chunk* _chunk;
         int _groupId = -1;
         int _currentChannelId = -1;
-        bool _isLooped, _ownData;
+        bool _isLooping, _ownData;
         float _length = 0f;
         float _volume = 0f;
         ubyte _leftPanning = 0, _rightPanning = 0, _distance = 0;
@@ -51,12 +51,12 @@ class Sound {
             return _chunk !is null;
         }
 
-        bool isLooped() const {
-            return _isLooped;
+        bool isLooping() const {
+            return _isLooping;
         }
 
-        bool isLooped(bool isLooped_) {
-            return _isLooped = isLooped_;
+        bool isLooping(bool isLooping_) {
+            return _isLooping = isLooping_;
         }
 
         bool isPaused() const {
@@ -92,7 +92,7 @@ class Sound {
         _chunk = sound._chunk;
         _groupId = sound._groupId;
         _currentChannelId = sound._currentChannelId;
-        _isLooped = sound._isLooped;
+        _isLooping = sound._isLooping;
         _length = sound._length;
         _volume = sound._volume;
         _ownData = false;
@@ -144,9 +144,9 @@ class Sound {
 		+/
         if (maxDuration > 0f)
             _currentChannelId = Mix_PlayChannelTimed(availableChannel, _chunk,
-                    _isLooped ? -1 : 0, cast(int)(maxDuration * 1000f));
+                    _isLooping ? -1 : 0, cast(int)(maxDuration * 1000f));
         else
-            _currentChannelId = Mix_PlayChannel(availableChannel, _chunk, _isLooped ? -1 : 0);
+            _currentChannelId = Mix_PlayChannel(availableChannel, _chunk, _isLooping ? -1 : 0);
 
         if (_leftPanning || _rightPanning)
             Mix_SetPanning(_currentChannelId, _leftPanning, _rightPanning);
@@ -168,11 +168,11 @@ class Sound {
 			todo: Unregister then register each effects here.
 		+/
         if (maxDuration > 0f)
-            _currentChannelId = Mix_FadeInChannelTimed(availableChannel, _chunk, _isLooped
+            _currentChannelId = Mix_FadeInChannelTimed(availableChannel, _chunk, _isLooping
                     ? -1 : 0, cast(int)(fadingDuration * 1000f), cast(int)(maxDuration * 1000f));
         else
             _currentChannelId = Mix_FadeInChannel(availableChannel, _chunk,
-                    _isLooped ? -1 : 0, cast(int)(fadingDuration * 1000f));
+                    _isLooping ? -1 : 0, cast(int)(fadingDuration * 1000f));
     }
 
     void pause() {

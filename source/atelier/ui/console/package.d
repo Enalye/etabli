@@ -9,5 +9,5 @@
 module atelier.ui.console;
 
 public {
-	import atelier.ui.console.console;
+    import atelier.ui.console.console;
 }

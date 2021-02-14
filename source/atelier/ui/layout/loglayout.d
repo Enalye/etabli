@@ -1,4 +1,3 @@
-
 /** 
  * Copyright: Enalye
  * License: Zlib
@@ -6,47 +5,48 @@
  */
 module atelier.ui.layout.loglayout;
 
-import std.conv: to;
-import std.algorithm.comparison: max;
+import std.conv : to;
+import std.algorithm.comparison : max;
 import atelier.render, atelier.core, atelier.common;
 import atelier.ui.gui_element;
 
-class LogLayout: GuiElement {
-	this() {}
+class LogLayout : GuiElement {
+    this() {
+    }
 
-	override void appendChild(GuiElement gui) {
+    override void appendChild(GuiElement gui) {
         gui.setAlign(GuiAlignX.left, GuiAlignY.top);
-		super.appendChild(gui);
-		resize();
-	}
+        super.appendChild(gui);
+        resize();
+    }
 
     override void onSize() {
         resize();
     }
 
-	private bool isResizeCalled;
-	protected void resize() {
-        if(isResizeCalled)
+    private bool isResizeCalled;
+    protected void resize() {
+        if (isResizeCalled)
             return;
         isResizeCalled = true;
 
-		if(!_children.length) {
+        if (!_children.length) {
             isResizeCalled = false;
-			return;
+            return;
         }
 
-		Vec2f totalSize = Vec2f.zero;
-		foreach(GuiElement gui; _children) {
-			totalSize.y += gui.scaledSize.y;
-			totalSize.x = max(totalSize.x, gui.scaledSize.x);
-		}
-		size = totalSize;
-		Vec2f currentPosition = origin;
-		foreach(GuiElement gui; _children) {
-			gui.position = currentPosition + gui.scaledSize / 2f;
-			currentPosition = currentPosition + Vec2f(0f, gui.scaledSize.y);
-		}
+        Vec2f totalSize = Vec2f.zero;
+        foreach (GuiElement gui; _children) {
+            totalSize.y += gui.scaledSize.y;
+            totalSize.x = max(totalSize.x, gui.scaledSize.x);
+        }
+        size = totalSize;
+        Vec2f currentPosition = origin;
+        foreach (GuiElement gui; _children) {
+            gui.position = currentPosition + gui.scaledSize / 2f;
+            currentPosition = currentPosition + Vec2f(0f, gui.scaledSize.y);
+        }
 
         isResizeCalled = false;
-	}
+    }
 }

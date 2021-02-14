@@ -17,85 +17,97 @@ import atelier.common;
 */
 struct Timer {
     /// Change the way Timer behave. \
-	/// once: Will run from 0 to 1 in one duration then stop. \
-	/// reverse: Will run from 1 to 0 in one duration then stop. \
-	/// loop: Will run from 0 to 1 in one duration then restart from 0 again, etc. \
-	/// loopReverse: Will run from 1 to 0 in one duration then restart from 1 again, etc. \
-	/// bounce: Will run from 0 to 1 in one duration then from 1 to 0, etc. \
-	/// bounceReverse: Will run from 1 to 0 in one duration then from 0 to 1, etc.
-	enum Mode {
-		once,
+    /// once: Will run from 0 to 1 in one duration then stop. \
+    /// reverse: Will run from 1 to 0 in one duration then stop. \
+    /// loop: Will run from 0 to 1 in one duration then restart from 0 again, etc. \
+    /// loopReverse: Will run from 1 to 0 in one duration then restart from 1 again, etc. \
+    /// bounce: Will run from 0 to 1 in one duration then from 1 to 0, etc. \
+    /// bounceReverse: Will run from 1 to 0 in one duration then from 0 to 1, etc.
+    enum Mode {
+        once,
         reverse,
-		loop,
+        loop,
         loopReverse,
-		bounce,
+        bounce,
         bounceReverse
-	}
+    }
 
-	private {
-		float _time = 0f, _duration = 1f;
-		bool _isRunning = false, _isReversed = false;
+    private {
+        float _time = 0f, _duration = 1f;
+        bool _isRunning = false, _isReversed = false;
         Mode _mode = Mode.once;
-	}
+    }
 
-	@property {
-		/// The relative time elapsed between 0 and 1.
-		float value01() const { return _time; }
+    @property {
+        /// The relative time elapsed between 0 and 1.
+        float value01() const {
+            return _time;
+        }
 
-		/// Time elapsed between 0 and the max duration.
-		float value() const { return _time * _duration; }
+        /// Time elapsed between 0 and the max duration.
+        float value() const {
+            return _time * _duration;
+        }
 
-		/// Duration in seconds from witch the timer goes from 0 to 1 (framerate dependent). \
+        /// Duration in seconds from witch the timer goes from 0 to 1 (framerate dependent). \
         /// Only positive non-null values.
-		float duration() const { return _duration; }
-		/// Ditto
-		float duration(float v) {
-			return _duration = v;
-		}
-
-		/// Is the timer currently running ?
-		bool isRunning() const { return _isRunning; }
-
-		/// Current behavior of the timer.
-		Mode mode() const { return _mode; }
+        float duration() const {
+            return _duration;
+        }
         /// Ditto
-		Mode mode(Mode v) { return _mode = v; }
-	}
+        float duration(float v) {
+            return _duration = v;
+        }
+
+        /// Is the timer currently running ?
+        bool isRunning() const {
+            return _isRunning;
+        }
+
+        /// Current behavior of the timer.
+        Mode mode() const {
+            return _mode;
+        }
+        /// Ditto
+        Mode mode(Mode v) {
+            return _mode = v;
+        }
+    }
 
     /// Immediatly starts the timer. \
-	/// Note that loop and bounce behaviours will never stop until you tell him to.
+    /// Note that loop and bounce behaviours will never stop until you tell him to.
     void start() {
         _isRunning = true;
         reset();
-	}
-	
-	/// Immediatly starts the timer with the specified running time. \
-	/// Note that loop and bounce behaviours will never stop until you tell him to.
-	void start(float duration_) {
-        _isRunning = true;
-		duration(duration_);
-        reset();
-	}
+    }
 
-	/// Immediatly stops the timer and resets it.
+    /// Immediatly starts the timer with the specified running time. \
+    /// Note that loop and bounce behaviours will never stop until you tell him to.
+    void start(float duration_) {
+        _isRunning = true;
+        duration(duration_);
+        reset();
+    }
+
+    /// Immediatly stops the timer and resets it.
     void stop() {
         _isRunning = false;
         reset();
     }
 
     /// Interrupts the timer without resetting it.
-	void pause() {
+    void pause() {
         _isRunning = false;
-	}
+    }
 
     /// Resumes the timer from where it was stopped.
-	void resume() {
+    void resume() {
         _isRunning = true;
-	}
+    }
 
     /// Goes back to starting settings.
     void reset() {
-        final switch(_mode) with(Mode) {
+        final switch (_mode) with (Mode) {
         case once:
             _time = 0f;
             _isReversed = false;
@@ -123,82 +135,82 @@ struct Timer {
         }
     }
 
-	/// Update with the current deltatime (~1)
-	/// If you don't call update, the timer won't advance.
-	void update(float deltaTime) {
-        if(!_isRunning)
+    /// Update with the current deltatime (~1)
+    /// If you don't call update, the timer won't advance.
+    void update(float deltaTime) {
+        if (!_isRunning)
             return;
-		if(_duration <= 0f) {
-			_time = _isReversed ? 0f : 1f;
-			_isRunning = false;
-			return;
-		}
+        if (_duration <= 0f) {
+            _time = _isReversed ? 0f : 1f;
+            _isRunning = false;
+            return;
+        }
         const float stepInterval = deltaTime / (getNominalFPS() * _duration);
-		final switch(_mode) with(Mode) {
-		case once:
-            if(_time < 1f)
+        final switch (_mode) with (Mode) {
+        case once:
+            if (_time < 1f)
                 _time += stepInterval;
-            if(_time >= 1f) {
+            if (_time >= 1f) {
                 _time = 1f;
                 _isRunning = false;
             }
-			break;
+            break;
         case reverse:
-            if(_time > 0f)
+            if (_time > 0f)
                 _time -= stepInterval;
-            if(_time <= 0f) {
+            if (_time <= 0f) {
                 _time = 0f;
                 _isRunning = false;
             }
             break;
-		case loop:
-			if(_time < 1f)
-				_time += stepInterval;
-			if(_time >= 1f)
-				_time = (_time - 1f) + stepInterval;
-			break;
+        case loop:
+            if (_time < 1f)
+                _time += stepInterval;
+            if (_time >= 1f)
+                _time = (_time - 1f) + stepInterval;
+            break;
         case loopReverse:
-			if(_time > 0f)
+            if (_time > 0f)
                 _time -= stepInterval;
-            if(_time <= 0f)
-				_time = (1f - _time) - stepInterval;
-			break;
-		case bounce:
-			if(_isReversed) {
-				if(_time > 0f)
-					_time -= stepInterval;
-				if(_time <= 0f) {
-					_time = -(_time - stepInterval);
-					_isReversed = false;
-				}
-			}
-			else {
-				if(_time < 1f)
-					_time += stepInterval;
-				if(_time >= 1f) {
-					_time = 1f - ((_time - 1f) + stepInterval);
-					_isReversed = true;
-				}
-			}
-			break;
+            if (_time <= 0f)
+                _time = (1f - _time) - stepInterval;
+            break;
+        case bounce:
+            if (_isReversed) {
+                if (_time > 0f)
+                    _time -= stepInterval;
+                if (_time <= 0f) {
+                    _time = -(_time - stepInterval);
+                    _isReversed = false;
+                }
+            }
+            else {
+                if (_time < 1f)
+                    _time += stepInterval;
+                if (_time >= 1f) {
+                    _time = 1f - ((_time - 1f) + stepInterval);
+                    _isReversed = true;
+                }
+            }
+            break;
         case bounceReverse:
-			if(_isReversed) {
-				if(_time < 1f)
-					_time += stepInterval;
-				if(_time >= 1f) {
-					_time = 1f - ((_time - 1f) + stepInterval);
-					_isReversed = false;
-				}
-			}
-			else {
-                if(_time > 0f)
-					_time -= stepInterval;
-				if(_time <= 0f) {
-					_time = -(_time - stepInterval);
-					_isReversed = true;
-				}
-			}
-			break;
-		}
-	}
+            if (_isReversed) {
+                if (_time < 1f)
+                    _time += stepInterval;
+                if (_time >= 1f) {
+                    _time = 1f - ((_time - 1f) + stepInterval);
+                    _isReversed = false;
+                }
+            }
+            else {
+                if (_time > 0f)
+                    _time -= stepInterval;
+                if (_time <= 0f) {
+                    _time = -(_time - stepInterval);
+                    _isReversed = true;
+                }
+            }
+            break;
+        }
+    }
 }

@@ -17,6 +17,7 @@ import atelier.core.color;
 import atelier.core.stream;
 import atelier.core.indexedarray;
 import atelier.core.particlefilter;
+
 /+
 class Particle {
 	Vec2f position, velocity;
