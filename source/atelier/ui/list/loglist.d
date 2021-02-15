@@ -21,8 +21,8 @@ private class LogContainer : GuiElement {
         isLocked = true;
         layout = new LogLayout;
         size(newSize);
-        super(Init.canvas);
         appendChild(layout);
+        hasCanvas(true);
     }
 
     override void draw() {

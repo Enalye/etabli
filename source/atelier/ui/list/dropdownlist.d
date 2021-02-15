@@ -90,7 +90,7 @@ class DropDownList : GuiElement {
     this(Vec2f newSize, uint maxListLength = 5U) {
         _maxListLength = maxListLength;
         size = newSize;
-        super(Init.canvas);
+        hasCanvas(true);
         _maxWidth = max(size.x, _maxWidth);
 
         _list = new VList(Vec2f(_maxWidth, _maxListLength * size.x));

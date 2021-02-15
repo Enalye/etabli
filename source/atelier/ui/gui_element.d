@@ -103,6 +103,22 @@ class GuiElement {
         final bool hasCanvas() const {
             return _hasCanvas;
         }
+        /// Ditto
+        final bool hasCanvas(bool hasCanvas_) {
+            _hasCanvas = hasCanvas_;
+            if(_hasCanvas) {
+                if (_size.x > 2f && _size.y > 2f) {
+                    _canvas = new Canvas(_size);
+                    _canvas.position = _canvas.size / 2f;
+                }
+                else
+                    _canvas = null;
+            }
+            else {
+                _canvas = null;
+            }
+            return _hasCanvas;
+        }
 
         /// The hint window to be shown when hovering this GUI.
         final Hint hint() {
@@ -276,14 +292,12 @@ class GuiElement {
             _size = size_ - _padding;
 
             if (_hasCanvas && oldSize != size_) {
-                Canvas newCanvas;
-                if (_size.x > 2f && _size.y > 2f)
-                    newCanvas = new Canvas(_size);
+                if (_size.x > 2f && _size.y > 2f) {
+                    _canvas = new Canvas(_size);
+                    _canvas.position = _canvas.size / 2f;
+                }
                 else
-                    newCanvas = new Canvas(Vec2u.one * 2);
-                newCanvas.position = _canvas.position;
-                _canvas = newCanvas;
-                _canvas.position = _canvas.size / 2f;
+                    _canvas = null;
             }
 
             onDeltaSize(_size - oldSize);
@@ -380,32 +394,28 @@ class GuiElement {
     enum Init {
         /// Default
         none = 0x0,
-        /// Initialize the gui with its own render canvas
-        canvas = 0x1,
+        /// Is focused ?
+        focus = 0x1,
         /// Initialize the gui locked
         locked = 0x2,
         /// The gui can be moved around with the mouse
         movable = 0x4,
         /// The gui will ignore mouse events
-        notInteractable = 0x8
+        notInteractable = 0x8,
+        /// The gui will receive mouse events that are destined to its children
+        eventHook = 0x10
     }
 
     /// Default ctor.
-    this(int flags = Init.none) {
-        if (flags & Init.canvas)
-            initCanvas();
-        _isLocked = cast(bool)(flags & Init.locked);
-        _isMovable = cast(bool)(flags & Init.movable);
-        _isInteractable = cast(bool) !(flags & Init.notInteractable);
-    }
+    this() {}
 
-    private final initCanvas() {
-        _hasCanvas = true;
-        if (_size.x > 2f && _size.y > 2f)
-            _canvas = new Canvas(_size);
-        else
-            _canvas = new Canvas(Vec2u.one * 2);
-        _canvas.position = _canvas.size / 2f;
+    /// Default ctor.
+    protected final void setInitFlags(int options = Init.none) {
+        _hasFocus = cast(bool)(options & Init.focus);
+        _isLocked = cast(bool)(options & Init.locked);
+        _isMovable = cast(bool)(options & Init.movable);
+        _isInteractable = cast(bool) !(options & Init.notInteractable);
+        _hasEventHook = cast(bool)(options & Init.eventHook);
     }
 
     /// Is it inside the gui ?

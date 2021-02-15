@@ -22,7 +22,7 @@ final class Text : GuiElement {
         size_t _currentIndex;
         Token[] _tokens;
         float _delay = 0f;
-        int _spacing = 0;
+        int _charSpacing = 0;
     }
 
     @property {
@@ -75,18 +75,18 @@ final class Text : GuiElement {
         }
 
         /// Default additionnal spacing between each character
-        int spacing() const {
-            return _spacing;
+        int charSpacing() const {
+            return _charSpacing;
         }
         /// Ditto
-        int spacing(int spacing_) {
-            return _spacing = spacing_;
+        int charSpacing(int charSpacing_) {
+            return _charSpacing = charSpacing_;
         }
     }
 
     /// Build text with default font
     this(string text_ = "", Font font_ = getDefaultFont()) {
-        super(Init.notInteractable);
+        setInitFlags(Init.notInteractable);
         _font = font_;
         _text = to!dstring(text_);
         tokenize();
@@ -105,7 +105,7 @@ final class Text : GuiElement {
             character,
             line,
             scale,
-            spacing,
+            charSpacing,
             color,
             delay,
             pause,
@@ -117,7 +117,7 @@ final class Text : GuiElement {
         union {
             CharToken character;
             ScaleToken scale;
-            SpacingToken spacing;
+            SpacingToken charSpacing;
             ColorToken color;
             DelayToken delay;
             PauseToken pause;
@@ -133,7 +133,7 @@ final class Text : GuiElement {
         }
 
         struct SpacingToken {
-            int spacing;
+            int charSpacing;
         }
 
         struct ColorToken {
@@ -364,7 +364,7 @@ final class Text : GuiElement {
         Vec2f totalSize_ = Vec2f(0f, _font.ascent - _font.descent);
         float lineWidth = 0f;
         dchar prevChar;
-        int charSpacing_ = _spacing;
+        int charSpacing_ = _charSpacing;
         int charScale_ = min(cast(int) scale.x, cast(int) scale.y);
         foreach (Token token; _tokens) {
             final switch (token.type) with (Token.Type) {
@@ -380,8 +380,8 @@ final class Text : GuiElement {
                     totalSize_.x = lineWidth;
                 prevChar = token.character.character;
                 break;
-            case spacing:
-                charSpacing_ = token.spacing.spacing;
+            case charSpacing:
+                charSpacing_ = token.charSpacing.charSpacing;
                 break;
             case scale:
                 charScale_ = token.scale.scale;
@@ -407,7 +407,7 @@ final class Text : GuiElement {
         Color charColor_ = color;
         float charDelay_ = _delay;
         int charScale_ = min(cast(int) scale.x, cast(int) scale.y);
-        int charSpacing_ = _spacing;
+        int charSpacing_ = _charSpacing;
         Token.EffectToken.Type charEffect_ = Token.EffectToken.Type.none;
         Vec2f totalSize_ = Vec2f.zero;
         Timer waveTimer = _effectTimer;
@@ -482,10 +482,10 @@ final class Text : GuiElement {
                     _currentIndex++;
                 charScale_ = token.scale.scale;
                 break;
-            case spacing:
+            case charSpacing:
                 if (_currentIndex == index)
                     _currentIndex++;
-                charSpacing_ = token.spacing.spacing;
+                charSpacing_ = token.charSpacing.charSpacing;
                 break;
             case color:
                 if (_currentIndex == index)

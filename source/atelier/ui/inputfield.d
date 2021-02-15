@@ -61,7 +61,6 @@ class InputField : GuiElement {
     /// Set startWithFocus to true if you want the inputfield to accept inputs immediatly.
     this(Vec2f size_, string defaultText = "", bool startWithFocus = false) {
         size = size_;
-        super(Init.canvas);
         _label = new Label;
         _label.setAlign(GuiAlignX.left, GuiAlignY.center);
         appendChild(_label);
@@ -74,6 +73,7 @@ class InputField : GuiElement {
         _caretAlpha = 1f;
         _timer.mode = Timer.Mode.bounce;
         _timer.start(1f);
+        hasCanvas(true);
     }
 
     private void insertText(dstring textInput) {

@@ -63,7 +63,7 @@ final class Label : GuiElement {
 
     /// Build label
     this(string text_ = "", Font font = getDefaultFont()) {
-        super(Init.notInteractable);
+        setInitFlags(Init.notInteractable);
         _font = font;
         _text = to!dstring(text_);
         reload();

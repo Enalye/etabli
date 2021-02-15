@@ -39,7 +39,7 @@ bool isModal() {
 
 /// Get and stop the current modal.
 T popModal(T)() {
-    T convModal = getModalGui!T();
+    T convModal = getModal!T();
     stopModal();
     return convModal;
 }

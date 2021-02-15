@@ -21,8 +21,8 @@ private final class ListContainer : GuiElement {
         isLocked = true;
         container = new VContainer;
         size(sz);
-        super(Init.canvas);
         appendChild(container);
+        hasCanvas(true);
     }
 }
 
