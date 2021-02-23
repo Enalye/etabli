@@ -133,6 +133,10 @@ class GuiElement {
         GuiElement[] children() {
             return _children;
         }
+        /// The list of all its own children.
+        final GuiElement[] nodes() {
+            return _children;
+        }
 
         /// Return the first child gui.
         GuiElement firstChild() {

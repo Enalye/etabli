@@ -253,9 +253,9 @@ package(atelier) void updateRoots(GuiElement gui, GuiElement parent) {
     gui.update(_deltaTime);
 
     size_t childIndex = 0;
-    while (childIndex < gui.children.length) {
-        if (gui.children[childIndex]._isRegistered) {
-            updateRoots(gui.children[childIndex], gui);
+    while (childIndex < gui.nodes.length) {
+        if (gui.nodes[childIndex]._isRegistered) {
+            updateRoots(gui.nodes[childIndex], gui);
             childIndex++;
         }
         else {
@@ -272,7 +272,7 @@ void drawRoots(GuiElement gui) {
         canvas.setAlpha(gui._currentState.alpha);
         pushCanvas(canvas, true);
         gui.draw();
-        foreach (GuiElement child; gui.children) {
+        foreach (GuiElement child; gui.nodes) {
             drawRoots(child);
         }
         popCanvas();
@@ -289,7 +289,7 @@ void drawRoots(GuiElement gui) {
     }
     else {
         gui.draw();
-        foreach (GuiElement child; gui.children) {
+        foreach (GuiElement child; gui.nodes) {
             drawRoots(child);
         }
         gui.drawOverlay();
@@ -299,13 +299,13 @@ void drawRoots(GuiElement gui) {
     if (_isGuiElementDebug) {
         drawRect(gui.center - (gui._size * gui._currentState.scale) / 2f,
                 gui._size * gui._currentState.scale, gui.isHovered ? Color.red
-                : (gui.children.length ? Color.blue : Color.green));
+                : (gui.nodes.length ? Color.blue : Color.green));
     }
 }
 
 /// Process a mouse down event down the tree.
 private void dispatchMouseDownEvent(GuiElement gui, Vec2f cursorPosition) {
-    auto children = (gui is null) ? _rootElements : gui.children;
+    auto children = (gui is null) ? _rootElements : gui.nodes;
     bool hasCanvas;
 
     if (gui !is null) {
@@ -346,7 +346,7 @@ private void dispatchMouseDownEvent(GuiElement gui, Vec2f cursorPosition) {
 
 /// Process a mouse up event down the tree.
 private void dispatchMouseUpEvent(GuiElement gui, Vec2f cursorPosition) {
-    auto children = (gui is null) ? _rootElements : gui.children;
+    auto children = (gui is null) ? _rootElements : gui.nodes;
     bool hasCanvas;
 
     if (gui !is null) {
@@ -396,7 +396,7 @@ private void dispatchMouseUpEvent(GuiElement gui, Vec2f cursorPosition) {
 
 /// Process a mouse update event down the tree.
 private void dispatchMouseUpdateEvent(GuiElement gui, Vec2f cursorPosition) {
-    auto children = (gui is null) ? _rootElements : gui.children;
+    auto children = (gui is null) ? _rootElements : gui.nodes;
     bool hasCanvas, wasHovered;
 
     if (gui !is null) {
@@ -447,7 +447,7 @@ private void dispatchMouseUpdateEvent(GuiElement gui, Vec2f cursorPosition) {
         else {
             void unHoverRoots(GuiElement gui) {
                 gui.isHovered = false;
-                foreach (child; gui.children)
+                foreach (child; gui.nodes)
                     unHoverRoots(child);
             }
 
@@ -487,7 +487,7 @@ private void dispatchMouseWheelEvent(Vec2f scroll) {
 /// Notify every gui in the tree that we are leaving.
 private void dispatchQuitEvent(GuiElement gui) {
     if (gui !is null) {
-        foreach (GuiElement child; gui.children)
+        foreach (GuiElement child; gui.nodes)
             dispatchQuitEvent(child);
         gui.onQuit();
     }
@@ -501,7 +501,7 @@ private void dispatchQuitEvent(GuiElement gui) {
 private void dispatchGenericEvents(GuiElement gui, Event event) {
     if (gui !is null) {
         gui.onEvent(event);
-        foreach (GuiElement child; gui.children) {
+        foreach (GuiElement child; gui.nodes) {
             dispatchGenericEvents(child, event);
         }
     }
