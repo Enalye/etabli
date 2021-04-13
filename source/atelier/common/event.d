@@ -31,8 +31,8 @@ import atelier.common.settings;
 import atelier.common.controller;
 
 static private {
-    bool[KeyButton.max + 1] _keys;
-    bool[MouseButton.max + 1] _buttons;
+    bool[KeyButton.max + 1] _keys1, _keys2;
+    bool[MouseButton.max + 1] _buttons1, _buttons2;
     Vec2f _mousePosition;
     Event[] _globalEvents;
 }
@@ -408,28 +408,28 @@ struct Event {
 /// Check whether the key associated with the ID is pressed. \
 /// Do not reset the value.
 bool isButtonDown(KeyButton button) {
-    return _keys[button];
+    return _keys1[button];
 }
 
 /// Check whether the key associated with the ID is pressed. \
 /// This function resets the value to false.
 bool getButtonDown(KeyButton button) {
-    const bool value = _keys[button];
-    _keys[button] = false;
+    const bool value = _keys2[button];
+    _keys2[button] = false;
     return value;
 }
 
 /// Check whether the mouse button associated with the ID is pressed. \
 /// Do not reset the value.
 bool isButtonDown(MouseButton button) {
-    return _buttons[button];
+    return _buttons1[button];
 }
 
 /// Check whether the mouse button associated with the ID is pressed. \
 /// This function resets the value to false.
 bool getButtonDown(MouseButton button) {
-    const bool value = _buttons[button];
-    _buttons[button] = false;
+    const bool value = _buttons2[button];
+    _buttons2[button] = false;
     return value;
 }
 
@@ -517,10 +517,11 @@ bool processEvents() {
             //No operation involving the SDL after this.
             return false;
         case SDL_KEYDOWN:
-            if (sdlEvent.key.keysym.scancode >= _keys.length)
+            if (sdlEvent.key.keysym.scancode >= _keys1.length)
                 break;
             if (!sdlEvent.key.repeat)
-                _keys[sdlEvent.key.keysym.scancode] = true;
+                _keys1[sdlEvent.key.keysym.scancode] = true;
+                _keys2[sdlEvent.key.keysym.scancode] = true;
 
             { // KeyDown Event
                 event.type = EventType.keyDown;
@@ -568,9 +569,10 @@ bool processEvents() {
             }
             break;
         case SDL_KEYUP:
-            if (sdlEvent.key.keysym.scancode >= _keys.length)
+            if (sdlEvent.key.keysym.scancode >= _keys1.length)
                 break;
-            _keys[sdlEvent.key.keysym.scancode] = false;
+            _keys1[sdlEvent.key.keysym.scancode] = false;
+            _keys2[sdlEvent.key.keysym.scancode] = false;
 
             { // KeyUp Event
                 event.type = EventType.keyUp;
@@ -598,9 +600,10 @@ bool processEvents() {
         case SDL_MOUSEBUTTONDOWN:
             _mousePosition.set(cast(float) sdlEvent.motion.x, cast(float) sdlEvent.motion.y);
             _mousePosition = transformCanvasSpace(_mousePosition);
-            if (sdlEvent.button.button >= _buttons.length)
+            if (sdlEvent.button.button >= _buttons1.length)
                 break;
-            _buttons[sdlEvent.button.button] = true;
+            _buttons1[sdlEvent.button.button] = true;
+            _buttons2[sdlEvent.button.button] = true;
 
             event.type = EventType.mouseDown;
             event.mouse.position = _mousePosition;
@@ -612,9 +615,10 @@ bool processEvents() {
         case SDL_MOUSEBUTTONUP:
             _mousePosition.set(cast(float) sdlEvent.motion.x, cast(float) sdlEvent.motion.y);
             _mousePosition = transformCanvasSpace(_mousePosition);
-            if (sdlEvent.button.button >= _buttons.length)
+            if (sdlEvent.button.button >= _buttons1.length)
                 break;
-            _buttons[sdlEvent.button.button] = false;
+            _buttons1[sdlEvent.button.button] = false;
+            _buttons2[sdlEvent.button.button] = false;
 
             event.type = EventType.mouseUp;
             event.mouse.position = _mousePosition;

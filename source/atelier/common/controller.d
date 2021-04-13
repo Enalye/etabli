@@ -57,7 +57,7 @@ private struct Controller {
 private {
     Controller[] _controllers;
     Timer[6] _analogTimers, _analogTimeoutTimers;
-    bool[ControllerButton.max + 1] _buttons;
+    bool[ControllerButton.max + 1] _buttons1, _buttons2;
     float[ControllerAxis.max + 1] _axis = 0f;
 }
 
@@ -202,20 +202,21 @@ private bool updateAnalogTimer(int axisIndex, float x, float y) {
 void setControllerButton(SDL_GameControllerButton button, bool state) {
     if (button > ControllerButton.max)
         return;
-    _buttons[button] = state;
+    _buttons1[button] = state;
+    _buttons2[button] = state;
 }
 
 /// Check whether the button associated with the ID is pressed. \
 /// Do not reset the value.
 bool isButtonDown(ControllerButton button) {
-    return _buttons[button];
+    return _buttons1[button];
 }
 
 /// Check whether the button associated with the ID is pressed. \
 /// This function resets the value to false.
 bool getButtonDown(ControllerButton button) {
-    const bool value = _buttons[button];
-    _buttons[button] = false;
+    const bool value = _buttons2[button];
+    _buttons2[button] = false;
     return value;
 }
 
