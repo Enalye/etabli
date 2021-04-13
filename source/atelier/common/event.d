@@ -519,9 +519,10 @@ bool processEvents() {
         case SDL_KEYDOWN:
             if (sdlEvent.key.keysym.scancode >= _keys1.length)
                 break;
-            if (!sdlEvent.key.repeat)
+            if (!sdlEvent.key.repeat) {
                 _keys1[sdlEvent.key.keysym.scancode] = true;
                 _keys2[sdlEvent.key.keysym.scancode] = true;
+            }
 
             { // KeyDown Event
                 event.type = EventType.keyDown;
