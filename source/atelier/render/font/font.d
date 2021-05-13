@@ -18,7 +18,6 @@ void setDefaultFont(Font font) {
 }
 
 Font getDefaultFont() {
-    assert(_defaultFont, "Default font not set");
     return _defaultFont;
 }
 

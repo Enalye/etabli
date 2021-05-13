@@ -56,40 +56,47 @@ final class TrueTypeFont : Font {
 
     /// Ctor
     this(const string path, int size_ = 16u, int outline_ = 0) {
-        load(path, size_, outline_);
-    }
-
-    ~this() {
-        unload();
-    }
-
-    /// Load
-    private void load(string path, int size_, int outline_) {
-        assert(size_ != 0u, "Cannot render a font with no size");
-        if (null != _trueTypeFont)
-            TTF_CloseFont(_trueTypeFont);
-
         _size = size_;
         _outline = outline_;
-        _trueTypeFont = TTF_OpenFont(toStringz(path), size_);
-        assert(_trueTypeFont, "Cannot load \'" ~ path ~ "\' font.");
+        assert(_size != 0u, "can't render a font with no size");
+        if (null != _trueTypeFont && _ownData)
+            TTF_CloseFont(_trueTypeFont);
 
-        TTF_SetFontKerning(_trueTypeFont, 0);
+        _trueTypeFont = TTF_OpenFont(toStringz(path), _size);
+        assert(_trueTypeFont, "can't load \'" ~ path ~ "\' font");
+
+        TTF_SetFontKerning(_trueTypeFont, 1);
 
         _name = to!string(fromStringz(TTF_FontFaceFamilyName(_trueTypeFont)));
         _ownData = true;
     }
 
-    /// Unload
-    private void unload() {
-        if (!_ownData)
-            return;
-        if (null != _trueTypeFont)
+    /// Init from buffer
+    this(const ubyte[] buffer, int size_ = 16u, int outline_ = 0) {
+        SDL_RWops* rw = SDL_RWFromConstMem(buffer.ptr, cast(int) buffer.length);
+        _size = size_;
+        _outline = outline_;
+
+        assert(_size != 0u, "can't render a font with no size");
+        if (null != _trueTypeFont && _ownData)
+            TTF_CloseFont(_trueTypeFont);
+        _trueTypeFont = TTF_OpenFontRW(rw, 1, _size);
+        assert(_trueTypeFont, "can't load font");
+
+        TTF_SetFontKerning(_trueTypeFont, 1);
+
+        _name = to!string(fromStringz(TTF_FontFaceFamilyName(_trueTypeFont)));
+        _ownData = true;
+    }
+
+    ~this() {
+        if (null != _trueTypeFont && _ownData)
             TTF_CloseFont(_trueTypeFont);
     }
 
     private Glyph cache(dchar ch) {
         int xmin, xmax, ymin, ymax, advance;
+        TTF_SetFontKerning(_trueTypeFont, 1);
         if (_outline == 0) {
             if (-1 == TTF_GlyphMetrics(_trueTypeFont, cast(wchar) ch, &xmin,
                     &xmax, &ymin, &ymax, &advance))
@@ -123,11 +130,7 @@ final class TrueTypeFont : Font {
             assert(surface);
 
             SDL_Rect srcRect = {0, 0, surface.w, surface.h};
-
-            SDL_Rect dstRect = {
-                (surfaceOutline.w - surface.w) / 2,
-                    (surfaceOutline.h - surface.h) / 2, surface.w, surface.h
-            };
+            SDL_Rect dstRect = {_outline, _outline, surface.w, surface.h};
 
             SDL_BlitSurface(surface, &srcRect, surfaceOutline, &dstRect);
 
@@ -143,7 +146,8 @@ final class TrueTypeFont : Font {
     }
 
     int getKerning(dchar prevChar, dchar currChar) {
-        return 0;
+        return TTF_GetFontKerningSizeGlyphs(_trueTypeFont,
+                cast(ushort) prevChar, cast(ushort) currChar);
     }
 
     Glyph getMetrics(dchar ch) {

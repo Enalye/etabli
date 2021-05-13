@@ -7,14 +7,13 @@
 		"Enalye"
 	],
 	"dependencies": {
-		"bindbc-sdl": "~>0.15.0"
+		"bindbc-sdl": "~>0.21.2"
 	},
 	"versions": [
 		"SDL_202",
-		"BindSDL_Image",
-		"SDLImage202",
-		"BindSDL_TTF",
-		"BindSDL_Mixer"
+		"SDL_Image_204",
+		"SDL_TTF_2014",
+		"SDL_Mixer_204"
 	],
 	"targetName": "atelier",
 	"targetType": "library",

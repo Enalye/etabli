@@ -77,7 +77,7 @@ import std.exception;
 void createWindow(const Vec2u windowSize, string title) {
     enforce(loadSDL() >= SDLSupport.sdl202);
     enforce(loadSDLImage() >= SDLImageSupport.sdlImage200);
-    enforce(loadSDLTTF() >= SDLTTFSupport.sdlTTF2012);
+    enforce(loadSDLTTF() >= SDLTTFSupport.sdlTTF2014);
     enforce(loadSDLMixer() >= SDLMixerSupport.sdlMixer200);
 
     enforce(SDL_Init(SDL_INIT_EVERYTHING) == 0,
@@ -206,7 +206,7 @@ void setWindowDisplay(DisplayMode displayMode) {
     import atelier.ui : handleGuiElementEvent;
 
     _displayMode = displayMode;
-    uint mode;
+    SDL_WindowFlags mode;
     final switch (displayMode) with (DisplayMode) {
     case fullscreen:
         mode = SDL_WINDOW_FULLSCREEN;
@@ -215,7 +215,7 @@ void setWindowDisplay(DisplayMode displayMode) {
         mode = SDL_WINDOW_FULLSCREEN_DESKTOP;
         break;
     case windowed:
-        mode = 0;
+        mode = cast(SDL_WindowFlags) 0;
         break;
     }
     SDL_SetWindowFullscreen(_sdlWindow, mode);
