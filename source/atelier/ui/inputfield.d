@@ -36,6 +36,7 @@ class InputField : GuiElement {
         string text(string newText) {
             _text = to!dstring(newText);
             _caretIndex = to!uint(_text.length);
+            _selectionIndex = _caretIndex;
             _label.text = newText;
             return newText;
         }

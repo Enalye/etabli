@@ -26,5 +26,6 @@ public {
     import atelier.ui.text;
     import atelier.ui.colorpicker;
     import atelier.ui.list;
+    import atelier.ui.separator;
     import atelier.ui.console;
 }
