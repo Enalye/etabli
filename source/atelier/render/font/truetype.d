@@ -20,6 +20,7 @@ final class TrueTypeFont : Font {
         string _name;
         int _size, _outline;
         Glyph[dchar] _cache;
+        bool _isSmooth = true;
     }
 
     @property {
@@ -94,9 +95,15 @@ final class TrueTypeFont : Font {
             TTF_CloseFont(_trueTypeFont);
     }
 
+    /// Toggle the glyph smoothing
+    void setSmooth(bool isSmooth_) {
+        if (isSmooth_ != _isSmooth)
+            _cache.clear();
+        _isSmooth = isSmooth_;
+    }
+
     private Glyph cache(dchar ch) {
         int xmin, xmax, ymin, ymax, advance;
-        TTF_SetFontKerning(_trueTypeFont, 1);
         if (_outline == 0) {
             if (-1 == TTF_GlyphMetrics(_trueTypeFont, cast(wchar) ch, &xmin,
                     &xmax, &ymin, &ymax, &advance))
@@ -105,9 +112,10 @@ final class TrueTypeFont : Font {
             SDL_Surface* surface = TTF_RenderGlyph_Blended(_trueTypeFont,
                     cast(wchar) ch, Color.white.toSDL());
             assert(surface);
-            Texture texture = new Texture(surface);
+            Texture texture = new Texture(surface, false, _isSmooth);
             assert(texture);
             SDL_FreeSurface(surface);
+
             Glyph metrics = Glyph(true, advance, 0, 0, texture.width,
                     texture.height, 0, 0, texture.width, texture.height, texture);
             _cache[ch] = metrics;
@@ -119,6 +127,7 @@ final class TrueTypeFont : Font {
                 return Glyph();
 
             TTF_SetFontOutline(_trueTypeFont, _outline);
+
             SDL_Surface* surfaceOutline = TTF_RenderGlyph_Blended(_trueTypeFont,
                     cast(wchar) ch, Color.black.toSDL());
             assert(surfaceOutline);
@@ -134,7 +143,7 @@ final class TrueTypeFont : Font {
 
             SDL_BlitSurface(surface, &srcRect, surfaceOutline, &dstRect);
 
-            Texture texture = new Texture(surfaceOutline);
+            Texture texture = new Texture(surfaceOutline, false, _isSmooth);
             assert(texture);
             SDL_FreeSurface(surface);
             SDL_FreeSurface(surfaceOutline);

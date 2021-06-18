@@ -64,7 +64,7 @@ package SDL_BlendMode getSDLBlend(Blend blend) {
 /// Base rendering class.
 final class Texture {
     private {
-        bool _isLoaded = false, _ownData;
+        bool _isLoaded = false, _ownData, _isSmooth;
         SDL_Texture* _texture = null;
         SDL_Surface* _surface = null;
         uint _width, _height;
@@ -92,11 +92,13 @@ final class Texture {
         _texture = cast(SDL_Texture*) texture._texture;
         _width = texture._width;
         _height = texture._height;
+        _isSmooth = texture._isSmooth;
         _ownData = false;
     }
 
     /// Ctor
-    this(SDL_Surface* surface, bool preload_ = false) {
+    this(SDL_Surface* surface, bool preload_ = false, bool isSmooth_ = false) {
+        _isSmooth = isSmooth_;
         if (preload_) {
             _surface = surface;
             _width = _surface.w;
@@ -107,7 +109,8 @@ final class Texture {
     }
 
     /// Ctor
-    this(string path, bool preload_ = false) {
+    this(string path, bool preload_ = false, bool isSmooth_ = false) {
+        _isSmooth = isSmooth_;
         if (preload_) {
             _surface = IMG_Load(toStringz(path));
             _width = _surface.w;
@@ -129,8 +132,12 @@ final class Texture {
 
         if (null != _texture)
             SDL_DestroyTexture(_texture);
+        if (_isSmooth)
+            SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
         _texture = SDL_CreateTextureFromSurface(_sdlRenderer, _surface);
         enforce(null != _texture, "Error occurred while converting a surface to a texture format.");
+        if (_isSmooth)
+            SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 
         if (_ownData)
             SDL_FreeSurface(_surface);
@@ -156,7 +163,11 @@ final class Texture {
         if (null != _texture)
             SDL_DestroyTexture(_texture);
 
+        if (_isSmooth)
+            SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
         _texture = SDL_CreateTextureFromSurface(_sdlRenderer, surface);
+        if (_isSmooth)
+            SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 
         enforce(null != _texture, "Error occurred while converting a surface to a texture format.");
 
@@ -174,7 +185,11 @@ final class Texture {
         enforce(null != surface, "Cannot load image file \'" ~ path ~ "\'.");
         enforce(null != _sdlRenderer, "The renderer does not exist.");
 
+        if (_isSmooth)
+            SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
         _texture = SDL_CreateTextureFromSurface(_sdlRenderer, surface);
+        if (_isSmooth)
+            SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 
         if (null == _texture)
             throw new Exception(

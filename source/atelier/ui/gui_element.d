@@ -94,6 +94,21 @@ class GuiElement {
         }
     }
 
+    void setCanvas(bool hasCanvas_, bool isSmooth = false) {
+        _hasCanvas = hasCanvas_;
+        if (_hasCanvas) {
+            if (_size.x > 2f && _size.y > 2f) {
+                _canvas = new Canvas(_size, isSmooth);
+                _canvas.position = _canvas.size / 2f;
+            }
+            else
+                _canvas = null;
+        }
+        else {
+            _canvas = null;
+        }
+    }
+
     @property {
         /// If set, the canvas used to be rendered on.
         final Canvas canvas() {
@@ -105,18 +120,7 @@ class GuiElement {
         }
         /// Ditto
         final bool hasCanvas(bool hasCanvas_) {
-            _hasCanvas = hasCanvas_;
-            if(_hasCanvas) {
-                if (_size.x > 2f && _size.y > 2f) {
-                    _canvas = new Canvas(_size);
-                    _canvas.position = _canvas.size / 2f;
-                }
-                else
-                    _canvas = null;
-            }
-            else {
-                _canvas = null;
-            }
+            setCanvas(hasCanvas_);
             return _hasCanvas;
         }
 
@@ -411,7 +415,8 @@ class GuiElement {
     }
 
     /// Default ctor.
-    this() {}
+    this() {
+    }
 
     /// Default ctor.
     protected final void setInitFlags(int options = Init.none) {

@@ -75,22 +75,24 @@ import std.exception;
 
 /// Create the application window.
 void createWindow(const Vec2u windowSize, string title) {
-    enforce(loadSDL() >= SDLSupport.sdl202);
-    enforce(loadSDLImage() >= SDLImageSupport.sdlImage200);
-    enforce(loadSDLTTF() >= SDLTTFSupport.sdlTTF2014);
-    enforce(loadSDLMixer() >= SDLMixerSupport.sdlMixer200);
+    enforce(loadSDL() >= SDLSupport.sdl2014, "SDL support <= 2.0.14");
+    enforce(loadSDLImage() >= SDLImageSupport.sdlImage204, "SDL image support <= 2.0.4");
+    enforce(loadSDLTTF() >= SDLTTFSupport.sdlTTF2014, "SDL ttf support <= 2.0.14");
+    enforce(loadSDLMixer() >= SDLMixerSupport.sdlMixer204, "SDL mixer support <= 2.0.4");
 
     enforce(SDL_Init(SDL_INIT_EVERYTHING) == 0,
-            "Could not initialize SDL: " ~ fromStringz(SDL_GetError()));
+            "SDL initialisation failure: " ~ fromStringz(SDL_GetError()));
 
-    enforce(TTF_Init() != -1, "Could not initialize TTF module.");
+    enforce(TTF_Init() != -1, "SDL ttf initialisation failure");
     enforce(Mix_OpenAudio(44_100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS,
-            1024) != -1, "No audio device connected.");
-    enforce(Mix_AllocateChannels(16) != -1, "Could not allocate audio channels.");
+            1024) != -1, "no audio device connected");
+    enforce(Mix_AllocateChannels(16) != -1, "audio channels allocation failure");
+
+    SDL_SetHint(SDL_HINT_RENDER_BATCHING, "1");
 
     enforce(SDL_CreateWindowAndRenderer(windowSize.x, windowSize.y,
             SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_WINDOW_RESIZABLE,
-            &_sdlWindow, &_sdlRenderer) != -1, "Window initialization failed.");
+            &_sdlWindow, &_sdlRenderer) != -1, "window initialisation failure");
 
     CanvasReference canvasRef;
     canvasRef.target = null;

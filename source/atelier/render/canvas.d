@@ -20,6 +20,7 @@ final class Canvas : Drawable {
     private {
         SDL_Texture* _renderTexture;
         Vec2u _renderSize;
+        bool _isSmooth = false;
     }
 
     package(atelier.render) {
@@ -37,16 +38,20 @@ final class Canvas : Drawable {
             return _renderSize;
         }
         /// Ditto
-        Vec2u renderSize(Vec2u newRenderSize) {
+        Vec2u renderSize(Vec2u renderSize_) {
             if (_isTargetOnStack)
-                throw new Exception("Attempt to resize canvas while being rendered.");
-            if (newRenderSize.x >= 2048u || newRenderSize.y >= 2048u)
-                throw new Exception("Canvas render size exceeds limits.");
-            _renderSize = newRenderSize;
+                throw new Exception("attempt to resize canvas while being rendered");
+            if (renderSize_.x >= 2048u || renderSize_.y >= 2048u)
+                throw new Exception("canvas render size exceeds limits");
+            _renderSize = renderSize_;
             if (_renderTexture !is null)
                 SDL_DestroyTexture(_renderTexture);
+            if (_isSmooth)
+                SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
             _renderTexture = SDL_CreateTexture(_sdlRenderer, SDL_PIXELFORMAT_RGBA8888,
                     SDL_TEXTUREACCESS_TARGET, _renderSize.x, _renderSize.y);
+            if (_isSmooth)
+                SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
             return _renderSize;
         }
     }
@@ -65,22 +70,27 @@ final class Canvas : Drawable {
     Flip flip = Flip.none;
 
     /// Ctor
-    this(Vec2f newRenderSize) {
-        this(to!Vec2u(newRenderSize));
+    this(Vec2f renderSize_, bool isSmooth_ = false) {
+        this(to!Vec2u(renderSize_), isSmooth_);
     }
 
     /// Ctor
-    this(Vec2i newRenderSize) {
-        this(to!Vec2u(newRenderSize));
+    this(Vec2i renderSize_, bool isSmooth_ = false) {
+        this(to!Vec2u(renderSize_), isSmooth_);
     }
 
     /// Ctor
-    this(Vec2u newRenderSize) {
-        if (newRenderSize.x >= 2048u || newRenderSize.y >= 2048u)
+    this(Vec2u renderSize_, bool isSmooth_ = false) {
+        _isSmooth = isSmooth_;
+        if (renderSize_.x >= 2048u || renderSize_.y >= 2048u)
             throw new Exception("Canvas render size exceeds limits.");
-        _renderSize = newRenderSize;
+        _renderSize = renderSize_;
+        if (_isSmooth)
+            SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
         _renderTexture = SDL_CreateTexture(_sdlRenderer, SDL_PIXELFORMAT_RGBA8888,
                 SDL_TEXTUREACCESS_TARGET, _renderSize.x, _renderSize.y);
+        if (_isSmooth)
+            SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
         setColorMod(Color.white, Blend.alpha);
 
         size = cast(Vec2f) _renderSize;
@@ -114,6 +124,14 @@ final class Canvas : Drawable {
         _renderTexture = SDL_CreateTexture(_sdlRenderer, SDL_PIXELFORMAT_RGBA8888,
                 SDL_TEXTUREACCESS_TARGET, _renderSize.x, _renderSize.y);
         return this;
+    }
+
+    /// Toggle the canvas smoothing
+    void setSmooth(bool isSmooth_) {
+        if (isSmooth_ != _isSmooth) {
+            renderSize(_renderSize);
+        }
+        _isSmooth = isSmooth_;
     }
 
     /// Apply a color filter or change its blending algorithm.
