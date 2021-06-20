@@ -20,7 +20,7 @@ final class TrueTypeFont : Font {
         string _name;
         int _size, _outline;
         Glyph[dchar] _cache;
-        bool _isSmooth = true;
+        bool _isSmooth;
     }
 
     @property {
