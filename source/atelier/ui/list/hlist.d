@@ -129,7 +129,7 @@ class HList : GuiElement {
     }
 
     override void onEvent(Event event) {
-        if (event.type == EventType.mouseWheel)
+        if (event.type == Event.Type.mouseWheel)
             _slider.onEvent(event);
     }
 
@@ -137,7 +137,7 @@ class HList : GuiElement {
         _slider.size = Vec2f(size.x, 10f);
         _container.container.size = Vec2f(_layoutLength * _nbElements, _container.size.y);
         _container.size = Vec2f(size.x, size.y - _slider.size.y);
-        _container.canvas.renderSize = _container.size.to!Vec2u;
+        _container.canvas.renderSize = _container.size.to!Vec2i;
     }
 
     override void update(float deltaTime) {

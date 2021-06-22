@@ -19,7 +19,7 @@ import atelier.render.drawable;
 final class Canvas : Drawable {
     private {
         SDL_Texture* _renderTexture;
-        Vec2u _renderSize;
+        Vec2i _renderSize;
         bool _isSmooth = false;
     }
 
@@ -34,14 +34,15 @@ final class Canvas : Drawable {
 
         /// The size (in texels) of the surface to be rendered on.
         /// Changing that value allocate a new texture, so don't do it everytime.
-        Vec2u renderSize() const {
+        Vec2i renderSize() const {
             return _renderSize;
         }
         /// Ditto
-        Vec2u renderSize(Vec2u renderSize_) {
+        Vec2i renderSize(Vec2i renderSize_) {
             if (_isTargetOnStack)
                 throw new Exception("attempt to resize canvas while being rendered");
-            if (renderSize_.x >= 2048u || renderSize_.y >= 2048u)
+            if (renderSize_.x >= 2048u || renderSize_.y >= 2048u
+                    || renderSize_.x <= 0 || renderSize_.y <= 0)
                 throw new Exception("canvas render size exceeds limits");
             _renderSize = renderSize_;
             if (_renderTexture !is null)
@@ -71,18 +72,14 @@ final class Canvas : Drawable {
 
     /// Ctor
     this(Vec2f renderSize_, bool isSmooth_ = false) {
-        this(to!Vec2u(renderSize_), isSmooth_);
+        this(to!Vec2i(renderSize_), isSmooth_);
     }
 
     /// Ctor
     this(Vec2i renderSize_, bool isSmooth_ = false) {
-        this(to!Vec2u(renderSize_), isSmooth_);
-    }
-
-    /// Ctor
-    this(Vec2u renderSize_, bool isSmooth_ = false) {
         _isSmooth = isSmooth_;
-        if (renderSize_.x >= 2048u || renderSize_.y >= 2048u)
+        if (renderSize_.x >= 2048u || renderSize_.y >= 2048u
+                || renderSize_.x <= 0 || renderSize_.y <= 0)
             throw new Exception("Canvas render size exceeds limits.");
         _renderSize = renderSize_;
         if (_isSmooth)
@@ -158,6 +155,7 @@ final class Canvas : Drawable {
         SDL_SetTextureAlphaMod(_renderTexture, cast(ubyte)(clamp(alpha, 0f, 1f) * 255f));
     }
 
+    /// Draw the texture at the specified location.
     void draw(const Vec2f renderPosition) const {
         draw(renderPosition, 0f);
     }

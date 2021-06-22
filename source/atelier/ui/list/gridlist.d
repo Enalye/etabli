@@ -137,7 +137,7 @@ class GridList : GuiElement {
     }
 
     override void onEvent(Event event) {
-        if (event.type == EventType.mouseWheel)
+        if (event.type == Event.Type.mouseWheel)
             _slider.onEvent(event);
     }
 
@@ -146,7 +146,7 @@ class GridList : GuiElement {
         _container.position = Vec2f(_slider.size.x, 0f);
         _container.container.size = Vec2f(_container.size.x, _layoutLength * _nbElements);
         _container.size = Vec2f(size.x - _slider.size.x, size.y);
-        _container.canvas.renderSize = _container.size.to!Vec2u;
+        _container.canvas.renderSize = _container.size.to!Vec2i;
     }
 
     override void update(float deltaTime) {

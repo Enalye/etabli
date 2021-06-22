@@ -172,7 +172,7 @@ class InputField : GuiElement {
 
     override void onEvent(Event event) {
         if (hasFocus) {
-            switch (event.type) with (EventType) {
+            switch (event.type) with (Event.Type) {
             case keyInput:
                 if (_caretIndex >= _limit)
                     break;

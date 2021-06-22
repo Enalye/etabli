@@ -83,12 +83,12 @@ class LogList : GuiElement {
 
     override void onEvent(Event event) {
         super.onEvent(event);
-        if (event.type == EventType.mouseDown || event.type == EventType.mouseUp
-                || event.type == EventType.mouseUpdate) {
+        if (event.type == Event.Type.mouseDown || event.type == Event.Type.mouseUp
+                || event.type == Event.Type.mouseUpdate) {
             _lastMousePos = event.mouse.position;
             if (_slider.isInside(event.mouse.position))
                 _slider.onEvent(event);
-            else if (event.type == EventType.mouseDown) {
+            else if (event.type == Event.Type.mouseDown) {
                 auto widgets = _container.layout.children;
                 foreach (size_t id, const GuiElement widget; widgets) {
                     if (widget.isHovered)
@@ -96,7 +96,7 @@ class LogList : GuiElement {
                 }
             }
         }
-        if (!isOnInteractableGuiElement(_lastMousePos) && event.type == EventType.mouseWheel)
+        if (!isOnInteractableGuiElement(_lastMousePos) && event.type == Event.Type.mouseWheel)
             _slider.onEvent(event);
     }
 
@@ -108,7 +108,7 @@ class LogList : GuiElement {
     override void onSize() {
         _slider.size = Vec2f(10f, size.y);
         _container.size = Vec2f(size.x - _slider.size.x, size.y);
-        _container.canvas.renderSize = _container.size.to!Vec2u;
+        _container.canvas.renderSize = _container.size.to!Vec2i;
         onPosition();
     }
 

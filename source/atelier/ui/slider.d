@@ -113,7 +113,7 @@ abstract class Slider : GuiElement {
         if (_step == 0f)
             return;
 
-        switch (event.type) with (EventType) {
+        switch (event.type) with (Event.Type) {
         case mouseWheel:
             _offset -= event.scroll.delta.y * _step;
             _offset = (_offset < -_step) ? -_step : ((_offset > 1f + _step) ? 1f + _step : _offset); //Clamp the value.

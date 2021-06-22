@@ -118,7 +118,7 @@ package(atelier) void handleGuiElementEvent(Event event) {
     }
 
     _hasClicked = false;
-    switch (event.type) with (EventType) {
+    switch (event.type) with (Event.Type) {
     case mouseDown:
         _tempGrabbedGuiElement = null;
         dispatchMouseDownEvent(null, event.mouse.position);
@@ -129,7 +129,7 @@ package(atelier) void handleGuiElementEvent(Event event) {
 
         if (_hasClicked && _clickedGuiElement !is null) {
             _clickedGuiElement.isClicked = true;
-            Event guiEvent = EventType.mouseDown;
+            Event guiEvent = Event.Type.mouseDown;
             guiEvent.mouse.position = _clickedGuiElementEventPosition;
             _clickedGuiElement.onEvent(guiEvent);
         }
@@ -149,7 +149,7 @@ package(atelier) void handleGuiElementEvent(Event event) {
                 _hoveredGuiElement.onHover();
 
             //Compatibility
-            Event guiEvent = EventType.mouseUpdate;
+            Event guiEvent = Event.Type.mouseUpdate;
             guiEvent.mouse.position = _hoveredGuiElementEventPosition;
             _hoveredGuiElement.onEvent(guiEvent);
         }
@@ -238,16 +238,16 @@ package(atelier) void updateRoots(GuiElement gui, GuiElement parent) {
         if (gui._alignX == GuiAlignX.left)
             coords.x = offset.x;
         else if (gui._alignX == GuiAlignX.right)
-            coords.x = screenWidth - offset.x;
+            coords.x = getWindowWidth() - offset.x;
         else
-            coords.x = centerScreen.x + gui._currentState.offset.x + gui.position.x;
+            coords.x = getWindowCenter().x + gui._currentState.offset.x + gui.position.x;
 
         if (gui._alignY == GuiAlignY.top)
             coords.y = offset.y;
         else if (gui._alignY == GuiAlignY.bottom)
-            coords.y = screenHeight - offset.y;
+            coords.y = getWindowHeight() - offset.y;
         else
-            coords.y = centerScreen.y + gui._currentState.offset.y + gui.position.y;
+            coords.y = getWindowCenter().y + gui._currentState.offset.y + gui.position.y;
     }
     gui.setScreenCoords(coords);
     gui.update(_deltaTime);
@@ -323,7 +323,7 @@ private void dispatchMouseDownEvent(GuiElement gui, Vec2f cursorPosition) {
             _hasClicked = true;
 
             if (gui._hasEventHook) {
-                Event guiEvent = EventType.mouseDown;
+                Event guiEvent = Event.Type.mouseDown;
                 guiEvent.mouse.position = cursorPosition;
                 gui.onEvent(guiEvent);
             }
@@ -358,7 +358,7 @@ private void dispatchMouseUpEvent(GuiElement gui, Vec2f cursorPosition) {
             }
 
             if (gui._hasEventHook) {
-                Event guiEvent = EventType.mouseUp;
+                Event guiEvent = Event.Type.mouseUp;
                 guiEvent.mouse.position = cursorPosition;
                 gui.onEvent(guiEvent);
             }
@@ -386,7 +386,7 @@ private void dispatchMouseUpEvent(GuiElement gui, Vec2f cursorPosition) {
         gui.onSubmit();
 
         //Compatibility
-        Event event = EventType.mouseUp;
+        Event event = Event.Type.mouseUp;
         event.mouse.position = cursorPosition;
         gui.onEvent(event);
     }
@@ -438,7 +438,7 @@ private void dispatchMouseUpdateEvent(GuiElement gui, Vec2f cursorPosition) {
             _hasClicked = true;
 
             if (gui._hasEventHook) {
-                Event guiEvent = EventType.mouseUpdate;
+                Event guiEvent = Event.Type.mouseUpdate;
                 guiEvent.mouse.position = cursorPosition;
                 gui.onEvent(guiEvent);
                 _hookedGuis ~= gui;
@@ -465,7 +465,7 @@ private void dispatchMouseUpdateEvent(GuiElement gui, Vec2f cursorPosition) {
 
 /// Process a mouse wheel event down the tree.
 private void dispatchMouseWheelEvent(Vec2f scroll) {
-    Event scrollEvent = EventType.mouseWheel;
+    Event scrollEvent = Event.Type.mouseWheel;
     scrollEvent.scroll.delta = scroll;
 
     foreach (gui; _hookedGuis) {
@@ -513,7 +513,7 @@ private void dispatchGenericEvents(GuiElement gui, Event event) {
 }
 /*
 private void handleGuiElementEvents(GuiElement gui) {
-    switch (event.type) with(EventType) {
+    switch (event.type) with(Event.Type) {
     case MouseDown:
         bool hasClickedGuiElement;
         foreach(uint id, GuiElement widget; _children) {

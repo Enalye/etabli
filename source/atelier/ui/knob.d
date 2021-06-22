@@ -105,7 +105,7 @@ class Knob : GuiElement {
         if (_step == 0f)
             return;
 
-        switch (event.type) with (EventType) {
+        switch (event.type) with (Event.Type) {
         case mouseWheel:
             _value += event.scroll.delta.y * _step;
             _value = clamp(_value, 0f, 1f);

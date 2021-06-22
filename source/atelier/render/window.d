@@ -25,8 +25,8 @@ static {
 
     private {
         SDL_Surface* _icon;
-        Vec2u _windowSize;
-        Vec2f _screenSize, _centerScreen;
+        Vec2i _windowDimensions;
+        Vec2f _windowSize, _windowCenter;
         bool _hasAudio = true;
         bool _hasCustomCursor = false;
         bool _showCursor = true;
@@ -35,23 +35,29 @@ static {
     }
 }
 
-@property {
-    /// Width of the window in pixels.
-    uint screenWidth() {
-        return _windowSize.x;
-    }
-    /// Height of the window in pixels.
-    uint screenHeight() {
-        return _windowSize.y;
-    }
-    /// Size of the window in pixels.
-    Vec2f screenSize() {
-        return _screenSize;
-    }
-    /// Half of the size of the window in pixels.
-    Vec2f centerScreen() {
-        return _centerScreen;
-    }
+/// Width of the window in pixels.
+int getWindowWidth() {
+    return _windowDimensions.x;
+}
+
+/// Height of the window in pixels.
+int getWindowHeight() {
+    return _windowDimensions.y;
+}
+
+/// Dimensions of the window in pixels.
+Vec2i getWindowDimensions() {
+    return _windowDimensions;
+}
+
+/// Size of the window in pixels.
+Vec2f getWindowSize() {
+    return _windowSize;
+}
+
+/// Half of the size of the window in pixels.
+Vec2f getWindowCenter() {
+    return _windowCenter;
 }
 
 private struct CanvasReference {
@@ -74,7 +80,7 @@ enum DisplayMode {
 import std.exception;
 
 /// Create the application window.
-void createWindow(const Vec2u windowSize, string title) {
+void createWindow(const Vec2i windowSize, string title) {
     enforce(loadSDL() >= SDLSupport.sdl2014, "SDL support <= 2.0.14");
     enforce(loadSDLImage() >= SDLImageSupport.sdlImage204, "SDL image support <= 2.0.4");
     enforce(loadSDLTTF() >= SDLTTFSupport.sdlTTF2014, "SDL ttf support <= 2.0.14");
@@ -101,9 +107,9 @@ void createWindow(const Vec2u windowSize, string title) {
     canvasRef.renderSize = cast(Vec2f)(windowSize);
     _canvases ~= canvasRef;
 
-    _windowSize = windowSize;
-    _screenSize = cast(Vec2f)(windowSize);
-    _centerScreen = _screenSize / 2f;
+    _windowDimensions = windowSize;
+    _windowSize = cast(Vec2f)(windowSize);
+    _windowCenter = _windowSize / 2f;
 
     setWindowTitle(title);
 }
@@ -138,7 +144,7 @@ void setWindowClearColor(Color color) {
 
 /// Update the window size. \
 /// If `isLogical` is set, the actual window won't be resized, only the canvas will.
-void setWindowSize(const Vec2u windowSize, bool isLogical = false) {
+void setWindowSize(const Vec2i windowSize, bool isLogical = false) {
     resizeWindow(windowSize);
 
     if (isLogical)
@@ -148,10 +154,10 @@ void setWindowSize(const Vec2u windowSize, bool isLogical = false) {
 }
 
 /// Call this to update canvas size when window's size is changed externally.
-package(atelier) void resizeWindow(const Vec2u windowSize) {
-    _windowSize = windowSize;
-    _screenSize = cast(Vec2f)(windowSize);
-    _centerScreen = _screenSize / 2f;
+package(atelier) void resizeWindow(const Vec2i windowSize) {
+    _windowDimensions = windowSize;
+    _windowSize = cast(Vec2f)(windowSize);
+    _windowCenter = _windowSize / 2f;
 
     if (_canvases.length) {
         _canvases[0].position = cast(Vec2f)(windowSize) / 2;
@@ -161,19 +167,19 @@ package(atelier) void resizeWindow(const Vec2u windowSize) {
 }
 
 /// Current window size.
-Vec2i getWindowSize() {
+private Vec2i fetchWindowSize() {
     Vec2i windowSize;
     SDL_GetWindowSize(_sdlWindow, &windowSize.x, &windowSize.y);
     return windowSize;
 }
 
 /// The window cannot be resized less than this.
-void setWindowMinSize(Vec2u size) {
+void setWindowMinSize(Vec2i size) {
     SDL_SetWindowMinimumSize(_sdlWindow, size.x, size.y);
 }
 
 /// The window cannot be resized more than this.
-void setWindowMaxSize(Vec2u size) {
+void setWindowMaxSize(Vec2i size) {
     SDL_SetWindowMaximumSize(_sdlWindow, size.x, size.y);
 }
 
@@ -221,10 +227,10 @@ void setWindowDisplay(DisplayMode displayMode) {
         break;
     }
     SDL_SetWindowFullscreen(_sdlWindow, mode);
-    Vec2u newSize = cast(Vec2u) getWindowSize();
+    Vec2i newSize = fetchWindowSize();
     resizeWindow(newSize);
     Event event;
-    event.type = EventType.resize;
+    event.type = Event.Type.resize;
     event.window.size = newSize;
     handleGuiElementEvent(event);
 }
@@ -235,8 +241,13 @@ DisplayMode getWindowDisplay() {
 }
 
 /// Enable/Disable the borders.
-void setWindowBordered(bool bordered) {
-    SDL_SetWindowBordered(_sdlWindow, bordered ? SDL_TRUE : SDL_FALSE);
+void setWindowBordered(bool isBordered) {
+    SDL_SetWindowBordered(_sdlWindow, isBordered ? SDL_TRUE : SDL_FALSE);
+}
+
+/// Allow the user to resize the window
+void setWindowResizable(bool isResizable) {
+    SDL_SetWindowResizable(_sdlWindow, isResizable ? SDL_TRUE : SDL_FALSE);
 }
 
 /// Show/Hide the window. \
@@ -251,7 +262,7 @@ void showWindow(bool show) {
 /// Render everything on screen.
 void renderWindow() {
     Vec2f mousePos = getMousePos();
-    if (_hasCustomCursor && _showCursor && mousePos.isBetween(Vec2f.one, screenSize - Vec2f.one)) {
+    if (_hasCustomCursor && _showCursor && mousePos.isBetween(Vec2f.one, _windowSize - Vec2f.one)) {
         _customCursorSprite.color = Color.white;
         _customCursorSprite.draw(mousePos + _customCursorSprite.size / 2f);
     }
