@@ -10,7 +10,7 @@
 		"bindbc-sdl": "~>0.21.2"
 	},
 	"versions": [
-		"SDL_2014",
+		"SDL_2010",
 		"SDL_Image_204",
 		"SDL_TTF_2014",
 		"SDL_Mixer_204"
