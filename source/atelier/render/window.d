@@ -81,7 +81,7 @@ import std.exception;
 
 /// Create the application window.
 void createWindow(const Vec2i windowSize, string title) {
-    enforce(loadSDL() >= SDLSupport.sdl2014, "SDL support <= 2.0.14");
+    enforce(loadSDL() >= SDLSupport.sdl2010, "SDL support <= 2.0.10");
     enforce(loadSDLImage() >= SDLImageSupport.sdlImage204, "SDL image support <= 2.0.4");
     enforce(loadSDLTTF() >= SDLTTFSupport.sdlTTF2014, "SDL ttf support <= 2.0.14");
     enforce(loadSDLMixer() >= SDLMixerSupport.sdlMixer204, "SDL mixer support <= 2.0.4");
