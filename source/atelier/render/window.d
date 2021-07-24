@@ -285,7 +285,7 @@ void pushCanvas(Canvas canvas, bool clear = true) {
     _canvases ~= canvasRef;
 
     SDL_SetRenderTarget(_sdlRenderer, cast(SDL_Texture*) canvasRef.target);
-    setRenderColor(canvas.color, canvas.alpha);
+    setRenderColor(canvas.clearColor, canvas.clearAlpha);
     if (clear)
         SDL_RenderClear(_sdlRenderer);
 }

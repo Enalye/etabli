@@ -21,6 +21,9 @@ final class Canvas : Drawable {
         SDL_Texture* _renderTexture;
         Vec2i _renderSize;
         bool _isSmooth = false;
+        Color _color = Color.white;
+        float _alpha = 1f;
+        Blend _blend = Blend.alpha;
     }
 
     package(atelier.render) {
@@ -53,20 +56,46 @@ final class Canvas : Drawable {
                     SDL_TEXTUREACCESS_TARGET, _renderSize.x, _renderSize.y);
             if (_isSmooth)
                 SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+            updateCanvasSettings();
             return _renderSize;
+        }
+
+        /// Color added to the canvas.
+        Color color() const { return _color; }
+        /// Ditto
+        Color color(Color color_) {
+            _color = color_;
+            auto sdlColor = _color.toSDL();
+            SDL_SetTextureColorMod(_renderTexture, sdlColor.r, sdlColor.g, sdlColor.b);
+            return _color;
+        }
+
+        /// Alpha
+        float alpha() const { return _alpha; }
+        /// Ditto
+        float alpha(float alpha_) {
+            _alpha = alpha_;
+            SDL_SetTextureAlphaMod(_renderTexture, cast(ubyte)(clamp(_alpha, 0f, 1f) * 255f));
+            return _alpha;
+        }
+        
+        /// Blending algorithm.
+        Blend blend() const { return _blend; }
+        /// Ditto
+        Blend blend(Blend blend_) {
+            _blend = blend_;
+            SDL_SetTextureBlendMode(_renderTexture, getSDLBlend(_blend));
+            return _blend;
         }
     }
 
     /// The view position inside the canvas.
     Vec2f position = Vec2f.zero, /// The size of the view inside of the canvas.
         size = Vec2f.zero;
-    /// Is the Canvas rendered from its center or from the top left corner ? \
-    /// (only change the render position, not the view).
-    bool isCentered = true;
     /// The base color when nothing is rendered.
-    Color color = Color.black;
+    Color clearColor = Color.black;
     /// The base opacity when nothing is rendered.
-    float alpha = 0f;
+    float clearAlpha = 0f;
     /// Mirroring property.
     Flip flip = Flip.none;
 
@@ -88,10 +117,9 @@ final class Canvas : Drawable {
                 SDL_TEXTUREACCESS_TARGET, _renderSize.x, _renderSize.y);
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-        setColorMod(Color.white, Blend.alpha);
+        updateCanvasSettings();
 
         size = cast(Vec2f) _renderSize;
-        isCentered = false;
     }
 
     /// Ctor
@@ -99,9 +127,20 @@ final class Canvas : Drawable {
         _renderSize = canvas._renderSize;
         size = canvas.size;
         position = canvas.position;
-        isCentered = canvas.isCentered;
+        _isSmooth = canvas._isSmooth;
+        clearColor = canvas.clearColor;
+        clearAlpha = canvas.clearAlpha;
+        _blend = canvas._blend;
+        _color = canvas._color;
+        _alpha = canvas._alpha;
+        
+        if (_isSmooth)
+            SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
         _renderTexture = SDL_CreateTexture(_sdlRenderer, SDL_PIXELFORMAT_RGBA8888,
                 SDL_TEXTUREACCESS_TARGET, _renderSize.x, _renderSize.y);
+        if (_isSmooth)
+            SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+        updateCanvasSettings();
     }
 
     ~this() {
@@ -110,17 +149,34 @@ final class Canvas : Drawable {
     }
 
     /// Copy
-    Canvas copy(const Canvas v) {
-        _renderSize = v._renderSize;
-        size = v.size;
-        position = v.position;
-        isCentered = v.isCentered;
+    Canvas copy(const Canvas canvas) {
+        _renderSize = canvas._renderSize;
+        size = canvas.size;
+        position = canvas.position;
+        _isSmooth = canvas._isSmooth;
+        clearColor = canvas.clearColor;
+        clearAlpha = canvas.clearAlpha;
+        _blend = canvas._blend;
+        _color = canvas._color;
+        _alpha = canvas._alpha;
 
         if (_renderTexture !is null)
             SDL_DestroyTexture(_renderTexture);
+        if (_isSmooth)
+            SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
         _renderTexture = SDL_CreateTexture(_sdlRenderer, SDL_PIXELFORMAT_RGBA8888,
                 SDL_TEXTUREACCESS_TARGET, _renderSize.x, _renderSize.y);
+        if (_isSmooth)
+            SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+        updateCanvasSettings();
         return this;
+    }
+
+    private void updateCanvasSettings() {
+        auto sdlColor = _color.toSDL();
+        SDL_SetTextureBlendMode(_renderTexture, getSDLBlend(_blend));
+        SDL_SetTextureColorMod(_renderTexture, sdlColor.r, sdlColor.g, sdlColor.b);
+        SDL_SetTextureAlphaMod(_renderTexture, cast(ubyte)(clamp(_alpha, 0f, 1f) * 255f));
     }
 
     /// Toggle the canvas smoothing
@@ -129,30 +185,6 @@ final class Canvas : Drawable {
             renderSize(_renderSize);
         }
         _isSmooth = isSmooth_;
-    }
-
-    /// Apply a color filter or change its blending algorithm.
-    void setColorMod(const Color color, Blend blend = Blend.alpha) {
-        SDL_SetTextureBlendMode(_renderTexture, getSDLBlend(blend));
-
-        auto sdlColor = color.toSDL();
-        SDL_SetTextureColorMod(_renderTexture, sdlColor.r, sdlColor.g, sdlColor.b);
-    }
-
-    /// Change the blending algorithm.
-    void setBlend(Blend blend) {
-        SDL_SetTextureBlendMode(_renderTexture, getSDLBlend(blend));
-    }
-
-    /// Apply a color filter.
-    void setColor(const Color color) {
-        auto sdlColor = color.toSDL();
-        SDL_SetTextureColorMod(_renderTexture, sdlColor.r, sdlColor.g, sdlColor.b);
-    }
-
-    /// Transparency (1 = visible, 0 = hidden).
-    void setAlpha(float alpha) {
-        SDL_SetTextureAlphaMod(_renderTexture, cast(ubyte)(clamp(alpha, 0f, 1f) * 255f));
     }
 
     /// Draw the texture at the specified location.
@@ -190,14 +222,6 @@ final class Canvas : Drawable {
         SDL_RendererFlip rendererFlip = getSDLFlip(flip);
         SDL_RenderCopyEx(cast(SDL_Renderer*) _sdlRenderer,
                 cast(SDL_Texture*) _renderTexture, null, &destRect, 0f, null, rendererFlip);
-    }
-
-    /// Check if a (outside) position is on the canvas rendering area. \
-    /// It needs to know where the canvas will be rendered.
-    bool isInside(const Vec2f pos, const Vec2f renderPosition) const {
-        return (isCentered) ? pos.isBetween(renderPosition - cast(Vec2f)(_renderSize) * 0.5f,
-                renderPosition + cast(Vec2f)(_renderSize) * 0.5f) : pos.isBetween(
-                renderPosition, renderPosition + cast(Vec2f)(_renderSize));
     }
 
     /// Draw the part of the texture at the specified location.

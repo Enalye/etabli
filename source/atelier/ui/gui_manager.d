@@ -268,8 +268,8 @@ package(atelier) void updateRoots(GuiElement gui, GuiElement parent) {
 void drawRoots(GuiElement gui) {
     if (gui.hasCanvas && gui.canvas !is null) {
         auto canvas = gui.canvas;
-        canvas.setColor(gui._currentState.color);
-        canvas.setAlpha(gui._currentState.alpha);
+        canvas.color(gui._currentState.color);
+        canvas.alpha(gui._currentState.alpha);
         pushCanvas(canvas, true);
         gui.draw();
         foreach (GuiElement child; gui.nodes) {
