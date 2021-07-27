@@ -67,6 +67,7 @@ void createApplication(Vec2i size, string title = "Atelier") {
     _isInitialized = true;
     createWindow(size, title);
     initializeEvents();
+    initFont();
     _tickStartFrame = Clock.currStdTime();
 }
 

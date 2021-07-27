@@ -56,7 +56,7 @@ final class TrueTypeFont : Font {
     }
 
     /// Ctor
-    this(const string path, int size_ = 16u, int outline_ = 0) {
+    this(const string path, int size_ = 12u, int outline_ = 0) {
         _size = size_;
         _outline = outline_;
         assert(_size != 0u, "can't render a font with no size");
@@ -73,7 +73,7 @@ final class TrueTypeFont : Font {
     }
 
     /// Init from buffer
-    this(const ubyte[] buffer, int size_ = 16u, int outline_ = 0) {
+    this(const ubyte[] buffer, int size_ = 12u, int outline_ = 0) {
         SDL_RWops* rw = SDL_RWFromConstMem(buffer.ptr, cast(int) buffer.length);
         _size = size_;
         _outline = outline_;

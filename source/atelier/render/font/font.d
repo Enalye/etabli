@@ -7,13 +7,23 @@ module atelier.render.font.font;
 
 import atelier.core;
 import atelier.render.texture;
-import atelier.render.font.glyph;
+import atelier.render.font.glyph, atelier.render.font.truetype, atelier.render.font.vera;
 
 private {
-    Font _defaultFont;
+    Font _defaultFont, _veraFont;
+}
+
+/// Initialize the default font
+void initFont() {
+    _veraFont = new TrueTypeFont(veraFontData);
+    _defaultFont = _veraFont;
 }
 
 void setDefaultFont(Font font) {
+    if (!font) {
+        _defaultFont = _veraFont;
+        return;
+    }
     _defaultFont = font;
 }
 
