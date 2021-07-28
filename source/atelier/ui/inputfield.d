@@ -41,6 +41,15 @@ class InputField : GuiElement {
             return newText;
         }
 
+        /// Label font
+        Font font() {
+            return _label.font;
+        }
+        /// Ditto
+        Font font(Font font_) {
+            return _label.font = font_;
+        }
+
         /// Max number of characters.
         uint limit() const {
             return _limit;
@@ -183,6 +192,68 @@ class InputField : GuiElement {
                 }
                 insertText(textInput);
                 break;
+            case keyDown:
+                switch (event.key.button) with (KeyButton) {
+                case right:
+                    if (_caretIndex < _text.length)
+                        _caretIndex++;
+                    if (!isButtonDown(KeyButton.leftShift) && !isButtonDown(KeyButton.rightShift)) {
+                        _selectionIndex = _caretIndex;
+                    }
+                    break;
+                case left:
+                    if (_caretIndex > 0U)
+                        _caretIndex--;
+                    if (!isButtonDown(KeyButton.leftShift) && !isButtonDown(KeyButton.rightShift)) {
+                        _selectionIndex = _caretIndex;
+                    }
+                    break;
+                case remove:
+                    removeSelection(1);
+                    break;
+                case backspace:
+                    removeSelection(-1);
+                    break;
+                case end:
+                    _caretIndex = cast(uint) _text.length;
+                    if (!isButtonDown(KeyButton.leftShift) && !isButtonDown(KeyButton.rightShift)) {
+                        _selectionIndex = _caretIndex;
+                    }
+                    break;
+                case home:
+                    _caretIndex = 0;
+                    if (!isButtonDown(KeyButton.leftShift) && !isButtonDown(KeyButton.rightShift)) {
+                        _selectionIndex = _caretIndex;
+                    }
+                    break;
+                case v:
+                    if (isButtonDown(KeyButton.leftControl) || isButtonDown(KeyButton.rightControl)) {
+                        if (hasClipboard()) {
+                            insertText(to!dstring(getClipboard()));
+                        }
+                    }
+                    break;
+                case c:
+                    if (isButtonDown(KeyButton.leftControl) || isButtonDown(KeyButton.rightControl)) {
+                        setClipboard(getSelection());
+                    }
+                    break;
+                case x:
+                    if (isButtonDown(KeyButton.leftControl) || isButtonDown(KeyButton.rightControl)) {
+                        setClipboard(getSelection());
+                        removeSelection(0);
+                    }
+                    break;
+                case a:
+                    if (isButtonDown(KeyButton.leftControl) || isButtonDown(KeyButton.rightControl)) {
+                        _caretIndex = cast(uint) _text.length;
+                        _selectionIndex = 0U;
+                    }
+                    break;
+                default:
+                    break;
+                }
+                break;
             default:
                 break;
             }
@@ -208,59 +279,6 @@ class InputField : GuiElement {
 
         _timer.update(deltaTime);
         _caretAlpha = lerp(1f, .21f, _timer.value01);
-
-        if (hasFocus()) {
-            if (getButtonDown(KeyButton.right)) {
-                if (_caretIndex < _text.length)
-                    _caretIndex++;
-                if (!isButtonDown(KeyButton.leftShift) && !isButtonDown(KeyButton.rightShift)) {
-                    _selectionIndex = _caretIndex;
-                }
-            }
-            else if (getButtonDown(KeyButton.left)) {
-                if (_caretIndex > 0U)
-                    _caretIndex--;
-                if (!isButtonDown(KeyButton.leftShift) && !isButtonDown(KeyButton.rightShift)) {
-                    _selectionIndex = _caretIndex;
-                }
-            }
-            if (getButtonDown(KeyButton.remove)) {
-                removeSelection(1);
-            }
-            else if (getButtonDown(KeyButton.backspace)) {
-                removeSelection(-1);
-            }
-            if (isButtonDown(KeyButton.leftControl) || isButtonDown(KeyButton.rightControl)) {
-                if (getButtonDown(KeyButton.v)) {
-                    if (hasClipboard()) {
-                        insertText(to!dstring(getClipboard()));
-                    }
-                }
-                else if (getButtonDown(KeyButton.c)) {
-                    setClipboard(getSelection());
-                }
-                else if (getButtonDown(KeyButton.x)) {
-                    setClipboard(getSelection());
-                    removeSelection(0);
-                }
-                else if (getButtonDown(KeyButton.a)) {
-                    _caretIndex = cast(uint) _text.length;
-                    _selectionIndex = 0U;
-                }
-            }
-            if (getButtonDown(KeyButton.end)) {
-                _caretIndex = cast(uint) _text.length;
-                if (!isButtonDown(KeyButton.leftShift) && !isButtonDown(KeyButton.rightShift)) {
-                    _selectionIndex = _caretIndex;
-                }
-            }
-            else if (getButtonDown(KeyButton.home)) {
-                _caretIndex = 0;
-                if (!isButtonDown(KeyButton.leftShift) && !isButtonDown(KeyButton.rightShift)) {
-                    _selectionIndex = _caretIndex;
-                }
-            }
-        }
     }
 
     override void draw() {
