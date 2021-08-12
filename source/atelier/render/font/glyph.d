@@ -61,4 +61,15 @@ struct Glyph {
         _texture.setColorMod(Color.white, Blend.alpha);
         _texture.setAlpha(1f);
     }
+
+    /// Ditto
+    void draw(Vec2f position, float scale, Color color, float alpha) {
+        const Vec2f finalSize = Vec2f(_width, _height) * scale * transformScale();
+        _texture.setColorMod(color, Blend.alpha);
+        _texture.setAlpha(alpha);
+        _texture.draw(transformRenderSpace(position), finalSize, Vec4i(_packX,
+                _packY, _packWidth, _packHeight), Vec2f.zero);
+        _texture.setColorMod(Color.white, Blend.alpha);
+        _texture.setAlpha(1f);
+    }
 }

@@ -100,6 +100,12 @@ final class Text : GuiElement {
         _timer.reset();
     }
 
+    /// Add to current text
+    void append(string text_) {
+        _text ~= to!dstring(text_);
+        tokenize();
+    }
+
     private struct Token {
         enum Type {
             character,
@@ -129,7 +135,7 @@ final class Text : GuiElement {
         }
 
         struct ScaleToken {
-            int scale;
+            float scale;
         }
 
         struct SpacingToken {
@@ -269,7 +275,7 @@ final class Text : GuiElement {
                         Token token;
                         token.type = Token.Type.scale;
                         if (!parameters.empty)
-                            token.scale.scale = parameters.front.to!int;
+                            token.scale.scale = parameters.front.to!float;
                         else
                             continue;
                         _tokens ~= token;
@@ -365,7 +371,7 @@ final class Text : GuiElement {
         float lineWidth = 0f;
         dchar prevChar;
         int charSpacing_ = _charSpacing;
-        int charScale_ = min(cast(int) scale.x, cast(int) scale.y);
+        float charScale_ = min(cast(int) scale.x, cast(int) scale.y);
         foreach (Token token; _tokens) {
             final switch (token.type) with (Token.Type) {
             case line:
@@ -406,7 +412,7 @@ final class Text : GuiElement {
         dchar prevChar;
         Color charColor_ = color;
         float charDelay_ = _delay;
-        int charScale_ = min(cast(int) scale.x, cast(int) scale.y);
+        float charScale_ = min(cast(int) scale.x, cast(int) scale.y);
         int charSpacing_ = _charSpacing;
         Token.EffectToken.Type charEffect_ = Token.EffectToken.Type.none;
         Vec2f totalSize_ = Vec2f.zero;
@@ -452,7 +458,7 @@ final class Text : GuiElement {
                                 easeInSine((_effectTimer.value01 - .5f) * 2f));
                     break;
                 case shake:
-                    drawPos += Vec2f(uniform01(), uniform01()) * charScale_;
+                    drawPos += Vec2f(uniform01(), uniform01()) * charScale_ * 5f;
                     break;
                 case rainbow:
                     break;
