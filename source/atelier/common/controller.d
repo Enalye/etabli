@@ -98,33 +98,33 @@ void updateControllers(float deltaTime) {
 
 /// Attempt to connect a new controller
 void addController(int index) {
-    writeln("Detected device at index ", index, ".");
+    //writeln("Detected device at index ", index, ".");
 
     auto c = SDL_JoystickNameForIndex(index);
     auto d = fromStringz(c);
-    writeln("Device name: ", d);
+    //writeln("Device name: ", d);
 
     if (!SDL_IsGameController(index)) {
-        writeln("The device is not recognised as a game controller.");
+        //writeln("The device is not recognised as a game controller.");
         auto stick = SDL_JoystickOpen(index);
         auto guid = SDL_JoystickGetGUID(stick);
-        writeln("The device guid is: ");
-        foreach (i; 0 .. 16)
-            printf("%02x", guid.data[i]);
-        writeln("");
+        //writeln("The device guid is: ");
+        //foreach (i; 0 .. 16)
+        //    printf("%02x", guid.data[i]);
+        //writeln("");
         return;
     }
-    writeln("The device has been detected as a game controller.");
+    //writeln("The device has been detected as a game controller.");
     foreach (ref controller; _controllers) {
         if (controller.index == index) {
-            writeln("The controller is already open, aborted.");
+            //writeln("The controller is already open, aborted.");
             return;
         }
     }
 
     auto sdlController = SDL_GameControllerOpen(index);
     if (!sdlController) {
-        writeln("Could not connect the game controller.");
+        //writeln("Could not connect the game controller.");
         return;
     }
 
@@ -135,12 +135,12 @@ void addController(int index) {
     controller.joystickId = SDL_JoystickInstanceID(controller.sdlJoystick);
     _controllers ~= controller;
 
-    writeln("The game controller is now connected.");
+    //writeln("The game controller is now connected.");
 }
 
 /// Remove a connected controller
 void removeController(int joystickId) {
-    writeln("Controller disconnected: ", joystickId);
+    //writeln("Controller disconnected: ", joystickId);
 
     int index;
     bool isControllerPresent;
@@ -168,7 +168,7 @@ void removeController(int joystickId) {
 
 /// Called upon remapping
 void remapController(int joystickId) {
-    writeln("Controller remapped: ", joystickId);
+    //writeln("Controller remapped: ", joystickId);
 }
 
 /// Change the value of a controller axis.
