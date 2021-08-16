@@ -11,7 +11,6 @@ import bindbc.sdl, bindbc.sdl.image;
 
 import atelier.core;
 import atelier.render.window;
-import atelier.render.texture;
 import atelier.render.sprite;
 import atelier.render.drawable;
 
@@ -20,7 +19,7 @@ final class Tileset {
     @property {
         /// loaded ?
         bool isLoaded() const {
-            return texture.isLoaded;
+            return drawable.isLoaded;
         }
         /// Number of tiles
         int maxtiles() const {
@@ -38,18 +37,18 @@ final class Tileset {
     /// The maximum number of tile, cannot be more than columns * lines, cannot be less than 0.
     private int _maxtiles;
 
-    /// Texture region of the first tile (the source size).
+    /// Drawable region of the first tile (the source size).
     Vec4i clip;
 
     /// Spacing between each tiles.
     Vec2i margin;
 
     /// Number of tiles on the horizontal axis.
-    int columns = 1,/// Number of tiles on the vertical axis.
-    lines = 1;
+    int columns = 1, /// Number of tiles on the vertical axis.
+        lines = 1;
 
     /// Source material.
-    Texture texture;
+    Drawable drawable;
 
     /// Destination size.
     Vec2f size = Vec2f.zero, scale = Vec2f.one;
@@ -82,7 +81,7 @@ final class Tileset {
         clip = tileset.clip;
         columns = tileset.columns;
         lines = tileset.lines;
-        texture = tileset.texture;
+        drawable = tileset.drawable;
         size = tileset.size;
         scale = tileset.scale;
         angle = tileset.angle;
@@ -94,8 +93,8 @@ final class Tileset {
     }
 
     /// Ctor
-    this(Texture newTexture, Vec4i newClip, int newColumns, int newLines, int newMaxTiles = -1) {
-        texture = newTexture;
+    this(Drawable newDrawable, Vec4i newClip, int newColumns, int newLines, int newMaxTiles = -1) {
+        drawable = newDrawable;
         clip = newClip;
         columns = newColumns;
         lines = newLines;
@@ -112,7 +111,7 @@ final class Tileset {
         Vec2i coord = Vec2i(id % columns, id / columns);
         Vec4i spriteClip = Vec4i(clip.x + coord.x * clip.z, clip.y + coord.y * clip.w,
                 clip.z, clip.w);
-        Sprite sprite = new Sprite(texture, spriteClip);
+        Sprite sprite = new Sprite(drawable, spriteClip);
         sprite.flip = flip;
         sprite.blend = blend;
         sprite.color = color;
@@ -152,11 +151,10 @@ final class Tileset {
 
         Vec4i currentClip = Vec4i(clip.x + coord.x * (clip.z + margin.x),
                 clip.y + coord.y * (clip.w + margin.y), clip.z, clip.w);
-        texture.setColorMod(color, blend);
-        texture.setAlpha(alpha);
-        texture.draw(transformRenderSpace(position - dist), finalSize, currentClip, angle, flip);
-        texture.setColorMod(Color.white);
-        texture.setAlpha(1f);
+        drawable.color = color;
+        drawable.blend = blend;
+        drawable.alpha = alpha;
+        drawable.draw(transformRenderSpace(position - dist), finalSize, currentClip, angle, flip);
     }
 
     /// Ditto
@@ -172,10 +170,9 @@ final class Tileset {
             throw new Exception("Tileset id out of bounds");
         Vec4i currentClip = Vec4i(clip.x + coord.x * (clip.z + margin.x),
                 clip.y + coord.y * (clip.w + margin.y), clip.z, clip.w);
-        texture.setColorMod(color, blend);
-        texture.setAlpha(alpha);
-        texture.draw(transformRenderSpace(position), finalSize, currentClip, angle, flip, anchor);
-        texture.setColorMod(Color.white);
-        texture.setAlpha(1f);
+        drawable.color = color;
+        drawable.blend = blend;
+        drawable.alpha = alpha;
+        drawable.draw(transformRenderSpace(position), finalSize, currentClip, angle, flip, anchor);
     }
 }

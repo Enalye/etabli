@@ -276,7 +276,9 @@ void drawRoots(GuiElement gui) {
             drawRoots(child);
         }
         popCanvas();
-        canvas.draw(gui._screenCoords, gui._currentState.angle);
+        canvas.draw(transformRenderSpace(gui._screenCoords),
+                transformScale() * cast(Vec2f) canvas.renderSize(), Vec4i(0, 0,
+                    canvas.width, canvas.height), gui._currentState.angle, Flip.none, Vec2f.half);
         const auto origin = gui._origin;
         const auto center = gui._center;
         gui._origin = gui._screenCoords - (gui._size * gui._currentState.scale) / 2f;

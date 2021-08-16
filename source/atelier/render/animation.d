@@ -12,11 +12,11 @@ import bindbc.sdl, bindbc.sdl.image;
 import atelier.common;
 import atelier.core;
 
-import atelier.render.window, atelier.render.texture, atelier.render.drawable;
-import atelier.render.tileset, atelier.render.sprite;
+import atelier.render.window, atelier.render.drawable, atelier.render.tileset,
+    atelier.render.sprite;
 
 /// Series of animation frames played successively.
-final class Animation : Drawable {
+final class Animation {
     /// Change the way the animation is playing.
     /// once: Play each frames sequencially then stop.
     /// reverse: Play each frames from the last to the first one then stop.
@@ -34,7 +34,7 @@ final class Animation : Drawable {
     }
 
     private {
-        Texture _texture;
+        Drawable _drawable;
         Timer _timer;
         int _currentFrameId;
         bool _isRunning = true, _isReversed;
@@ -63,17 +63,17 @@ final class Animation : Drawable {
             return frames[_currentFrameId];
         }
 
-        /// Texture.
-        Texture texture(Texture texture_) {
-            return _texture = texture_;
+        /// Drawable.
+        Drawable drawable(Drawable drawable_) {
+            return _drawable = drawable_;
         }
         /// Ditto
-        const(Texture) texture() const {
-            return _texture;
+        const(Drawable) drawable() const {
+            return _drawable;
         }
     }
 
-    /// Texture regions (the source size) for each frames.
+    /// Drawable regions (the source size) for each frames.
     Vec4i[] clips;
 
     /// The order in which each frames is played.
@@ -114,19 +114,19 @@ final class Animation : Drawable {
     }
 
     /// Create an animation from a series of clips.
-    this(Texture tex, const Vec2f size_, Vec4i[] clips_, int[] frames_) {
-        assert(tex, "Null texture");
-        _texture = tex;
+    this(Drawable tex, const Vec2f size_, Vec4i[] clips_, int[] frames_) {
+        assert(tex, "Null drawable");
+        _drawable = tex;
         size = size_;
         clips = clips_;
         frames = frames_;
     }
 
     /// Create an animation from a tileset.
-    this(Texture tex, const Vec4i startTileClip, const int columns, const int lines,
+    this(Drawable tex, const Vec4i startTileClip, const int columns, const int lines,
             const int maxcount = 0, const Vec2i margin = Vec2i.zero) {
-        assert(tex, "Null texture");
-        _texture = tex;
+        assert(tex, "Null drawable");
+        _drawable = tex;
         size = to!Vec2f(startTileClip.zw);
         int count;
         for (int y; y < lines; y++) {
@@ -149,7 +149,7 @@ final class Animation : Drawable {
     /// Copy ctor.
     this(Animation animation) {
         _timer = animation._timer;
-        _texture = animation._texture;
+        _drawable = animation._drawable;
         clips = animation.clips;
         frames = animation.frames;
         size = animation.size;
@@ -294,26 +294,25 @@ final class Animation : Drawable {
     void draw(const Vec2f position) {
         if (_currentFrameId < 0 || !frames.length)
             return;
-        assert(_texture, "No texture loaded.");
+        assert(_drawable, "No drawable loaded.");
         if (_currentFrameId >= frames.length)
             _currentFrameId = 0;
         const int currentClip = frames[_currentFrameId];
         if (currentClip >= clips.length)
             return;
         const Vec2f finalSize = size * transformScale();
-        _texture.setColorMod(color, blend);
-        _texture.setAlpha(alpha);
-        _texture.draw(transformRenderSpace(position), finalSize,
+        _drawable.color = color;
+        _drawable.blend = blend;
+        _drawable.alpha = alpha;
+        _drawable.draw(transformRenderSpace(position), finalSize,
                 clips[currentClip], angle, flip, anchor);
-        _texture.setColorMod(Color.white);
-        _texture.setAlpha(1f);
     }
 
     /// Render the current frame with a direction information.
     void draw(const Vec2f position, int currentDir) {
         if (_currentFrameId < 0 || !frames.length)
             return;
-        assert(_texture, "No texture loaded.");
+        assert(_drawable, "No drawable loaded.");
         if (_currentFrameId >= frames.length)
             _currentFrameId = 0;
         const int currentClip = frames[_currentFrameId];
@@ -347,10 +346,10 @@ final class Animation : Drawable {
         }
 
         const Vec2f finalSize = size * transformScale();
-        _texture.setColorMod(color, blend);
-        _texture.draw(transformRenderSpace(position), finalSize, texClip,
+        _drawable.color = color;
+        _drawable.blend = blend;
+        _drawable.alpha = alpha;
+        _drawable.draw(transformRenderSpace(position), finalSize, texClip,
                 angle, currentFlip, anchor);
-        _texture.setColorMod(Color.white);
-        _texture.setAlpha(1f);
     }
 }
