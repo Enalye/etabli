@@ -79,6 +79,7 @@ final class Tileset {
     this(Tileset tileset) {
         _maxtiles = tileset._maxtiles;
         clip = tileset.clip;
+        margin = tileset.margin;
         columns = tileset.columns;
         lines = tileset.lines;
         drawable = tileset.drawable;
