@@ -68,7 +68,7 @@ final class Animation {
             return _drawable = drawable_;
         }
         /// Ditto
-        const(Drawable) drawable() const {
+        Drawable drawable() {
             return _drawable;
         }
     }
