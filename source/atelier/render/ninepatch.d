@@ -115,6 +115,24 @@ final class NinePatch : Drawable {
         bool _isDirty = true;
     }
 
+    /// Mirroring property.
+    Flip flip = Flip.none;
+
+    /// Relative center of the ninepatch.
+    Vec2f anchor = Vec2f.half;
+
+    /// Angle in which the ninepatch will be rendered.
+    float angle = 0f;
+
+    /// Color added to the ninepatch.
+    Color color = Color.white;
+
+    /// Alpha
+    float alpha = 1f;
+
+    /// Blending algorithm.
+    Blend blend = Blend.alpha;
+
     /// Default ctor
     this() {
     }
@@ -298,6 +316,9 @@ final class NinePatch : Drawable {
     void draw(const Vec2f position) {
         if (_isDirty)
             renderToCache();
-        _cache.draw(transformRenderSpace(position));
+        _cache.color = color;
+        _cache.blend = blend;
+        _cache.alpha = alpha;
+        _cache.draw(transformRenderSpace(position), angle, anchor);
     }
 }

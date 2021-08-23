@@ -501,6 +501,23 @@ class GuiElement {
         _alignX = x;
         _alignY = y;
     }
+    /// Ditto
+    final void setAlignX(GuiAlignX x) {
+        _alignX = x;
+    }
+    /// Ditto
+    final void setAlignY(GuiAlignY y) {
+        _alignY = y;
+    }
+
+    /// Returns the alignment relative to its parent.
+    final GuiAlignX getAlignX() {
+        return _alignX;
+    }
+    /// Ditto
+    final GuiAlignY getAlignY() {
+        return _alignY;
+    }
 
     /// Override this to set the gui logic.
     /// The deltaTime is the time ratio for the last frame to the next.

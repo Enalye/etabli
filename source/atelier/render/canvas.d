@@ -61,7 +61,9 @@ final class Canvas : Drawable {
         }
 
         /// Color added to the canvas.
-        Color color() const { return _color; }
+        Color color() const {
+            return _color;
+        }
         /// Ditto
         Color color(Color color_) {
             _color = color_;
@@ -71,16 +73,20 @@ final class Canvas : Drawable {
         }
 
         /// Alpha
-        float alpha() const { return _alpha; }
+        float alpha() const {
+            return _alpha;
+        }
         /// Ditto
         float alpha(float alpha_) {
             _alpha = alpha_;
             SDL_SetTextureAlphaMod(_renderTexture, cast(ubyte)(clamp(_alpha, 0f, 1f) * 255f));
             return _alpha;
         }
-        
+
         /// Blending algorithm.
-        Blend blend() const { return _blend; }
+        Blend blend() const {
+            return _blend;
+        }
         /// Ditto
         Blend blend(Blend blend_) {
             _blend = blend_;
@@ -133,7 +139,7 @@ final class Canvas : Drawable {
         _blend = canvas._blend;
         _color = canvas._color;
         _alpha = canvas._alpha;
-        
+
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
         _renderTexture = SDL_CreateTexture(_sdlRenderer, SDL_PIXELFORMAT_RGBA8888,
@@ -193,13 +199,13 @@ final class Canvas : Drawable {
     }
 
     /// Draw the texture at the specified location.
-    void draw(const Vec2f renderPosition, float angle) const {
-        const Vec2f pos = transformRenderSpace(renderPosition);
+    void draw(const Vec2f renderPosition, float angle, Vec2f anchor = Vec2f.half) const {
+        Vec2f pos = transformRenderSpace(renderPosition);
         const Vec2f scale = transformScale();
+        pos -= anchor * (cast(Vec2f) _renderSize) * scale;
 
         SDL_Rect destRect = {
-            cast(uint)(pos.x - (_renderSize.x / 2) * scale.x),
-                cast(uint)(pos.y - (_renderSize.y / 2) * scale.y),
+            cast(uint)(pos.x), cast(uint)(pos.y),
                 cast(uint)(_renderSize.x * scale.x), cast(uint)(_renderSize.y * scale.y)
         };
 
