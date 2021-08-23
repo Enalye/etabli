@@ -33,12 +33,12 @@ class InputField : GuiElement {
             return to!string(_text);
         }
         /// Ditto
-        string text(string newText) {
-            _text = to!dstring(newText);
+        string text(string text_) {
+            _text = to!dstring(text_);
             _caretIndex = to!uint(_text.length);
             _selectionIndex = _caretIndex;
-            _label.text = newText;
-            return newText;
+            _label.text = text_;
+            return text_;
         }
 
         /// Label font
@@ -67,17 +67,22 @@ class InputField : GuiElement {
         }
     }
 
+    /// Color of the inputfield's selection area
+    Color selectionColor = Color(.23f, .30f, .37f);
+    /// Color of the inputfield's cursor
+    Color caretColor = Color.white;
+
     /// The size is used to setup a canvas, avoid resizing too often. \
     /// Set startWithFocus to true if you want the inputfield to accept inputs immediatly.
     this(Vec2f size_, string defaultText = "", bool startWithFocus = false) {
         size = size_;
-        _label = new Label;
+        _label = new Label(defaultText, new TrueTypeFont(veraMonoFontData));
         _label.setAlign(GuiAlignX.left, GuiAlignY.center);
         appendChild(_label);
         hasFocus = startWithFocus;
         _text = to!dstring(defaultText);
         _caretIndex = to!uint(_text.length);
-        _label.text = to!string(_text);
+        _selectionIndex = _caretIndex;
 
         _borderColor = Color.white;
         _caretAlpha = 1f;
@@ -287,9 +292,9 @@ class InputField : GuiElement {
                 const float minPos = min(_selectionPosition.x, _caretPosition.x);
                 const float selectionSize = abs(_selectionPosition.x - _caretPosition.x);
                 drawFilledRect(Vec2f(minPos, _selectionPosition.y),
-                        Vec2f(selectionSize, _label.size.y), Color(.23f, .30f, .37f), .7f);
+                        Vec2f(selectionSize, _label.size.y), selectionColor, .7f);
             }
-            drawFilledRect(_caretPosition, Vec2f(2f, _label.size.y), Color.white, _caretAlpha);
+            drawFilledRect(_caretPosition, Vec2f(2f, _label.size.y), caretColor, _caretAlpha);
         }
     }
 
