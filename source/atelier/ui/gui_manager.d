@@ -396,6 +396,16 @@ private void dispatchMouseUpEvent(GuiElement gui, Vec2f cursorPosition) {
         _clickedGuiElement.isClicked = false;
 }
 
+package void setFocusedElement(GuiElement gui) {
+    if (_focusedGuiElement == gui)
+        return;
+    //The previous widget is now unfocused.
+    if (_focusedGuiElement !is null) {
+        _focusedGuiElement.hasFocus = false;
+    }
+    _focusedGuiElement = gui;
+}
+
 /// Process a mouse update event down the tree.
 private void dispatchMouseUpdateEvent(GuiElement gui, Vec2f cursorPosition) {
     auto children = (gui is null) ? _rootElements : gui.nodes;

@@ -9,7 +9,7 @@
 module atelier.ui.gui_element;
 
 import atelier.render, atelier.core, atelier.common, atelier.render;
-import atelier.ui.gui_overlay;
+import atelier.ui.gui_manager, atelier.ui.gui_overlay;
 
 /// Alignment on the horizontal axis relative to its parent.
 enum GuiAlignX {
@@ -239,6 +239,8 @@ class GuiElement {
         final bool hasFocus(bool hasFocus_) {
             if (hasFocus_ != _hasFocus) {
                 _hasFocus = hasFocus_;
+                if (_hasFocus)
+                    setFocusedElement(this);
                 onFocus();
                 return _hasFocus;
             }
