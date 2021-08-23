@@ -11,15 +11,15 @@ import bindbc.sdl, bindbc.sdl.image;
 
 import atelier.core;
 import atelier.render.window;
-import atelier.render.texture;
+import atelier.render.drawable;
 import atelier.render.drawable;
 
 /// Renders a **Texture** with its own properties.
-final class Sprite : Drawable {
+final class Sprite {
     @property {
-        /// Is the texture loaded ?
+        /// Is the drawable loaded ?
         bool isValid() const {
-            return texture !is null;
+            return drawable !is null;
         }
 
         /// Get the anchored and scaled center of the sprite.
@@ -29,7 +29,7 @@ final class Sprite : Drawable {
     }
 
     /// Texture being used.
-    Texture texture;
+    Drawable drawable;
 
     /// Mirroring property.
     Flip flip = Flip.none;
@@ -64,7 +64,7 @@ final class Sprite : Drawable {
 
     /// Copy another sprite.
     this(Sprite sprite) {
-        texture = sprite.texture;
+        drawable = sprite.drawable;
         flip = sprite.flip;
         scale = sprite.scale;
         size = sprite.size;
@@ -77,36 +77,36 @@ final class Sprite : Drawable {
     }
 
     /// Default sprite that takes the whole Texture.
-    this(Texture tex, Flip flip_ = Flip.none) {
-        texture = tex;
-        if (!texture) {
+    this(Drawable drawable_, Flip flip_ = Flip.none) {
+        drawable = drawable_;
+        if (!drawable) {
             clip = Vec4i.zero;
             size = Vec2f.zero;
         }
         else {
-            clip = Vec4i(0, 0, texture.width, texture.height);
+            clip = Vec4i(0, 0, drawable.width, drawable.height);
             size = to!Vec2f(clip.zw);
         }
         flip = flip_;
     }
 
     /// Sprite that takes a clipped region of a Texture.
-    this(Texture tex, Vec4i clip_, Flip flip_ = Flip.none) {
-        texture = tex;
+    this(Drawable drawable_, Vec4i clip_, Flip flip_ = Flip.none) {
+        drawable = drawable_;
         clip = clip_;
         size = to!Vec2f(clip.zw);
         flip = flip_;
     }
 
     /// Reset the sprite to take the whole specified Texture.
-    Sprite opAssign(Texture tex) {
-        texture = tex;
-        if (!texture) {
+    Sprite opAssign(Drawable drawable_) {
+        drawable = drawable_;
+        if (!drawable) {
             clip = Vec4i.zero;
             size = Vec2f.zero;
         }
         else {
-            clip = Vec4i(0, 0, texture.width, texture.height);
+            clip = Vec4i(0, 0, drawable.width, drawable.height);
             size = to!Vec2f(clip.zw);
         }
         return this;
@@ -124,63 +124,58 @@ final class Sprite : Drawable {
 
     /// Render the sprite there.
     void draw(const Vec2f position) {
-        assert(texture, "Texture is null");
+        assert(drawable, "Texture is null");
         Vec2f finalSize = size * scale * transformScale();
         //if (isVisible(position, finalSize)) {
-        texture.setColorMod(color, blend);
-        texture.setAlpha(alpha);
-        texture.draw(transformRenderSpace(position), finalSize, clip, angle, flip, anchor);
-        texture.setColorMod(Color.white);
-        texture.setAlpha(1f);
+        drawable.color = color;
+        drawable.blend = blend;
+        drawable.alpha = alpha;
+        drawable.draw(transformRenderSpace(position), finalSize, clip, angle, flip, anchor);
         //}
     }
 
     /// Ditto
     void drawUnchecked(const Vec2f position) {
-        assert(texture, "Texture is null");
+        assert(drawable, "Texture is null");
         Vec2f finalSize = size * scale * transformScale();
-        texture.setColorMod(color, blend);
-        texture.setAlpha(alpha);
-        texture.draw(transformRenderSpace(position), finalSize, clip, angle, flip, anchor);
-        texture.setColorMod(Color.white);
-        texture.setAlpha(1f);
+        drawable.color = color;
+        drawable.blend = blend;
+        drawable.alpha = alpha;
+        drawable.draw(transformRenderSpace(position), finalSize, clip, angle, flip, anchor);
     }
 
     /// Ditto
     void drawRotated(const Vec2f position) {
-        assert(texture, "Texture is null");
+        assert(drawable, "Texture is null");
         Vec2f finalSize = size * scale * transformScale();
         Vec2f dist = (anchor - Vec2f.half) * size * scale;
         dist.rotate(angle);
-        texture.setColorMod(color, blend);
-        texture.setAlpha(alpha);
-        texture.draw(transformRenderSpace(position - dist), finalSize, clip, angle, flip);
-        texture.setColorMod(Color.white);
-        texture.setAlpha(1f);
+        drawable.color = color;
+        drawable.blend = blend;
+        drawable.alpha = alpha;
+        drawable.draw(transformRenderSpace(position - dist), finalSize, clip, angle, flip);
     }
 
     /// Ditto
     void draw(const Vec2f pivot, float pivotDistance, float pivotAngle) {
-        assert(texture, "Texture is null");
+        assert(drawable, "Texture is null");
         Vec2f finalSize = size * scale * transformScale();
-        texture.setColorMod(color, blend);
-        texture.setAlpha(alpha);
-        texture.draw(transformRenderSpace(pivot + Vec2f.angled(pivotAngle) * pivotDistance),
+        drawable.color = color;
+        drawable.blend = blend;
+        drawable.alpha = alpha;
+        drawable.draw(transformRenderSpace(pivot + Vec2f.angled(pivotAngle) * pivotDistance),
                 finalSize, clip, angle, flip, anchor);
-        texture.setColorMod(Color.white);
-        texture.setAlpha(1f);
     }
 
     /// Ditto
     void draw(const Vec2f pivot, const Vec2f pivotOffset, float pivotAngle) {
-        assert(texture, "Texture is null");
+        assert(drawable, "Texture is null");
         Vec2f finalSize = size * scale * transformScale();
-        texture.setColorMod(color, blend);
-        texture.setAlpha(alpha);
-        texture.draw(transformRenderSpace(pivot + pivotOffset.rotated(pivotAngle)),
+        drawable.color = color;
+        drawable.blend = blend;
+        drawable.alpha = alpha;
+        drawable.draw(transformRenderSpace(pivot + pivotOffset.rotated(pivotAngle)),
                 finalSize, clip, angle, flip, anchor);
-        texture.setColorMod(Color.white);
-        texture.setAlpha(1f);
     }
 
     /// Is this inside the sprite region ? \

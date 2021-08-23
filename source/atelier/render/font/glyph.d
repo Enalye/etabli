@@ -6,7 +6,7 @@
 module atelier.render.font.glyph;
 
 import atelier.core;
-import atelier.render.texture, atelier.render.window;
+import atelier.render.drawable, atelier.render.window;
 
 /// Information about a single character
 struct Glyph {
@@ -45,20 +45,29 @@ struct Glyph {
         int _offsetX, _offsetY;
         /// Character size
         int _width, _height;
-        /// Coordinates in texture
+        /// Coordinates in drawable
         int _packX, _packY, _packWidth, _packHeight;
-        /// Texture
-        Texture _texture;
+        /// Drawable
+        Drawable _drawable;
     }
 
     /// Render glyph
     void draw(Vec2f position, int scale, Color color, float alpha) {
         const Vec2f finalSize = Vec2f(_width, _height) * scale * transformScale();
-        _texture.setColorMod(color, Blend.alpha);
-        _texture.setAlpha(alpha);
-        _texture.draw(transformRenderSpace(position), finalSize, Vec4i(_packX,
+        _drawable.color = color;
+        _drawable.blend = Blend.alpha;
+        _drawable.alpha = alpha;
+        _drawable.draw(transformRenderSpace(position), finalSize, Vec4i(_packX,
                 _packY, _packWidth, _packHeight), Vec2f.zero);
-        _texture.setColorMod(Color.white, Blend.alpha);
-        _texture.setAlpha(1f);
+    }
+
+    /// Ditto
+    void draw(Vec2f position, float scale, Color color, float alpha) {
+        const Vec2f finalSize = Vec2f(_width, _height) * scale * transformScale();
+        _drawable.color = color;
+        _drawable.blend = Blend.alpha;
+        _drawable.alpha = alpha;
+        _drawable.draw(transformRenderSpace(position), finalSize, Vec4i(_packX,
+                _packY, _packWidth, _packHeight), Vec2f.zero);
     }
 }

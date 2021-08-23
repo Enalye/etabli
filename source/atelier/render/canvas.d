@@ -18,7 +18,7 @@ import atelier.render.drawable;
 /// Use pushCanvas/popCanvas to start the drawing region on it.
 final class Canvas : Drawable {
     private {
-        SDL_Texture* _renderTexture;
+        SDL_Texture* _texture;
         Vec2i _renderSize;
         bool _isSmooth = false;
         Color _color = Color.white;
@@ -32,7 +32,21 @@ final class Canvas : Drawable {
 
     @property {
         package(atelier) const(SDL_Texture*) target() const {
-            return _renderTexture;
+            return _texture;
+        }
+
+        /// loaded ?
+        bool isLoaded() const {
+            return true;
+        }
+
+        /// Width in texels.
+        uint width() const {
+            return _renderSize.x;
+        }
+        /// Height in texels.
+        uint height() const {
+            return _renderSize.y;
         }
 
         /// The size (in texels) of the surface to be rendered on.
@@ -48,11 +62,11 @@ final class Canvas : Drawable {
                     || renderSize_.x <= 0 || renderSize_.y <= 0)
                 throw new Exception("canvas render size exceeds limits");
             _renderSize = renderSize_;
-            if (_renderTexture !is null)
-                SDL_DestroyTexture(_renderTexture);
+            if (_texture !is null)
+                SDL_DestroyTexture(_texture);
             if (_isSmooth)
                 SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-            _renderTexture = SDL_CreateTexture(_sdlRenderer, SDL_PIXELFORMAT_RGBA8888,
+            _texture = SDL_CreateTexture(_sdlRenderer, SDL_PIXELFORMAT_RGBA8888,
                     SDL_TEXTUREACCESS_TARGET, _renderSize.x, _renderSize.y);
             if (_isSmooth)
                 SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
@@ -68,7 +82,7 @@ final class Canvas : Drawable {
         Color color(Color color_) {
             _color = color_;
             auto sdlColor = _color.toSDL();
-            SDL_SetTextureColorMod(_renderTexture, sdlColor.r, sdlColor.g, sdlColor.b);
+            SDL_SetTextureColorMod(_texture, sdlColor.r, sdlColor.g, sdlColor.b);
             return _color;
         }
 
@@ -79,7 +93,7 @@ final class Canvas : Drawable {
         /// Ditto
         float alpha(float alpha_) {
             _alpha = alpha_;
-            SDL_SetTextureAlphaMod(_renderTexture, cast(ubyte)(clamp(_alpha, 0f, 1f) * 255f));
+            SDL_SetTextureAlphaMod(_texture, cast(ubyte)(clamp(_alpha, 0f, 1f) * 255f));
             return _alpha;
         }
 
@@ -90,7 +104,7 @@ final class Canvas : Drawable {
         /// Ditto
         Blend blend(Blend blend_) {
             _blend = blend_;
-            SDL_SetTextureBlendMode(_renderTexture, getSDLBlend(_blend));
+            SDL_SetTextureBlendMode(_texture, getSDLBlend(_blend));
             return _blend;
         }
     }
@@ -119,7 +133,7 @@ final class Canvas : Drawable {
         _renderSize = renderSize_;
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-        _renderTexture = SDL_CreateTexture(_sdlRenderer, SDL_PIXELFORMAT_RGBA8888,
+        _texture = SDL_CreateTexture(_sdlRenderer, SDL_PIXELFORMAT_RGBA8888,
                 SDL_TEXTUREACCESS_TARGET, _renderSize.x, _renderSize.y);
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
@@ -142,7 +156,7 @@ final class Canvas : Drawable {
 
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-        _renderTexture = SDL_CreateTexture(_sdlRenderer, SDL_PIXELFORMAT_RGBA8888,
+        _texture = SDL_CreateTexture(_sdlRenderer, SDL_PIXELFORMAT_RGBA8888,
                 SDL_TEXTUREACCESS_TARGET, _renderSize.x, _renderSize.y);
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
@@ -150,8 +164,8 @@ final class Canvas : Drawable {
     }
 
     ~this() {
-        if (_renderTexture !is null)
-            SDL_DestroyTexture(_renderTexture);
+        if (_texture !is null)
+            SDL_DestroyTexture(_texture);
     }
 
     /// Copy
@@ -166,11 +180,11 @@ final class Canvas : Drawable {
         _color = canvas._color;
         _alpha = canvas._alpha;
 
-        if (_renderTexture !is null)
-            SDL_DestroyTexture(_renderTexture);
+        if (_texture !is null)
+            SDL_DestroyTexture(_texture);
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-        _renderTexture = SDL_CreateTexture(_sdlRenderer, SDL_PIXELFORMAT_RGBA8888,
+        _texture = SDL_CreateTexture(_sdlRenderer, SDL_PIXELFORMAT_RGBA8888,
                 SDL_TEXTUREACCESS_TARGET, _renderSize.x, _renderSize.y);
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
@@ -180,9 +194,9 @@ final class Canvas : Drawable {
 
     private void updateCanvasSettings() {
         auto sdlColor = _color.toSDL();
-        SDL_SetTextureBlendMode(_renderTexture, getSDLBlend(_blend));
-        SDL_SetTextureColorMod(_renderTexture, sdlColor.r, sdlColor.g, sdlColor.b);
-        SDL_SetTextureAlphaMod(_renderTexture, cast(ubyte)(clamp(_alpha, 0f, 1f) * 255f));
+        SDL_SetTextureBlendMode(_texture, getSDLBlend(_blend));
+        SDL_SetTextureColorMod(_texture, sdlColor.r, sdlColor.g, sdlColor.b);
+        SDL_SetTextureAlphaMod(_texture, cast(ubyte)(clamp(_alpha, 0f, 1f) * 255f));
     }
 
     /// Toggle the canvas smoothing
@@ -194,7 +208,7 @@ final class Canvas : Drawable {
     }
 
     /// Draw the texture at the specified location.
-    void draw(const Vec2f renderPosition) const {
+    /*void draw(const Vec2f renderPosition) const {
         draw(renderPosition, 0f);
     }
 
@@ -210,7 +224,7 @@ final class Canvas : Drawable {
         };
 
         SDL_RendererFlip rendererFlip = getSDLFlip(flip);
-        SDL_RenderCopyEx(_sdlRenderer, cast(SDL_Texture*) _renderTexture, null,
+        SDL_RenderCopyEx(_sdlRenderer, cast(SDL_Texture*) _texture, null,
                 &destRect, angle, null, rendererFlip);
     }
 
@@ -227,7 +241,7 @@ final class Canvas : Drawable {
 
         SDL_RendererFlip rendererFlip = getSDLFlip(flip);
         SDL_RenderCopyEx(cast(SDL_Renderer*) _sdlRenderer,
-                cast(SDL_Texture*) _renderTexture, null, &destRect, 0f, null, rendererFlip);
+                cast(SDL_Texture*) _texture, null, &destRect, 0f, null, rendererFlip);
     }
 
     /// Draw the part of the texture at the specified location.
@@ -240,7 +254,70 @@ final class Canvas : Drawable {
         };
 
         SDL_RendererFlip rendererFlip = getSDLFlip(flip);
-        SDL_RenderCopyEx(cast(SDL_Renderer*) _sdlRenderer, cast(SDL_Texture*) _renderTexture,
+        SDL_RenderCopyEx(cast(SDL_Renderer*) _sdlRenderer, cast(SDL_Texture*) _texture,
+                &srcSdlRect, &destSdlRect, angle, null, rendererFlip);
+    }*/
+
+    /// Render the whole texture here
+    void draw(Vec2f pos, Vec2f anchor = Vec2f.half) const {
+        pos -= anchor * Vec2f(_renderSize.x, _renderSize.y);
+
+        SDL_Rect destRect = {cast(uint) pos.x, cast(uint) pos.y, _renderSize.x, _renderSize.y};
+
+        SDL_RenderCopy(cast(SDL_Renderer*) _sdlRenderer,
+                cast(SDL_Texture*) _texture, null, &destRect);
+    }
+
+    /// Render a section of the texture here
+    void draw(Vec2f pos, Vec4i srcRect, Vec2f anchor = Vec2f.half) const {
+        pos -= anchor * cast(Vec2f) srcRect.zw;
+
+        SDL_Rect srcSdlRect = srcRect.toSdlRect();
+        SDL_Rect destSdlRect = {
+            cast(uint) pos.x, cast(uint) pos.y, srcSdlRect.w, srcSdlRect.h
+        };
+
+        SDL_RenderCopy(cast(SDL_Renderer*) _sdlRenderer,
+                cast(SDL_Texture*) _texture, &srcSdlRect, &destSdlRect);
+    }
+
+    /// Render the whole texture here
+    void draw(Vec2f pos, Vec2f size, Vec2f anchor = Vec2f.half) const {
+        pos -= anchor * size;
+
+        SDL_Rect destSdlRect = {
+            cast(uint) pos.x, cast(uint) pos.y, cast(uint) size.x, cast(uint) size.y
+        };
+
+        SDL_RenderCopy(cast(SDL_Renderer*) _sdlRenderer,
+                cast(SDL_Texture*) _texture, null, &destSdlRect);
+    }
+
+    /// Render a section of the texture here
+    void draw(Vec2f pos, Vec2f size, Vec4i srcRect, Vec2f anchor = Vec2f.half) const {
+        pos -= anchor * size;
+
+        SDL_Rect srcSdlRect = srcRect.toSdlRect();
+        SDL_Rect destSdlRect = {
+            cast(uint) pos.x, cast(uint) pos.y, cast(uint) size.x, cast(uint) size.y
+        };
+
+        SDL_RenderCopy(cast(SDL_Renderer*) _sdlRenderer,
+                cast(SDL_Texture*) _texture, &srcSdlRect, &destSdlRect);
+    }
+
+    /// Render a section of the texture here
+    void draw(Vec2f pos, Vec2f size, Vec4i srcRect, float angle,
+            Flip flip = Flip.none, Vec2f anchor = Vec2f.half) const {
+        pos -= anchor * size;
+
+        SDL_Rect srcSdlRect = srcRect.toSdlRect();
+        SDL_Rect destSdlRect = {
+            cast(uint) pos.x, cast(uint) pos.y, cast(uint) size.x, cast(uint) size.y
+        };
+
+        const SDL_RendererFlip rendererFlip = getSDLFlip(flip);
+        SDL_RenderCopyEx(cast(SDL_Renderer*) _sdlRenderer, cast(SDL_Texture*) _texture,
                 &srcSdlRect, &destSdlRect, angle, null, rendererFlip);
     }
 }

@@ -8,11 +8,10 @@ module atelier.render.ninepatch;
 import std.conv : to;
 import std.algorithm.comparison : min;
 import atelier.common, atelier.core;
-import atelier.render.drawable, atelier.render.canvas, atelier.render.texture,
-    atelier.render.window;
+import atelier.render.drawable, atelier.render.canvas, atelier.render.window;
 
 /// Render a resizable repeated sprite with borders. (ex: bubble speech).
-final class NinePatch : Drawable {
+final class NinePatch {
     @property {
         /// Size of the render zone. \
         /// Changing the value allocate a new Canvas (don't do it too often).
@@ -27,7 +26,7 @@ final class NinePatch : Drawable {
             return _size;
         }
 
-        /// Texture's region used.
+        /// Drawable's region used.
         Vec4i clip() {
             return _clip;
         }
@@ -92,24 +91,24 @@ final class NinePatch : Drawable {
             return _right;
         }
 
-        /// The texture used to render.
-        Texture texture() {
-            return _texture;
+        /// The drawable used to render.
+        Drawable drawable() {
+            return _drawable;
         }
         /// Ditto
-        Texture texture(Texture newTexture) {
-            if (_texture == newTexture)
-                return _texture;
-            _texture = newTexture;
+        Drawable drawable(Drawable newDrawable) {
+            if (_drawable == newDrawable)
+                return _drawable;
+            _drawable = newDrawable;
             _isDirty = true;
-            return _texture;
+            return _drawable;
         }
     }
 
     private {
         Canvas _cache;
         Vec2f _size;
-        Texture _texture;
+        Drawable _drawable;
         Vec4i _clip;
         int _top, _bottom, _left, _right;
         bool _isDirty = true;
@@ -140,7 +139,7 @@ final class NinePatch : Drawable {
     /// Copy ctor
     this(NinePatch ninePatch) {
         _size = ninePatch._size;
-        _texture = ninePatch._texture;
+        _drawable = ninePatch._drawable;
         _clip = ninePatch._clip;
         _top = ninePatch._top;
         _bottom = ninePatch._bottom;
@@ -151,18 +150,13 @@ final class NinePatch : Drawable {
     }
 
     /// Ctor
-    this(string textureId, Vec4i newClip, int newTop, int newBottom, int newLeft, int newRight) {
-        this(fetchPrototype!Texture(textureId), newClip, newTop, newBottom, newLeft, newRight);
-    }
-
-    /// Ctor
-    this(Texture tex, Vec4i newClip, int newTop, int newBottom, int newLeft, int newRight) {
-        _texture = tex;
-        _clip = newClip;
-        _top = newTop;
-        _bottom = newBottom;
-        _left = newLeft;
-        _right = newRight;
+    this(Drawable drawable_, Vec4i clip_, int top_, int bottom_, int left_, int right_) {
+        _drawable = drawable_;
+        _clip = clip_;
+        _top = top_;
+        _bottom = bottom_;
+        _left = left_;
+        _right = right_;
         _size = to!Vec2f(_clip.zw);
         _cache = new Canvas(_clip.zw);
         _isDirty = true;
@@ -177,7 +171,7 @@ final class NinePatch : Drawable {
     /// Render to the canvas.
     private void renderToCache() {
         _isDirty = false;
-        if (_texture is null || _clip.z <= (_left + _right) || _clip.w <= (_top + _bottom))
+        if (_drawable is null || _clip.z <= (_left + _right) || _clip.w <= (_top + _bottom))
             return;
         pushCanvas(_cache, true);
 
@@ -200,7 +194,7 @@ final class NinePatch : Drawable {
                     if (width <= 0)
                         break;
                     localClip = Vec4i(_clip.x + _left, _clip.y + _top, width, height);
-                    _texture.draw(Vec2f(_left + filledWidth, _top + filledHeight),
+                    _drawable.draw(Vec2f(_left + filledWidth, _top + filledHeight),
                             Vec2f(width, height), localClip, 0f, Flip.none, Vec2f.zero);
                     filledWidth += width;
                 }
@@ -220,7 +214,7 @@ final class NinePatch : Drawable {
                     break;
                 const int height = _top;
                 localClip = Vec4i(_clip.x + _left, _clip.y, width, height);
-                _texture.draw(Vec2f(_left + filled, 0f), Vec2f(width, height),
+                _drawable.draw(Vec2f(_left + filled, 0f), Vec2f(width, height),
                         localClip, 0f, Flip.none, Vec2f.zero);
                 filled += width;
             }
@@ -236,7 +230,7 @@ final class NinePatch : Drawable {
                     break;
                 const int height = _bottom;
                 localClip = Vec4i(_clip.x + _left, _clip.y + _clip.w - _bottom, width, height);
-                _texture.draw(Vec2f(_left + filled, to!int(_size.y) - _bottom),
+                _drawable.draw(Vec2f(_left + filled, to!int(_size.y) - _bottom),
                         Vec2f(width, height), localClip, 0f, Flip.none, Vec2f.zero);
                 filled += width;
             }
@@ -252,7 +246,7 @@ final class NinePatch : Drawable {
                     break;
                 const int width = _top;
                 localClip = Vec4i(_clip.x, _clip.y + _top, width, height);
-                _texture.draw(Vec2f(0f, _top + filled), Vec2f(width, height),
+                _drawable.draw(Vec2f(0f, _top + filled), Vec2f(width, height),
                         localClip, 0f, Flip.none, Vec2f.zero);
                 filled += height;
             }
@@ -268,7 +262,7 @@ final class NinePatch : Drawable {
                     break;
                 const int width = _top;
                 localClip = Vec4i(_clip.x + _clip.z - _right, _clip.y + _top, width, height);
-                _texture.draw(Vec2f(to!int(_size.x) - _right, _top + filled),
+                _drawable.draw(Vec2f(to!int(_size.x) - _right, _top + filled),
                         Vec2f(width, height), localClip, 0f, Flip.none, Vec2f.zero);
                 filled += height;
             }
@@ -280,14 +274,14 @@ final class NinePatch : Drawable {
         if (_top > 0 && _left > 0) {
             localSize = Vec2i(_left, _top);
             localClip = Vec4i(_clip.xy, localSize);
-            _texture.draw(Vec2f.zero, to!Vec2f(localSize), localClip, 0f, Flip.none, Vec2f.zero);
+            _drawable.draw(Vec2f.zero, to!Vec2f(localSize), localClip, 0f, Flip.none, Vec2f.zero);
         }
 
         //Top right corner
         if (_top > 0 && _right > 0) {
             localSize = Vec2i(_right, _top);
             localClip = Vec4i(_clip.x + _clip.z - _right, _clip.y, localSize.x, localSize.y);
-            _texture.draw(Vec2f(to!int(_size.x) - _right, 0f),
+            _drawable.draw(Vec2f(to!int(_size.x) - _right, 0f),
                     to!Vec2f(localSize), localClip, 0f, Flip.none, Vec2f.zero);
         }
 
@@ -295,7 +289,7 @@ final class NinePatch : Drawable {
         if (_bottom > 0 && _left > 0) {
             localSize = Vec2i(_left, _top);
             localClip = Vec4i(_clip.x, _clip.y + _clip.w - _bottom, localSize.x, localSize.y);
-            _texture.draw(Vec2f(0f, to!int(_size.y) - _bottom),
+            _drawable.draw(Vec2f(0f, to!int(_size.y) - _bottom),
                     to!Vec2f(localSize), localClip, 0f, Flip.none, Vec2f.zero);
         }
 
@@ -304,7 +298,7 @@ final class NinePatch : Drawable {
             localSize = Vec2i(_right, _top);
             localClip = Vec4i(_clip.x + _clip.z - _right,
                     _clip.y + _clip.w - _bottom, localSize.x, localSize.y);
-            _texture.draw(Vec2f(to!int(_size.x) - _right,
+            _drawable.draw(Vec2f(to!int(_size.x) - _right,
                     to!int(_size.y) - _bottom), to!Vec2f(localSize),
                     localClip, 0f, Flip.none, Vec2f.zero);
         }

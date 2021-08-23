@@ -12,40 +12,7 @@ import std.algorithm.comparison : clamp;
 import bindbc.sdl, bindbc.sdl.image;
 
 import atelier.core;
-import atelier.render.window;
-
-/// Indicate if something is mirrored.
-enum Flip {
-    none,
-    horizontal,
-    vertical,
-    both
-}
-
-package SDL_RendererFlip getSDLFlip(Flip flip) {
-    final switch (flip) with (Flip) {
-    case both:
-        return cast(SDL_RendererFlip)(SDL_FLIP_HORIZONTAL | SDL_FLIP_VERTICAL);
-    case horizontal:
-        return SDL_FLIP_HORIZONTAL;
-    case vertical:
-        return SDL_FLIP_VERTICAL;
-    case none:
-        return SDL_FLIP_NONE;
-    }
-}
-
-/// Blending algorithm \
-/// none: Paste everything without transparency \
-/// modular: Multiply color value with the destination \
-/// additive: Add color value with the destination \
-/// alpha: Paste everything with transparency (Default one)
-enum Blend {
-    none,
-    modular,
-    additive,
-    alpha
-}
+import atelier.render.window, atelier.render.drawable;
 
 /// Returns the SDL blend flag.
 package SDL_BlendMode getSDLBlend(Blend blend) {
@@ -62,12 +29,15 @@ package SDL_BlendMode getSDLBlend(Blend blend) {
 }
 
 /// Base rendering class.
-final class Texture {
+final class Texture : Drawable {
     private {
         bool _isLoaded = false, _ownData, _isSmooth;
         SDL_Texture* _texture = null;
         SDL_Surface* _surface = null;
         uint _width, _height;
+        Color _color = Color.white;
+        float _alpha = 1f;
+        Blend _blend = Blend.alpha;
     }
 
     @property {
@@ -75,7 +45,6 @@ final class Texture {
         bool isLoaded() const {
             return _isLoaded;
         }
-
         /// Width in texels.
         uint width() const {
             return _width;
@@ -83,6 +52,40 @@ final class Texture {
         /// Height in texels.
         uint height() const {
             return _height;
+        }
+
+        /// Color added to the canvas.
+        Color color() const {
+            return _color;
+        }
+        /// Ditto
+        Color color(Color color_) {
+            _color = color_;
+            auto sdlColor = _color.toSDL();
+            SDL_SetTextureColorMod(_texture, sdlColor.r, sdlColor.g, sdlColor.b);
+            return _color;
+        }
+
+        /// Alpha
+        float alpha() const {
+            return _alpha;
+        }
+        /// Ditto
+        float alpha(float alpha_) {
+            _alpha = alpha_;
+            SDL_SetTextureAlphaMod(_texture, cast(ubyte)(clamp(_alpha, 0f, 1f) * 255f));
+            return _alpha;
+        }
+
+        /// Blending algorithm.
+        Blend blend() const {
+            return _blend;
+        }
+        /// Ditto
+        Blend blend(Blend blend_) {
+            _blend = blend_;
+            SDL_SetTextureBlendMode(_texture, getSDLBlend(_blend));
+            return _blend;
         }
     }
 
@@ -93,6 +96,9 @@ final class Texture {
         _width = texture._width;
         _height = texture._height;
         _isSmooth = texture._isSmooth;
+        _blend = texture._blend;
+        _color = texture._color;
+        _alpha = texture._alpha;
         _ownData = false;
     }
 
@@ -138,22 +144,12 @@ final class Texture {
         enforce(null != _texture, "Error occurred while converting a surface to a texture format.");
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+        updateSettings();
 
         if (_ownData)
             SDL_FreeSurface(_surface);
         _surface = null;
         _isLoaded = true;
-    }
-
-    void setColorMod(Color color, Blend blend = Blend.alpha) {
-        SDL_SetTextureBlendMode(_texture, getSDLBlend(blend));
-
-        auto sdlColor = color.toSDL();
-        SDL_SetTextureColorMod(_texture, sdlColor.r, sdlColor.g, sdlColor.b);
-    }
-
-    void setAlpha(float alpha) {
-        SDL_SetTextureAlphaMod(_texture, cast(ubyte)(clamp(alpha, 0f, 1f) * 255f));
     }
 
     package void load(SDL_Surface* surface) {
@@ -170,6 +166,7 @@ final class Texture {
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 
         enforce(null != _texture, "Error occurred while converting a surface to a texture format.");
+        updateSettings();
 
         _width = surface.w;
         _height = surface.h;
@@ -194,6 +191,7 @@ final class Texture {
         if (null == _texture)
             throw new Exception(
                     "Error occurred while converting \'" ~ path ~ "\' to a texture format.");
+        updateSettings();
 
         _width = surface.w;
         _height = surface.h;
@@ -210,6 +208,13 @@ final class Texture {
         if (null != _texture)
             SDL_DestroyTexture(_texture);
         _isLoaded = false;
+    }
+
+    private void updateSettings() {
+        auto sdlColor = _color.toSDL();
+        SDL_SetTextureBlendMode(_texture, getSDLBlend(_blend));
+        SDL_SetTextureColorMod(_texture, sdlColor.r, sdlColor.g, sdlColor.b);
+        SDL_SetTextureAlphaMod(_texture, cast(ubyte)(clamp(_alpha, 0f, 1f) * 255f));
     }
 
     /// Render the whole texture here
