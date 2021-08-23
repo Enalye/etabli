@@ -310,9 +310,10 @@ final class NinePatch {
     void draw(const Vec2f position) {
         if (_isDirty)
             renderToCache();
+        Vec2f finalSize = _size * transformScale();
         _cache.color = color;
         _cache.blend = blend;
         _cache.alpha = alpha;
-        _cache.draw(transformRenderSpace(position), angle, anchor);
+        _cache.draw(transformRenderSpace(position), finalSize, Vec4i(0, 0, _cache.width, _cache.height), angle, flip, anchor);
     }
 }
