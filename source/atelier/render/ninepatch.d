@@ -173,6 +173,11 @@ final class NinePatch {
         _isDirty = false;
         if (_drawable is null || _clip.z <= (_left + _right) || _clip.w <= (_top + _bottom))
             return;
+
+        _drawable.color = Color.white;
+        _drawable.blend = Blend.alpha;
+        _drawable.alpha = 1f;
+
         pushCanvas(_cache, true);
 
         Vec4i localClip;
@@ -314,6 +319,7 @@ final class NinePatch {
         _cache.color = color;
         _cache.blend = blend;
         _cache.alpha = alpha;
-        _cache.draw(transformRenderSpace(position), finalSize, Vec4i(0, 0, _cache.width, _cache.height), angle, flip, anchor);
+        _cache.draw(transformRenderSpace(position), finalSize, Vec4i(0, 0,
+                _cache.width, _cache.height), angle, flip, anchor);
     }
 }
