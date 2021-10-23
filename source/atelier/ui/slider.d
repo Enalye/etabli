@@ -17,7 +17,7 @@ import atelier.ui.button, atelier.ui.gui_element;
 /// Base abstract class for any vertical or horizontal slider/scrollbar.
 abstract class Slider : GuiElement {
     protected {
-        float _value = 0f, _offset = 0f, _step = 1f, _min = 0f, _max = 1f,
+        float _value = 0f, _offset = 0f, _step = 1f, _minValue = 0f, _maxValue = 1f,
             _scrollLength = 1f, _minimalSliderSize = 25f, _scrollAngle = 0f;
         bool _isGrabbed = false;
     }
@@ -28,26 +28,26 @@ abstract class Slider : GuiElement {
             return _value;
         }
         /// Ditto
-        float value01(float newValue) {
-            return _value = _offset = newValue;
+        float value01(float value_) {
+            return _value = _offset = value_;
         }
 
         /// Rounded value between the min and max values specified.
         int ivalue() const {
-            return cast(int) lerp(_min, _max, _value);
+            return cast(int) lerp(_minValue, _maxValue, _value);
         }
         /// Ditto
-        int ivalue(int newValue) {
-            return cast(int)(_value = _offset = rlerp(_min, _max, newValue));
+        int ivalue(int value_) {
+            return cast(int)(_value = _offset = rlerp(_minValue, _maxValue, value_));
         }
 
         /// Value between the min and max values specified.
         float fvalue() const {
-            return lerp(_min, _max, _value);
+            return lerp(_minValue, _maxValue, _value);
         }
         /// Ditto
-        float fvalue(float newValue) {
-            return _value = _offset = rlerp(_min, _max, newValue);
+        float fvalue(float value_) {
+            return _value = _offset = rlerp(_minValue, _maxValue, value_);
         }
 
         /// Value (from 0 to 1) before being processed/clamped/etc. \
@@ -59,36 +59,36 @@ abstract class Slider : GuiElement {
         /// The number of steps of the slider. \
         /// 1 = The slider jumps directly from start to finish. \
         /// More = The slider has more intermediate values.
-        uint step() const {
+        uint steps() const {
             return (_step > 0f) ? cast(uint)(1f / _step) : 0u;
         }
         /// Ditto
-        uint step(uint newStep) {
-            if (newStep < 1u)
+        uint steps(uint steps_) {
+            if (steps_ < 1u)
                 _step = 0f;
             else
-                _step = 1f / newStep;
-            return newStep;
+                _step = 1f / steps_;
+            return steps_;
         }
 
         /// Minimal value possible for the slider. \
         /// Used by ivalue() and fvalue().
-        float min() const {
-            return _min;
+        float minValue() const {
+            return _minValue;
         }
         /// Ditto
-        float min(float newMin) {
-            return _min = newMin;
+        float minValue(float newMin) {
+            return _minValue = newMin;
         }
 
         /// Maximal value possible for the slider. \
         /// Used by ivalue() and fvalue().
-        float max() const {
-            return _max;
+        float maxValue() const {
+            return _maxValue;
         }
         /// Ditto
-        float max(float newMax) {
-            return _max = newMax;
+        float maxValue(float newMax) {
+            return _maxValue = newMax;
         }
     }
 
@@ -104,7 +104,8 @@ abstract class Slider : GuiElement {
             _value = (_offset < 0f) ? 0f : ((_offset > 1f) ? 1f : _offset); //Clamp the value.
             if (_step > 0f)
                 _value = std.math.round(_value / _step) * _step; //Snap the value.
-            _offset = lerp(_offset, _value, deltaTime * 0.25f);
+            if (!isClicked)
+                _offset = lerp(_offset, _value, deltaTime * 0.25f);
             triggerCallback();
         }
     }

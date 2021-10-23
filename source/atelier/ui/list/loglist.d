@@ -83,8 +83,8 @@ class LogList : GuiElement {
 
     override void onEvent(Event event) {
         super.onEvent(event);
-        if (event.type == Event.Type.mouseDown || event.type == Event.Type.mouseUp
-                || event.type == Event.Type.mouseUpdate) {
+        if (event.type == Event.Type.mouseDown
+                || event.type == Event.Type.mouseUp || event.type == Event.Type.mouseUpdate) {
             _lastMousePos = event.mouse.position;
             if (_slider.isInside(event.mouse.position))
                 _slider.onEvent(event);
@@ -119,12 +119,12 @@ class LogList : GuiElement {
         float exceedingHeight = _container.layout.size.y - _container.canvas.size.y;
 
         if (exceedingHeight < 0f) {
-            _slider.max = 0;
-            _slider.step = 0;
+            _slider.maxValue = 0;
+            _slider.steps = 0;
         }
         else {
-            _slider.max = exceedingHeight / (_container.canvas.size.y / 50f);
-            _slider.step = to!uint(_slider.max);
+            _slider.maxValue = exceedingHeight / (_container.canvas.size.y / 50f);
+            _slider.steps = to!uint(_slider.maxValue);
         }
         _container.canvas.position = Vec2f(0f, lerp(min, max, _slider.offset));
     }
