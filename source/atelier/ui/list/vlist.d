@@ -136,12 +136,12 @@ class VList : GuiElement {
         const float exceedingHeight = _container.container.size.y - _container.canvas.size.y;
 
         if (exceedingHeight < 0f) {
-            _slider.max = 0;
-            _slider.step = 0;
+            _slider.maxValue = 0;
+            _slider.steps = 0;
         }
         else {
-            _slider.max = exceedingHeight / _layoutLength;
-            _slider.step = to!uint(_slider.max);
+            _slider.maxValue = exceedingHeight / _layoutLength;
+            _slider.steps = to!uint(_slider.maxValue);
         }
         _container.canvas.position = _container.canvas.size / 2f + Vec2f(0f,
                 lerp(min, max, _slider.offset));
@@ -188,7 +188,7 @@ class VList : GuiElement {
         _container.container.size = Vec2f(_container.size.x, _layoutLength * _nbElements);
         _container.container.position = Vec2f(0f, _container.container.size.y / 2f);
     }
-    
+
     override void removeChild(GuiElement gui) {
         _container.container.removeChild(gui);
         _nbElements = cast(int) _container.container.childCount;
