@@ -21,6 +21,16 @@ class OutStream {
     this() {
         _buffer = appender!(const ubyte[])();
     }
+    /// Ditto
+    this(const ubyte[] buffer_) {
+        _buffer = appender!(const ubyte[])();
+        _buffer.put(buffer_.dup);
+    }
+    /// Ditto
+    this(InStream inStream) {
+        _buffer = appender!(const ubyte[])();
+        _buffer.put(inStream._buffer.dup);
+    }
 
     @property {
         /// Raw buffer.
