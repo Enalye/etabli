@@ -687,7 +687,7 @@ bool processEvents() {
             break;
         case SDL_CONTROLLERAXISMOTION:
             setControllerAxis(cast(SDL_GameControllerAxis) sdlEvent.caxis.axis,
-                    sdlEvent.caxis.value);
+                sdlEvent.caxis.value);
             break;
         case SDL_CONTROLLERBUTTONDOWN:
             setControllerButton(cast(SDL_GameControllerButton) sdlEvent.cbutton.button, true);
