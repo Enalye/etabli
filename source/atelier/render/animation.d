@@ -352,4 +352,49 @@ final class Animation {
         _drawable.draw(transformRenderSpace(position), finalSize, texClip,
                 angle, currentFlip, anchor);
     }
+
+    /// Render the desired frame with a direction information.
+    void draw(const Vec2f position, uint frame, int currentDir) {
+        if (!frames.length)
+            return;
+        assert(_drawable, "No drawable loaded.");
+        if (frame >= frames.length || frame < 0)
+            frame = 0;
+        const int currentClip = frames[frame];
+        if (currentClip >= clips.length)
+            return;
+        Vec4i texClip = clips[currentClip];
+
+        Flip currentFlip = flip;
+        if (currentDir >= maxDirs || currentDir < 0)
+            return;
+        if (currentDir < dirs) {
+            texClip.xy = texClip.xy + (dirOffset * currentDir);
+        }
+        else {
+            currentDir = dirs - ((currentDir + 2) - dirs);
+            texClip.xy = texClip.xy + (dirOffset * currentDir);
+            final switch (flip) with (Flip) {
+            case none:
+                currentFlip = Flip.horizontal;
+                break;
+            case horizontal:
+                currentFlip = Flip.none;
+                break;
+            case vertical:
+                currentFlip = Flip.both;
+                break;
+            case both:
+                currentFlip = Flip.vertical;
+                break;
+            }
+        }
+
+        const Vec2f finalSize = size * transformScale();
+        _drawable.color = color;
+        _drawable.blend = blend;
+        _drawable.alpha = alpha;
+        _drawable.draw(transformRenderSpace(position), finalSize, texClip,
+                angle, currentFlip, anchor);
+    }
 }
