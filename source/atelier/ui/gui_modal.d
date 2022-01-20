@@ -9,7 +9,7 @@
 module atelier.ui.gui_modal;
 import atelier.core, atelier.render, atelier.common;
 import atelier.ui.gui_element, atelier.ui.layout, atelier.ui.label,
-    atelier.ui.button, atelier.ui.gui_manager;
+    atelier.ui.button, atelier.ui.gui_manager, atelier.ui.gui_overlay;
 
 private {
     GuiElement[][] _backups;
@@ -57,6 +57,7 @@ private T getModal(T)() {
 /// Immediately stops the currently running modal gui.
 void stopModal() {
     removeRoots();
+    stopOverlay();
     if (_modalElement is null)
         throw new Exception("Modal: No window instanciated");
     setRoots(_backups[$ - 1]);
