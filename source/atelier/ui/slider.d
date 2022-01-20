@@ -106,7 +106,6 @@ abstract class Slider : GuiElement {
                 _value = std.math.round(_value / _step) * _step; //Snap the value.
             if (!isClicked)
                 _offset = lerp(_offset, _value, deltaTime * 0.25f);
-            triggerCallback();
         }
     }
 
@@ -129,6 +128,7 @@ abstract class Slider : GuiElement {
             break;
         case mouseUp:
             relocateSlider(event);
+            triggerCallback();
             break;
         default:
             break;

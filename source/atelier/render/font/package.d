@@ -11,4 +11,5 @@ public {
     import atelier.render.font.truetype;
     import atelier.render.font.bitmap;
     import atelier.render.font.vera;
+    import atelier.render.font.text;
 }
