@@ -60,9 +60,9 @@ class GuiElement {
         Hint _hint;
         bool _isRegistered = true;
         bool _isLocked, _isMovable, _isHovered, _isClicked, _isSelected,
-            _hasFocus, _isInteractable = true, _hasEventHook;
+        _hasFocus, _isInteractable = true, _hasEventHook;
         Vec2f _position = Vec2f.zero, _size = Vec2f.zero, _anchor = Vec2f.half,
-            _padding = Vec2f.zero, _center = Vec2f.zero, _origin = Vec2f.zero;
+        _padding = Vec2f.zero, _center = Vec2f.zero, _origin = Vec2f.zero;
         GuiElement _callbackGuiElement;
         string _callbackId;
 
@@ -668,11 +668,13 @@ class GuiElement {
     /// Add a gui as a child of this one.
     void prependChild(GuiElement child) {
         _children = child ~ _children;
+        updateRoots(child, this);
     }
 
     /// Add a gui as a child of this one.
     void appendChild(GuiElement child) {
         _children ~= child;
+        updateRoots(child, this);
     }
 
     /// Remove all the children.
