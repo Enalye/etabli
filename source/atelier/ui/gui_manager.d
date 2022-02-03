@@ -15,7 +15,7 @@ import atelier.ui.gui_element, atelier.ui.gui_overlay, atelier.ui.gui_modal;
 private {
     bool _isGuiElementDebug = false;
     GuiElement[] _rootElements;
-    float _deltaTime;
+    float _deltaTime = 1f;
 }
 
 //-- Public ---

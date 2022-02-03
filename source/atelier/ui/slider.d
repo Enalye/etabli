@@ -18,7 +18,7 @@ import atelier.ui.button, atelier.ui.gui_element;
 abstract class Slider : GuiElement {
     protected {
         float _value = 0f, _offset = 0f, _step = 1f, _minValue = 0f, _maxValue = 1f,
-            _scrollLength = 1f, _minimalSliderSize = 25f, _scrollAngle = 0f;
+        _scrollLength = 1f, _minimalSliderSize = 25f, _scrollAngle = 0f;
         bool _isGrabbed = false;
     }
 
@@ -150,10 +150,10 @@ abstract class Slider : GuiElement {
         const float b = startPos.y - (coef * startPos.x);
 
         const Vec2f closestPoint = Vec2f(
-                (coef * event.mouse.position.y + event.mouse.position.x - coef * b) / (
+            (coef * event.mouse.position.y + event.mouse.position.x - coef * b) / (
                 coef * coef + 1f),
-                (coef * coef * event.mouse.position.y + coef * event.mouse.position.x + b) / (
-                    coef * coef + 1f));
+            (coef * coef * event.mouse.position.y + coef * event.mouse.position.x + b) / (
+                coef * coef + 1f));
 
         _offset = ((closestPoint.x - startPos.x) + (closestPoint.y - startPos.y)) / _scrollLength;
         _offset = (_offset < 0f) ? 0f : ((_offset > 1f) ? 1f : _offset); //Clamp the value.
@@ -195,7 +195,7 @@ class VScrollbar : Slider {
         }
 
         sliderPosition.y = clamp(sliderPosition.y, center.y - _scrollLength / 2f,
-                center.y + _scrollLength / 2f);
+            center.y + _scrollLength / 2f);
         if (sliderLength < 0f)
             sliderLength = 0f;
 
@@ -236,7 +236,7 @@ class HScrollbar : Slider {
         }
 
         sliderPosition.x = clamp(sliderPosition.x, center.x - _scrollLength / 2f,
-                center.x + _scrollLength / 2f);
+            center.x + _scrollLength / 2f);
         if (sliderLength < 0f)
             sliderLength = 0f;
 

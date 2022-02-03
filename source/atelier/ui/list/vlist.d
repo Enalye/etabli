@@ -140,7 +140,7 @@ class VList : GuiElement {
             _slider.steps = 0;
         }
         else {
-            _slider.maxValue = exceedingHeight / _layoutLength;
+            _slider.maxValue = (exceedingHeight / _layoutLength) + 1;
             _slider.steps = to!uint(_slider.maxValue);
         }
         _container.canvas.position = _container.canvas.size / 2f + Vec2f(0f,
