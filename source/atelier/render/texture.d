@@ -87,12 +87,18 @@ final class Texture : Drawable {
             SDL_SetTextureBlendMode(_texture, getSDLBlend(_blend));
             return _blend;
         }
+
+        /// underlaying surface
+        package SDL_Surface* surface() const {
+            return cast(SDL_Surface*) _surface;
+        }
     }
 
     /// Ctor
     this(const Texture texture) {
         _isLoaded = texture._isLoaded;
         _texture = cast(SDL_Texture*) texture._texture;
+        _surface = cast(SDL_Surface*) texture._surface;
         _width = texture._width;
         _height = texture._height;
         _isSmooth = texture._isSmooth;
@@ -103,15 +109,15 @@ final class Texture : Drawable {
     }
 
     /// Ctor
-    this(SDL_Surface* surface, bool preload_ = false, bool isSmooth_ = false) {
+    this(SDL_Surface* surface_, bool preload_ = false, bool isSmooth_ = false) {
         _isSmooth = isSmooth_;
         if (preload_) {
-            _surface = surface;
+            _surface = surface_;
             _width = _surface.w;
             _height = _surface.h;
         }
         else
-            load(surface);
+            load(surface_);
     }
 
     /// Ctor
@@ -133,43 +139,43 @@ final class Texture : Drawable {
 
     /// Call it if you set the preload flag on ctor.
     void postload() {
-        enforce(null != _surface, "Invalid surface.");
-        enforce(null != _sdlRenderer, "The renderer does not exist.");
+        enforce(null != _surface, "invalid surface");
+        enforce(null != _sdlRenderer, "the renderer does not exist");
 
         if (null != _texture)
             SDL_DestroyTexture(_texture);
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
         _texture = SDL_CreateTextureFromSurface(_sdlRenderer, _surface);
-        enforce(null != _texture, "Error occurred while converting a surface to a texture format.");
+        enforce(null != _texture, "error occurred while converting a surface to a texture format");
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
         updateSettings();
-
-        if (_ownData)
-            SDL_FreeSurface(_surface);
-        _surface = null;
         _isLoaded = true;
     }
 
-    package void load(SDL_Surface* surface) {
-        enforce(null != surface, "Invalid surface.");
-        enforce(null != _sdlRenderer, "The renderer does not exist.");
+    package void load(SDL_Surface* surface_) {
+        if (_surface && _ownData)
+            SDL_FreeSurface(_surface);
+        _surface = surface_;
+
+        enforce(null != _surface, "invalid surface");
+        enforce(null != _sdlRenderer, "the renderer does not exist");
 
         if (null != _texture)
             SDL_DestroyTexture(_texture);
 
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-        _texture = SDL_CreateTextureFromSurface(_sdlRenderer, surface);
+        _texture = SDL_CreateTextureFromSurface(_sdlRenderer, _surface);
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 
-        enforce(null != _texture, "Error occurred while converting a surface to a texture format.");
+        enforce(null != _texture, "error occurred while converting a surface to a texture format.");
         updateSettings();
 
-        _width = surface.w;
-        _height = surface.h;
+        _width = _surface.w;
+        _height = _surface.h;
 
         _isLoaded = true;
         _ownData = true;
@@ -177,25 +183,26 @@ final class Texture : Drawable {
 
     /// Load from file
     void load(string path) {
-        SDL_Surface* surface = IMG_Load(toStringz(path));
+        if (_surface && _ownData)
+            SDL_FreeSurface(_surface);
+        _surface = IMG_Load(toStringz(path));
 
-        enforce(null != surface, "Cannot load image file \'" ~ path ~ "\'.");
-        enforce(null != _sdlRenderer, "The renderer does not exist.");
+        enforce(null != _surface, "can't load image file `" ~ path ~ "`");
+        enforce(null != _sdlRenderer, "the renderer does not exist");
 
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-        _texture = SDL_CreateTextureFromSurface(_sdlRenderer, surface);
+        _texture = SDL_CreateTextureFromSurface(_sdlRenderer, _surface);
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 
         if (null == _texture)
             throw new Exception(
-                    "Error occurred while converting \'" ~ path ~ "\' to a texture format.");
+                "Error occurred while converting `" ~ path ~ "` to a texture format.");
         updateSettings();
 
-        _width = surface.w;
-        _height = surface.h;
-        SDL_FreeSurface(surface);
+        _width = _surface.w;
+        _height = _surface.h;
 
         _isLoaded = true;
         _ownData = true;
@@ -205,7 +212,9 @@ final class Texture : Drawable {
     void unload() {
         if (!_ownData)
             return;
-        if (null != _texture)
+        if (_surface)
+            SDL_FreeSurface(_surface);
+        if (_texture)
             SDL_DestroyTexture(_texture);
         _isLoaded = false;
     }
@@ -219,18 +228,18 @@ final class Texture : Drawable {
 
     /// Render the whole texture here
     void draw(Vec2f pos, Vec2f anchor = Vec2f.half) const {
-        assert(_isLoaded, "Cannot render the texture: Asset not loaded.");
+        assert(_isLoaded, "can't render the texture: asset not loaded");
         pos -= anchor * Vec2f(_width, _height);
 
         SDL_Rect destRect = {cast(uint) pos.x, cast(uint) pos.y, _width, _height};
 
         SDL_RenderCopy(cast(SDL_Renderer*) _sdlRenderer,
-                cast(SDL_Texture*) _texture, null, &destRect);
+            cast(SDL_Texture*) _texture, null, &destRect);
     }
 
     /// Render a section of the texture here
     void draw(Vec2f pos, Vec4i srcRect, Vec2f anchor = Vec2f.half) const {
-        assert(_isLoaded, "Cannot render the texture: Asset not loaded.");
+        assert(_isLoaded, "can't render the texture: asset not loaded");
         pos -= anchor * cast(Vec2f) srcRect.zw;
 
         SDL_Rect srcSdlRect = srcRect.toSdlRect();
@@ -239,12 +248,12 @@ final class Texture : Drawable {
         };
 
         SDL_RenderCopy(cast(SDL_Renderer*) _sdlRenderer,
-                cast(SDL_Texture*) _texture, &srcSdlRect, &destSdlRect);
+            cast(SDL_Texture*) _texture, &srcSdlRect, &destSdlRect);
     }
 
     /// Render the whole texture here
     void draw(Vec2f pos, Vec2f size, Vec2f anchor = Vec2f.half) const {
-        assert(_isLoaded, "Cannot render the texture: Asset not loaded.");
+        assert(_isLoaded, "can't render the texture: asset not loaded");
         pos -= anchor * size;
 
         SDL_Rect destSdlRect = {
@@ -252,12 +261,12 @@ final class Texture : Drawable {
         };
 
         SDL_RenderCopy(cast(SDL_Renderer*) _sdlRenderer,
-                cast(SDL_Texture*) _texture, null, &destSdlRect);
+            cast(SDL_Texture*) _texture, null, &destSdlRect);
     }
 
     /// Render a section of the texture here
     void draw(Vec2f pos, Vec2f size, Vec4i srcRect, Vec2f anchor = Vec2f.half) const {
-        enforce(_isLoaded, "Cannot render the texture: Asset not loaded.");
+        enforce(_isLoaded, "can't render the texture: asset not loaded");
         pos -= anchor * size;
 
         SDL_Rect srcSdlRect = srcRect.toSdlRect();
@@ -266,13 +275,13 @@ final class Texture : Drawable {
         };
 
         SDL_RenderCopy(cast(SDL_Renderer*) _sdlRenderer,
-                cast(SDL_Texture*) _texture, &srcSdlRect, &destSdlRect);
+            cast(SDL_Texture*) _texture, &srcSdlRect, &destSdlRect);
     }
 
     /// Render a section of the texture here
     void draw(Vec2f pos, Vec2f size, Vec4i srcRect, float angle,
-            Flip flip = Flip.none, Vec2f anchor = Vec2f.half) const {
-        assert(_isLoaded, "Cannot render the texture: Asset not loaded.");
+        Flip flip = Flip.none, Vec2f anchor = Vec2f.half) const {
+        assert(_isLoaded, "can't render the texture: asset not loaded");
         pos -= anchor * size;
 
         SDL_Rect srcSdlRect = srcRect.toSdlRect();
@@ -282,6 +291,6 @@ final class Texture : Drawable {
 
         const SDL_RendererFlip rendererFlip = getSDLFlip(flip);
         SDL_RenderCopyEx(cast(SDL_Renderer*) _sdlRenderer, cast(SDL_Texture*) _texture,
-                &srcSdlRect, &destSdlRect, angle, null, rendererFlip);
+            &srcSdlRect, &destSdlRect, angle, null, rendererFlip);
     }
 }

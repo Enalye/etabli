@@ -114,7 +114,6 @@ final class TrueTypeFont : Font {
             assert(surface);
             Texture texture = new Texture(surface, false, _isSmooth);
             assert(texture);
-            SDL_FreeSurface(surface);
 
             Glyph metrics = Glyph(true, advance, 0, 0, texture.width,
                     texture.height, 0, 0, texture.width, texture.height, texture);
@@ -146,7 +145,6 @@ final class TrueTypeFont : Font {
             Texture texture = new Texture(surfaceOutline, false, _isSmooth);
             assert(texture);
             SDL_FreeSurface(surface);
-            SDL_FreeSurface(surfaceOutline);
             Glyph metrics = Glyph(true, advance, 0, 0, texture.width,
                     texture.height, 0, 0, texture.width, texture.height, texture);
             _cache[ch] = metrics;
