@@ -107,7 +107,7 @@ final class TrueTypeFont : Font {
         if (_outline == 0) {
             if (-1 == TTF_GlyphMetrics(_trueTypeFont, cast(wchar) ch, &xmin,
                     &xmax, &ymin, &ymax, &advance))
-                return Glyph();
+                return new BasicGlyph();
 
             SDL_Surface* surface = TTF_RenderGlyph_Blended(_trueTypeFont,
                     cast(wchar) ch, Color.white.toSDL());
@@ -115,7 +115,7 @@ final class TrueTypeFont : Font {
             Texture texture = new Texture(surface, false, _isSmooth);
             assert(texture);
 
-            Glyph metrics = Glyph(true, advance, 0, 0, texture.width,
+            Glyph metrics = new BasicGlyph(true, advance, 0, 0, texture.width,
                     texture.height, 0, 0, texture.width, texture.height, texture);
             _cache[ch] = metrics;
             return metrics;
@@ -123,7 +123,7 @@ final class TrueTypeFont : Font {
         else {
             if (-1 == TTF_GlyphMetrics(_trueTypeFont, cast(wchar) ch, &xmin,
                     &xmax, &ymin, &ymax, &advance))
-                return Glyph();
+                return new BasicGlyph();
 
             TTF_SetFontOutline(_trueTypeFont, _outline);
 
@@ -145,7 +145,7 @@ final class TrueTypeFont : Font {
             Texture texture = new Texture(surfaceOutline, false, _isSmooth);
             assert(texture);
             SDL_FreeSurface(surface);
-            Glyph metrics = Glyph(true, advance, 0, 0, texture.width,
+            Glyph metrics = new BasicGlyph(true, advance, 0, 0, texture.width,
                     texture.height, 0, 0, texture.width, texture.height, texture);
             _cache[ch] = metrics;
             return metrics;

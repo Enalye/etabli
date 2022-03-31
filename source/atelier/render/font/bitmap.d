@@ -118,13 +118,13 @@ final class BitmapFont : Font {
     Glyph getMetrics(dchar character) {
         for (int i; i < _metrics.chars.length; ++i) {
             if (_metrics.chars[i] == character) {
-                Glyph metrics = Glyph(true, _metrics.advance[i], _metrics.offsetX[i],
+                Glyph metrics = new BasicGlyph(true, _metrics.advance[i], _metrics.offsetX[i],
                         _metrics.offsetY[i], _metrics.width[i],
                         _metrics.height[i], _metrics.packX[i], _metrics.packY[i],
                         _metrics.width[i], _metrics.height[i], _texture);
                 return metrics;
             }
         }
-        return Glyph();
+        return new BasicGlyph();
     }
 }
