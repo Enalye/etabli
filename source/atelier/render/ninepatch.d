@@ -102,7 +102,7 @@ final class NinePatch {
             _surfaceWidth = texture_.width;
             _surfaceHeight = texture_.height;
             _isDirty = true;
-            return _texture;
+            return texture_;
         }
     }
 
