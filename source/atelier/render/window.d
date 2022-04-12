@@ -30,6 +30,7 @@ static {
         bool _hasAudio = true;
         bool _hasCustomCursor = false;
         bool _showCursor = true;
+        bool _isLogicalSize = false;
         Sprite _customCursorSprite;
         DisplayMode _displayMode = DisplayMode.windowed;
     }
@@ -142,19 +143,30 @@ void setWindowClearColor(Color color) {
     _windowClearColor = color;
 }
 
-/// Update the window size. \
-/// If `isLogical` is set, the actual window won't be resized, only the canvas will.
-void setWindowSize(const Vec2i windowSize, bool isLogical = false) {
-    resizeWindow(windowSize);
+/// If set, the actual window won't be resized, only the canvas will.
+void setWindowLogicalSize(const Vec2i logicalSize) {
+    _isLogicalSize = true;
+    SDL_RenderSetLogicalSize(_sdlRenderer, logicalSize.x, logicalSize.y);
+}
 
-    if (isLogical)
-        SDL_RenderSetLogicalSize(_sdlRenderer, windowSize.x, windowSize.y);
-    else
-        SDL_SetWindowSize(_sdlWindow, windowSize.x, windowSize.y);
+/// Update the window size.
+void setWindowSize(const Vec2i windowSize) {
+    _windowDimensions = windowSize;
+    _windowSize = cast(Vec2f)(windowSize);
+    _windowCenter = _windowSize / 2f;
+
+    if (_canvases.length) {
+        _canvases[0].position = cast(Vec2f)(windowSize) / 2;
+        _canvases[0].size = cast(Vec2f)(windowSize);
+        _canvases[0].renderSize = cast(Vec2f) windowSize;
+    }
+    SDL_SetWindowSize(_sdlWindow, windowSize.x, windowSize.y);
 }
 
 /// Call this to update canvas size when window's size is changed externally.
 package(atelier) void resizeWindow(const Vec2i windowSize) {
+    if (_isLogicalSize)
+        return;
     _windowDimensions = windowSize;
     _windowSize = cast(Vec2f)(windowSize);
     _windowCenter = _windowSize / 2f;
