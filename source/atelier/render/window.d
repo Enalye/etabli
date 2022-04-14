@@ -146,6 +146,7 @@ void setWindowClearColor(Color color) {
 /// If set, the actual window won't be resized, only the canvas will.
 void setWindowLogicalSize(const Vec2i logicalSize) {
     _isLogicalSize = true;
+    SDL_RenderSetIntegerScale(_sdlRenderer, SDL_TRUE);
     SDL_RenderSetLogicalSize(_sdlRenderer, logicalSize.x, logicalSize.y);
 }
 

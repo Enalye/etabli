@@ -25,8 +25,9 @@ final class NinePatch {
         }
         /// Ditto
         Vec2f size(const Vec2f size_) {
+            if ((cast(Vec2i) _size) != (cast(Vec2i) size_))
+                _isDirty = true;
             _size = size_;
-            _isDirty = true;
             return _size;
         }
 
@@ -97,10 +98,14 @@ final class NinePatch {
 
         /// The texture used to render.
         Texture texture(Texture texture_) {
+            if (_ownSurface && _surface)
+                SDL_FreeSurface(_surface);
+
             _surface = SDL_ConvertSurfaceFormat(texture_.surface, SDL_PIXELFORMAT_RGBA8888, 0);
             enforce(null != _surface, "can't format surface");
             _surfaceWidth = texture_.width;
             _surfaceHeight = texture_.height;
+            _ownSurface = true;
             _isDirty = true;
             return texture_;
         }
@@ -114,6 +119,7 @@ final class NinePatch {
         Vec4i _clip;
         int _top, _bottom, _left, _right;
         bool _isDirty = true;
+        bool _ownSurface;
     }
 
     /// Mirroring property.
@@ -144,6 +150,7 @@ final class NinePatch {
         _surface = ninePatch._surface;
         _surfaceWidth = ninePatch._surfaceWidth;
         _surfaceHeight = ninePatch._surfaceHeight;
+        _ownSurface = false;
         _clip = ninePatch._clip;
         _top = ninePatch._top;
         _bottom = ninePatch._bottom;
@@ -158,6 +165,7 @@ final class NinePatch {
         enforce(null != _surface, "can't format surface");
         _surfaceWidth = texture_.width;
         _surfaceHeight = texture_.height;
+        _ownSurface = true;
         _clip = clip_;
         _top = top_;
         _bottom = bottom_;
@@ -165,6 +173,11 @@ final class NinePatch {
         _right = right_;
         _size = to!Vec2f(_clip.zw);
         _isDirty = true;
+    }
+
+    ~this() {
+        if (_ownSurface && _surface)
+            SDL_FreeSurface(_surface);
     }
 
     /// Set the ninepatch's size to fit inside the specified size.
