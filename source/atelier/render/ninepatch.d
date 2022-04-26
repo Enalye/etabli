@@ -209,8 +209,8 @@ final class NinePatch {
         rasterData.left = _left;
         rasterData.clipX = _clip.x;
         rasterData.clipY = _clip.y;
-        rasterData.clipW = _clip.w;
-        rasterData.clipH = _clip.z;
+        rasterData.clipW = _clip.z;
+        rasterData.clipH = _clip.w;
         rasterData.texW = _surfaceWidth;
         rasterData.texH = _surfaceHeight;
         rasterData.pixels = cast(uint*) _surface.pixels;
@@ -257,55 +257,60 @@ final class NinePatch {
                 }
             }
 
-            // Top edge
-            for (int iy; iy < data.top; ++iy) {
-                int ix;
-                while (ix < texInternalW) {
-                    dest[iy * texWidth + ix + data.left] =
-                        data.pixels[(data.clipY + iy) * data.texW + data.clipX + (
-                                ix % clipInternalW) + data.left];
-                    ix++;
+            if (clipInternalW > 0) {
+                // Top edge
+                for (int iy; iy < data.top; ++iy) {
+                    int ix;
+                    while (ix < texInternalW) {
+                        dest[iy * texWidth + ix + data.left] =
+                            data.pixels[(data.clipY + iy) * data.texW + data.clipX + (
+                                    ix % clipInternalW) + data.left];
+                        ix++;
+                    }
                 }
-            }
 
-            // Bottom edge
-            for (int iy; iy < data.bottom; ++iy) {
-                int ix;
-                while (ix < texInternalW) {
-                    dest[iy * texWidth + ix + data.left + offsetY] =
-                        data.pixels[(data.clipY + iy + (
-                                data.clipH - data.bottom)) * data.texW + data.clipX + (
-                                ix % clipInternalW) + data.left];
-                    ix++;
+                // Bottom edge
+                for (int iy; iy < data.bottom; ++iy) {
+                    int ix;
+                    while (ix < texInternalW) {
+                        dest[iy * texWidth + ix + data.left + offsetY] =
+                            data.pixels[(data.clipY + iy + (
+                                    data.clipH - data.bottom)) * data.texW + data.clipX + (
+                                    ix % clipInternalW) + data.left];
+                        ix++;
+                    }
                 }
             }
 
             // Left and right edges
-            for (int iy; iy < (texHeight - (data.top + data.bottom)); ++iy) {
+            if (clipInternalH > 0) {
+                for (int iy; iy < (texHeight - (data.top + data.bottom)); ++iy) {
+                    // Left edge
+                    for (int ix; ix < data.left; ++ix) {
+                        dest[(iy + data.top) * texWidth + ix] =
+                            data.pixels[(data.clipY + (
+                                    iy % clipInternalH) + data.top) * data.texW + data.clipX + ix];
+                    }
 
-                // Left edge
-                for (int ix; ix < data.left; ++ix) {
-                    dest[(iy + data.top) * texWidth + ix] =
-                        data.pixels[(data.clipY + (
-                                iy % clipInternalH) + data.top) * data.texW + data.clipX + ix];
-                }
-
-                // Right edge
-                for (int ix; ix < data.right; ++ix) {
-                    dest[(iy + data.top + 1) * texWidth + (ix - data.right)] =
-                        data.pixels[(data.clipY + (
-                                iy % clipInternalH) + data.top) * data.texW + data.clipX + ix + (
-                                data.clipW - data.right)];
+                    // Right edge
+                    for (int ix; ix < data.right; ++ix) {
+                        dest[(iy + data.top + 1) * texWidth + (ix - data.right)] =
+                            data.pixels[(data.clipY + (
+                                    iy % clipInternalH) + data.top) * data.texW + data.clipX + ix + (
+                                    data.clipW - data.right)];
+                    }
                 }
             }
 
             // Center
-            for (int iy; iy < (texHeight - (data.top + data.bottom)); ++iy) {
-                for (int ix; ix < (texWidth - (data.left + data.right)); ++ix) {
-                    dest[(iy + data.top) * texWidth + (ix + data.left)] =
-                        data.pixels[(data.clipY + (
-                                iy % clipInternalH) + data.top) * data.texW + data.clipX + (
-                                ix % clipInternalW) + data.left];
+            if (clipInternalW > 0 && clipInternalH > 0) {
+                for (int iy; iy < (texHeight - (data.top + data.bottom)); ++iy) {
+                    for (int ix; ix < (texWidth - (data.left + data.right)); ++ix) {
+                        dest[(iy + data.top) * texWidth + (ix + data.left)] =
+                            data.pixels[(data.clipY + (
+                                    iy % clipInternalH) + data.top) * data.texW + data.clipX + (
+                                    ix % clipInternalW) + data.left];
+                    }
                 }
             }
         }, &rasterData);
