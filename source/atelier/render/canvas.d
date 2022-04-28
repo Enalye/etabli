@@ -202,9 +202,9 @@ final class Canvas : Drawable {
     /// Toggle the canvas smoothing
     void setSmooth(bool isSmooth_) {
         if (isSmooth_ != _isSmooth) {
+            _isSmooth = isSmooth_;
             renderSize(_renderSize);
         }
-        _isSmooth = isSmooth_;
     }
 
     /// Draw the texture at the specified location.
