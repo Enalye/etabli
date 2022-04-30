@@ -203,17 +203,17 @@ package(atelier) void updateRoots(GuiElement gui, GuiElement parent) {
             if (gui._alignX == GuiAlignX.left)
                 coords.x = offset.x;
             else if (gui._alignX == GuiAlignX.right)
-                coords.x = (parent._size.x * parent._currentState.scale.x) - offset.x;
+                coords.x = parent._size.x - offset.x;
             else
-                coords.x = (parent._size.x * parent._currentState.scale.x) / 2f
+                coords.x = parent._size.x / 2f
                     + gui._currentState.offset.x + gui.position.x;
 
             if (gui._alignY == GuiAlignY.top)
                 coords.y = offset.y;
             else if (gui._alignY == GuiAlignY.bottom)
-                coords.y = (parent._size.y * parent._currentState.scale.y) - offset.y;
+                coords.y = parent._size.y - offset.y;
             else
-                coords.y = (parent._size.y * parent._currentState.scale.y) / 2f
+                coords.y = parent._size.y / 2f
                     + gui._currentState.offset.y + gui.position.y;
         }
         else {
@@ -277,7 +277,7 @@ void drawRoots(GuiElement gui) {
         }
         popCanvas();
         canvas.draw(transformRenderSpace(gui._screenCoords),
-                transformScale() * cast(Vec2f) canvas.renderSize(), Vec4i(0, 0,
+                transformScale() * cast(Vec2f) canvas.renderSize() * gui._currentState.scale, Vec4i(0, 0,
                     canvas.width, canvas.height), gui._currentState.angle, Flip.none, Vec2f.half);
         const auto origin = gui._origin;
         const auto center = gui._center;
@@ -299,7 +299,7 @@ void drawRoots(GuiElement gui) {
             openHintWindow(gui.hint);
     }
     if (_isGuiElementDebug) {
-        drawRect(gui.center - (gui._size * gui._currentState.scale) / 2f,
+        drawRect(gui._screenCoords - (gui._size * gui._currentState.scale) / 2f,
                 gui._size * gui._currentState.scale, gui.isHovered ? Color.red
                 : (gui.nodes.length ? Color.blue : Color.green));
     }
