@@ -146,7 +146,21 @@ void setWindowClearColor(Color color) {
 /// If set, the actual window won't be resized, only the canvas will.
 void setWindowLogicalSize(const Vec2i logicalSize) {
     _isLogicalSize = true;
+    
+    _windowDimensions = logicalSize;
+    _windowSize = cast(Vec2f)(logicalSize);
+    _windowCenter = _windowSize / 2f;
+
+    if (_canvases.length) {
+        _canvases[0].position = cast(Vec2f)(logicalSize) / 2;
+        _canvases[0].size = cast(Vec2f)(logicalSize);
+        _canvases[0].renderSize = cast(Vec2f) logicalSize;
+    }
     SDL_RenderSetLogicalSize(_sdlRenderer, logicalSize.x, logicalSize.y);
+}
+/// Ditto
+bool isWindowLogicalSize() {
+    return _isLogicalSize;
 }
 
 /// Limits the window scaling to multiple of the base resolution.

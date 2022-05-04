@@ -264,6 +264,84 @@ package(atelier) void updateRoots(GuiElement gui, GuiElement parent) {
     }
 }
 
+/// Force update all gui in place, but does not call update()
+void forceUpdateRoots() {
+    foreach (GuiElement root; _rootElements) {
+        _forceUpdateRoots(root, null);
+    }
+}
+/// Ditto
+private void _forceUpdateRoots(GuiElement gui, GuiElement parent) {
+    Vec2f coords = Vec2f.zero;
+
+    //Calculate gui location
+    const Vec2f offset = gui._position + (
+            gui._size * gui._currentState.scale / 2f) + gui._currentState.offset;
+    if (parent !is null) {
+        if (parent.hasCanvas && parent.canvas !is null) {
+            if (gui._alignX == GuiAlignX.left)
+                coords.x = offset.x;
+            else if (gui._alignX == GuiAlignX.right)
+                coords.x = parent._size.x - offset.x;
+            else
+                coords.x = parent._size.x / 2f
+                    + gui._currentState.offset.x + gui.position.x;
+
+            if (gui._alignY == GuiAlignY.top)
+                coords.y = offset.y;
+            else if (gui._alignY == GuiAlignY.bottom)
+                coords.y = parent._size.y - offset.y;
+            else
+                coords.y = parent._size.y / 2f
+                    + gui._currentState.offset.y + gui.position.y;
+        }
+        else {
+            if (gui._alignX == GuiAlignX.left)
+                coords.x = parent.origin.x + offset.x;
+            else if (gui._alignX == GuiAlignX.right)
+                coords.x = parent.origin.x + (
+                        parent._size.x * parent._currentState.scale.x) - offset.x;
+            else
+                coords.x = parent.center.x + gui._currentState.offset.x + gui.position.x;
+
+            if (gui._alignY == GuiAlignY.top)
+                coords.y = parent.origin.y + offset.y;
+            else if (gui._alignY == GuiAlignY.bottom)
+                coords.y = parent.origin.y + (
+                        parent._size.y * parent._currentState.scale.y) - offset.y;
+            else
+                coords.y = parent.center.y + gui._currentState.offset.y + gui.position.y;
+        }
+    }
+    else {
+        if (gui._alignX == GuiAlignX.left)
+            coords.x = offset.x;
+        else if (gui._alignX == GuiAlignX.right)
+            coords.x = getWindowWidth() - offset.x;
+        else
+            coords.x = getWindowCenter().x + gui._currentState.offset.x + gui.position.x;
+
+        if (gui._alignY == GuiAlignY.top)
+            coords.y = offset.y;
+        else if (gui._alignY == GuiAlignY.bottom)
+            coords.y = getWindowHeight() - offset.y;
+        else
+            coords.y = getWindowCenter().y + gui._currentState.offset.y + gui.position.y;
+    }
+    gui.setScreenCoords(coords);
+
+    size_t childIndex = 0;
+    while (childIndex < gui.nodes.length) {
+        if (gui.nodes[childIndex]._isRegistered) {
+            updateRoots(gui.nodes[childIndex], gui);
+            childIndex++;
+        }
+        else {
+            gui.removeChild(childIndex);
+        }
+    }
+}
+
 /// Renders a gui and all its children.
 void drawRoots(GuiElement gui) {
     if (gui.hasCanvas && gui.canvas !is null) {

@@ -641,10 +641,12 @@ bool processEvents() {
         case SDL_WINDOWEVENT:
             switch (sdlEvent.window.event) {
             case SDL_WINDOWEVENT_RESIZED:
-                event.type = Event.Type.resize;
-                event.window.size = Vec2i(sdlEvent.window.data1, sdlEvent.window.data2);
-                resizeWindow(event.window.size);
-                handleGuiElementEvent(event);
+                if (!isWindowLogicalSize()) {
+                    event.type = Event.Type.resize;
+                    event.window.size = Vec2i(sdlEvent.window.data1, sdlEvent.window.data2);
+                    resizeWindow(event.window.size);
+                    handleGuiElementEvent(event);
+                }
                 break;
             case SDL_WINDOWEVENT_SIZE_CHANGED:
                 break;
