@@ -34,7 +34,7 @@ void resumeSounds() {
 }
 
 /// Sound
-class Sound {
+final class Sound {
     private {
         Mix_Chunk* _chunk;
         int _groupId = -1;
@@ -57,6 +57,12 @@ class Sound {
 
         bool isLooping(bool isLooping_) {
             return _isLooping = isLooping_;
+        }
+
+        bool isPlaying() const {
+            if (isChunkPlaying())
+                return Mix_Playing(_currentChannelId) == 1;
+            return false;
         }
 
         bool isPaused() const {
@@ -119,7 +125,7 @@ class Sound {
 
     void load(Mix_Chunk* chunk) {
         _chunk = chunk;
-        _length = (cast(float) _chunk.alen) / (44100f * 4f);
+        _length = (cast(float) _chunk.alen) / (44_100f * 4f);
         _volume = (cast(float) _chunk.volume) / MIX_MAX_VOLUME;
         _ownData = true;
     }
