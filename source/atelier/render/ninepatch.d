@@ -195,6 +195,9 @@ final class NinePatch {
         _cache = (_size.x >= 1f && _size.y >= 1f) ? new WritableTexture(cast(int) _size.x, cast(int) _size
                 .y) : null;
 
+        if (!_cache)
+            return;
+
         struct RasterData {
             int top, right, bottom, left;
             int clipX, clipY, clipW, clipH;
