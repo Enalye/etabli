@@ -14,6 +14,8 @@ import atelier.ui.gui_element, atelier.ui.gui_overlay, atelier.ui.gui_modal;
 
 private {
     bool _isGuiElementDebug = false;
+    string[] _debugHoveredElements;
+
     GuiElement[] _rootElements;
     float _deltaTime = 1f;
 }
@@ -49,6 +51,11 @@ GuiElement[] getRoots() {
 /// Show every the hitbox of every gui element.
 void setDebugGui(bool isDebug) {
     _isGuiElementDebug = isDebug;
+}
+
+/// Show current hovered gui elements.
+string[] getHoveredDebugGui() {
+    return _debugHoveredElements;
 }
 
 /// Remove the specified gui from roots.
@@ -92,6 +99,10 @@ package(atelier) void updateRoots(float deltaTime) {
 
 /// Draw all the guis from the root.
 package(atelier) void drawRoots() {
+    if (_isGuiElementDebug) {
+        _debugHoveredElements.length = 0;
+    }
+
     foreach_reverse (GuiElement widget; _rootElements) {
         drawRoots(widget);
     }
@@ -197,7 +208,7 @@ package(atelier) void updateRoots(GuiElement gui, GuiElement parent) {
 
     //Calculate gui location
     const Vec2f offset = gui._position + (
-            gui._size * gui._currentState.scale / 2f) + gui._currentState.offset;
+        gui._size * gui._currentState.scale / 2f) + gui._currentState.offset;
     if (parent !is null) {
         if (parent.hasCanvas && parent.canvas !is null) {
             if (gui._alignX == GuiAlignX.left)
@@ -221,7 +232,7 @@ package(atelier) void updateRoots(GuiElement gui, GuiElement parent) {
                 coords.x = parent.origin.x + offset.x;
             else if (gui._alignX == GuiAlignX.right)
                 coords.x = parent.origin.x + (
-                        parent._size.x * parent._currentState.scale.x) - offset.x;
+                    parent._size.x * parent._currentState.scale.x) - offset.x;
             else
                 coords.x = parent.center.x + gui._currentState.offset.x + gui.position.x;
 
@@ -229,7 +240,7 @@ package(atelier) void updateRoots(GuiElement gui, GuiElement parent) {
                 coords.y = parent.origin.y + offset.y;
             else if (gui._alignY == GuiAlignY.bottom)
                 coords.y = parent.origin.y + (
-                        parent._size.y * parent._currentState.scale.y) - offset.y;
+                    parent._size.y * parent._currentState.scale.y) - offset.y;
             else
                 coords.y = parent.center.y + gui._currentState.offset.y + gui.position.y;
         }
@@ -276,7 +287,7 @@ private void _forceUpdateRoots(GuiElement gui, GuiElement parent) {
 
     //Calculate gui location
     const Vec2f offset = gui._position + (
-            gui._size * gui._currentState.scale / 2f) + gui._currentState.offset;
+        gui._size * gui._currentState.scale / 2f) + gui._currentState.offset;
     if (parent !is null) {
         if (parent.hasCanvas && parent.canvas !is null) {
             if (gui._alignX == GuiAlignX.left)
@@ -300,7 +311,7 @@ private void _forceUpdateRoots(GuiElement gui, GuiElement parent) {
                 coords.x = parent.origin.x + offset.x;
             else if (gui._alignX == GuiAlignX.right)
                 coords.x = parent.origin.x + (
-                        parent._size.x * parent._currentState.scale.x) - offset.x;
+                    parent._size.x * parent._currentState.scale.x) - offset.x;
             else
                 coords.x = parent.center.x + gui._currentState.offset.x + gui.position.x;
 
@@ -308,7 +319,7 @@ private void _forceUpdateRoots(GuiElement gui, GuiElement parent) {
                 coords.y = parent.origin.y + offset.y;
             else if (gui._alignY == GuiAlignY.bottom)
                 coords.y = parent.origin.y + (
-                        parent._size.y * parent._currentState.scale.y) - offset.y;
+                    parent._size.y * parent._currentState.scale.y) - offset.y;
             else
                 coords.y = parent.center.y + gui._currentState.offset.y + gui.position.y;
         }
@@ -333,7 +344,7 @@ private void _forceUpdateRoots(GuiElement gui, GuiElement parent) {
     size_t childIndex = 0;
     while (childIndex < gui.nodes.length) {
         if (gui.nodes[childIndex]._isRegistered) {
-            updateRoots(gui.nodes[childIndex], gui);
+            _forceUpdateRoots(gui.nodes[childIndex], gui);
             childIndex++;
         }
         else {
@@ -355,8 +366,8 @@ void drawRoots(GuiElement gui) {
         }
         popCanvas();
         canvas.draw(transformRenderSpace(gui._screenCoords),
-                transformScale() * cast(Vec2f) canvas.renderSize() * gui._currentState.scale, Vec4i(0, 0,
-                    canvas.width, canvas.height), gui._currentState.angle, Flip.none, Vec2f.half);
+            transformScale() * cast(Vec2f) canvas.renderSize() * gui._currentState.scale, Vec4i(0, 0,
+                canvas.width, canvas.height), gui._currentState.angle, Flip.none, Vec2f.half);
         const auto origin = gui._origin;
         const auto center = gui._center;
         gui._origin = gui._screenCoords - (gui._size * gui._currentState.scale) / 2f;
@@ -377,8 +388,12 @@ void drawRoots(GuiElement gui) {
             openHintWindow(gui.hint);
     }
     if (_isGuiElementDebug) {
+        if (gui.isHovered) {
+            _debugHoveredElements ~= gui.classinfo.name;
+        }
+
         drawRect(gui._screenCoords - (gui._size * gui._currentState.scale) / 2f,
-                gui._size * gui._currentState.scale, gui.isHovered ? Color.red
+            gui._size * gui._currentState.scale, gui.isHovered ? Color.red
                 : (gui.nodes.length ? Color.blue : Color.green));
     }
 }
