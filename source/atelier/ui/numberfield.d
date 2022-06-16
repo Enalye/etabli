@@ -95,7 +95,7 @@ class NumberField : GuiElement {
                     _maxValue = 0;
 
                 int currentValue = value();
-                if(currentValue < 0)
+                if (currentValue < 0)
                     value = 0;
             }
             return _isUnsigned;
@@ -190,6 +190,11 @@ class NumberField : GuiElement {
         }
         _label.text = to!string(_text);
         _selectionIndex = _caretIndex;
+
+        int currentValue = value();
+        if (currentValue > _maxValue)
+            value = _maxValue;
+
         triggerCallback();
     }
 
@@ -255,8 +260,6 @@ class NumberField : GuiElement {
         if (hasFocus) {
             switch (event.type) with (Event.Type) {
             case keyInput:
-                if (_caretIndex >= _maxValue)
-                    break;
                 insertText(event.input.text);
                 break;
             case keyDown:
