@@ -150,7 +150,7 @@ final class Sound {
 		+/
         if (maxDuration > 0f)
             _currentChannelId = Mix_PlayChannelTimed(availableChannel, _chunk,
-                    _isLooping ? -1 : 0, cast(int)(maxDuration * 1000f));
+                    _isLooping ? -1 : 0, cast(int)(maxDuration * 1_000f));
         else
             _currentChannelId = Mix_PlayChannel(availableChannel, _chunk, _isLooping ? -1 : 0);
 
@@ -175,10 +175,10 @@ final class Sound {
 		+/
         if (maxDuration > 0f)
             _currentChannelId = Mix_FadeInChannelTimed(availableChannel, _chunk, _isLooping
-                    ? -1 : 0, cast(int)(fadingDuration * 1000f), cast(int)(maxDuration * 1000f));
+                    ? -1 : 0, cast(int)(fadingDuration * 1_000f), cast(int)(maxDuration * 1_000f));
         else
             _currentChannelId = Mix_FadeInChannel(availableChannel, _chunk,
-                    _isLooping ? -1 : 0, cast(int)(fadingDuration * 1000f));
+                    _isLooping ? -1 : 0, cast(int)(fadingDuration * 1_000f));
     }
 
     void pause() {
@@ -198,18 +198,24 @@ final class Sound {
 
     void stop(float seconds) {
         if (isChunkPlaying)
-            Mix_ExpireChannel(_currentChannelId, cast(int)(seconds * 1000f));
+            Mix_ExpireChannel(_currentChannelId, cast(int)(seconds * 1_000f));
     }
 
     void fadeOut(float seconds) {
-        if (isChunkPlaying())
-            Mix_FadeOutChannel(_currentChannelId, cast(int)(seconds * 1000f));
+        if (isChunkPlaying()) {
+            auto duration = cast(int)(seconds * 1_000f);
+            Mix_FadeOutChannel(_currentChannelId, duration);
+
+            // Prevents a glitch when a sound with fadeIn is fadeOut in the same frame or the next one
+            // This causes the sound to never stops. Idk why (maybe threads stuff), but this fixes it.
+            Mix_ExpireChannel(_currentChannelId, duration);
+        }
     }
 
     void fadeOutGroup(float seconds) {
         if (_groupId == -1)
             return;
-        Mix_FadeOutGroup(_groupId, cast(int)(seconds * 1000f));
+        Mix_FadeOutGroup(_groupId, cast(int)(seconds * 1_000f));
     }
 
     void stopGroup() {
