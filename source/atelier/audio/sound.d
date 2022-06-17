@@ -203,12 +203,11 @@ final class Sound {
 
     void fadeOut(float seconds) {
         if (isChunkPlaying()) {
-            auto duration = cast(int)(seconds * 1_000f);
-            Mix_FadeOutChannel(_currentChannelId, duration);
-
+            const int err = Mix_FadeOutChannel(_currentChannelId, cast(int)(seconds * 1_000f));
             // Prevents a glitch when a sound with fadeIn is fadeOut in the same frame or the next one
             // This causes the sound to never stops. Idk why (maybe threads stuff), but this fixes it.
-            Mix_ExpireChannel(_currentChannelId, duration);
+            if(err != 1)
+                Mix_HaltChannel(_currentChannelId);
         }
     }
 
