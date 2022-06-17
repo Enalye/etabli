@@ -36,7 +36,7 @@ void resumeSounds() {
 /// Sound
 final class Sound {
     private {
-        Mix_Chunk* _chunk;
+        Mix_Chunk _chunk;
         int _groupId = -1;
         int _currentChannelId = -1;
         bool _isLooping, _ownData;
@@ -48,7 +48,7 @@ final class Sound {
 
     @property {
         bool isLoaded() const {
-            return _chunk !is null;
+            return _chunk.abuf !is null;
         }
 
         bool isLooping() const {
@@ -81,7 +81,7 @@ final class Sound {
 
         float volume(float volume_) {
             _volume = volume_;
-            Mix_VolumeChunk(_chunk, cast(int)(_volume * MIX_MAX_VOLUME));
+            Mix_VolumeChunk(&_chunk, cast(int)(_volume * MIX_MAX_VOLUME));
             return _volume;
         }
 
@@ -117,14 +117,14 @@ final class Sound {
     }
 
     void load(string path) {
-        auto chunk = Mix_LoadWAV(toStringz(path));
+        Mix_Chunk* chunk = Mix_LoadWAV(toStringz(path));
         if (!chunk)
             throw new Exception("Could not load sound \'" ~ path ~ "\'");
         load(chunk);
     }
 
     void load(Mix_Chunk* chunk) {
-        _chunk = chunk;
+        _chunk = *chunk;
         _length = (cast(float) _chunk.alen) / (44_100f * 4f);
         _volume = (cast(float) _chunk.volume) / MIX_MAX_VOLUME;
         _ownData = true;
@@ -133,9 +133,10 @@ final class Sound {
     void unload() {
         if (!_ownData)
             return;
-        if (_chunk)
-            Mix_FreeChunk(_chunk);
-        _chunk = null;
+        if (_chunk.abuf)
+            Mix_FreeChunk(&_chunk);
+        _chunk.abuf = null;
+        _ownData = false;
     }
 
     void play(float maxDuration = 0f) {
@@ -149,10 +150,10 @@ final class Sound {
 			todo: Unregister then register each effects here.
 		+/
         if (maxDuration > 0f)
-            _currentChannelId = Mix_PlayChannelTimed(availableChannel, _chunk,
+            _currentChannelId = Mix_PlayChannelTimed(availableChannel, &_chunk,
                     _isLooping ? -1 : 0, cast(int)(maxDuration * 1_000f));
         else
-            _currentChannelId = Mix_PlayChannel(availableChannel, _chunk, _isLooping ? -1 : 0);
+            _currentChannelId = Mix_PlayChannel(availableChannel, &_chunk, _isLooping ? -1 : 0);
 
         if (_leftPanning || _rightPanning)
             Mix_SetPanning(_currentChannelId, _leftPanning, _rightPanning);
@@ -174,10 +175,10 @@ final class Sound {
 			todo: Unregister then register each effects here.
 		+/
         if (maxDuration > 0f)
-            _currentChannelId = Mix_FadeInChannelTimed(availableChannel, _chunk, _isLooping
+            _currentChannelId = Mix_FadeInChannelTimed(availableChannel, &_chunk, _isLooping
                     ? -1 : 0, cast(int)(fadingDuration * 1_000f), cast(int)(maxDuration * 1_000f));
         else
-            _currentChannelId = Mix_FadeInChannel(availableChannel, _chunk,
+            _currentChannelId = Mix_FadeInChannel(availableChannel, &_chunk,
                     _isLooping ? -1 : 0, cast(int)(fadingDuration * 1_000f));
     }
 
@@ -226,7 +227,7 @@ final class Sound {
     private bool isChunkPlaying() const {
         if (_currentChannelId == -1)
             return false;
-        return _chunk == Mix_GetChunk(_currentChannelId);
+        return &_chunk == Mix_GetChunk(_currentChannelId);
     }
 
     void setDistance(float distance) {
