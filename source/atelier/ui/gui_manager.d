@@ -24,23 +24,27 @@ private {
 
 /// Add a gui as a top gui (not a child of anything).
 void prependRoot(GuiElement gui) {
+    gui._isRegistered = true;
     _rootElements = gui ~ _rootElements;
 }
 
 /// Add a gui as a top gui (not a child of anything).
 void appendRoot(GuiElement gui) {
+    gui._isRegistered = true;
     _rootElements ~= gui;
 }
 
 /// Remove all the top gui (that aren't a child of anything).
 void removeRoots() {
-    //_isChildGrabbed = false;
     _rootElements.length = 0uL;
 }
 
 /// Set those gui as the top guis (replacing the previous ones).
-void setRoots(GuiElement[] widgets) {
-    _rootElements = widgets;
+void setRoots(GuiElement[] guis) {
+    foreach (GuiElement gui; guis) {
+        gui._isRegistered = true;
+    }
+    _rootElements = guis;
 }
 
 /// Get all the root gui.
