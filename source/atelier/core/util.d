@@ -59,3 +59,7 @@ Vec2f scaleToFit(Vec2f src, Vec2f dst) {
 float approach(float value, float target, float step) {
     return value > target ? max(value - step, target) : min(value + step, target);
 }
+/// Ditto
+int approach(int value, int target, int step) {
+    return value > target ? max(value - step, target) : min(value + step, target);
+}
