@@ -43,7 +43,7 @@ final class Animation {
     @property {
         /// Is the animation currently playing ?
         bool isPlaying() const {
-            return _timer.isRunning;
+            return _isRunning;
         }
 
         /// Duration in seconds from witch the timer goes from 0 to 1 (framerate dependent). \
@@ -124,7 +124,7 @@ final class Animation {
 
     /// Create an animation from a tileset.
     this(Drawable tex, const Vec4i startTileClip, const int columns, const int lines,
-            const int maxcount = 0, const Vec2i margin = Vec2i.zero) {
+        const int maxcount = 0, const Vec2i margin = Vec2i.zero) {
         assert(tex, "Null drawable");
         _drawable = tex;
         size = to!Vec2f(startTileClip.zw);
@@ -132,8 +132,8 @@ final class Animation {
         for (int y; y < lines; y++) {
             for (int x; x < columns; x++) {
                 Vec4i currentClip = Vec4i(startTileClip.x + x * (startTileClip.z + margin.x),
-                        startTileClip.y + y * (startTileClip.w + margin.y),
-                        startTileClip.z, startTileClip.w);
+                    startTileClip.y + y * (startTileClip.w + margin.y),
+                    startTileClip.z, startTileClip.w);
                 clips ~= currentClip;
                 frames ~= count;
 
@@ -305,7 +305,7 @@ final class Animation {
         _drawable.blend = blend;
         _drawable.alpha = alpha;
         _drawable.draw(transformRenderSpace(position), finalSize,
-                clips[currentClip], angle, flip, anchor);
+            clips[currentClip], angle, flip, anchor);
     }
 
     /// Render the current frame with a direction information.
@@ -350,7 +350,7 @@ final class Animation {
         _drawable.blend = blend;
         _drawable.alpha = alpha;
         _drawable.draw(transformRenderSpace(position), finalSize, texClip,
-                angle, currentFlip, anchor);
+            angle, currentFlip, anchor);
     }
 
     /// Render the desired frame with a direction information.
@@ -395,6 +395,6 @@ final class Animation {
         _drawable.blend = blend;
         _drawable.alpha = alpha;
         _drawable.draw(transformRenderSpace(position), finalSize, texClip,
-                angle, currentFlip, anchor);
+            angle, currentFlip, anchor);
     }
 }
