@@ -218,6 +218,10 @@ void setWindowMaxSize(Vec2i size) {
     SDL_SetWindowMaximumSize(_sdlWindow, size.x, size.y);
 }
 
+void minimizeWindow() {
+    SDL_MinimizeWindow(_sdlWindow);
+}
+
 /// Change the icon displayed.
 void setWindowIcon(string path) {
     if (_icon) {
