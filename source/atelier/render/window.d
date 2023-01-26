@@ -81,19 +81,23 @@ enum DisplayMode {
 import std.exception;
 
 /// Create the application window.
-void createWindow(const Vec2i windowSize, string title) {
+void createWindow(const Vec2i windowSize, string title, uint initFlags = SDL_INIT_EVERYTHING) {
     enforce(loadSDL() >= SDLSupport.sdl2010, "SDL support <= 2.0.10");
     enforce(loadSDLImage() >= SDLImageSupport.sdlImage204, "SDL image support <= 2.0.4");
     enforce(loadSDLTTF() >= SDLTTFSupport.sdlTTF2014, "SDL ttf support <= 2.0.14");
-    enforce(loadSDLMixer() >= SDLMixerSupport.sdlMixer204, "SDL mixer support <= 2.0.4");
 
-    enforce(SDL_Init(SDL_INIT_EVERYTHING) == 0,
-            "SDL initialisation failure: " ~ fromStringz(SDL_GetError()));
+    if (_hasAudio)
+        enforce(loadSDLMixer() >= SDLMixerSupport.sdlMixer204, "SDL mixer support <= 2.0.4");
+
+    enforce(SDL_Init(initFlags) == 0, "SDL initialisation failure: " ~ fromStringz(SDL_GetError()));
 
     enforce(TTF_Init() != -1, "SDL ttf initialisation failure");
-    enforce(Mix_OpenAudio(44_100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS,
-            1024) != -1, "no audio device connected");
-    enforce(Mix_AllocateChannels(16) != -1, "audio channels allocation failure");
+
+    if (_hasAudio) {
+        enforce(Mix_OpenAudio(44_100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS,
+                1024) != -1, "no audio device connected");
+        enforce(Mix_AllocateChannels(16) != -1, "audio channels allocation failure");
+    }
 
     SDL_SetHint(SDL_HINT_RENDER_BATCHING, "1");
 
@@ -146,7 +150,7 @@ void setWindowClearColor(Color color) {
 /// If set, the actual window won't be resized, only the canvas will.
 void setWindowLogicalSize(const Vec2i logicalSize) {
     _isLogicalSize = true;
-    
+
     _windowDimensions = logicalSize;
     _windowSize = cast(Vec2f)(logicalSize);
     _windowCenter = _windowSize / 2f;
@@ -290,6 +294,21 @@ void showWindow(bool show) {
         SDL_HideWindow(_sdlWindow);
 }
 
+Vec2i getWindowPosition() {
+    Vec2i position;
+    SDL_GetWindowPosition(_sdlWindow, &position.x, &position.y);
+    return position;
+}
+
+void setWindowPosition(Vec2i position) {
+    SDL_SetWindowPosition(_sdlWindow, position.x, position.y);
+}
+
+alias HitTestFunc = SDL_HitTest;
+void setWindowHitTest(HitTestFunc callback, void* data) {
+    SDL_SetWindowHitTest(_sdlWindow, callback, data);
+}
+
 /// Render everything on screen.
 void renderWindow() {
     Vec2f mousePos = getMousePos();
@@ -343,7 +362,7 @@ void popCanvas() {
 Vec2f transformRenderSpace(const Vec2f pos) {
     const CanvasReference* canvasRef = &_canvases[$ - 1];
     return (pos - canvasRef.position) * (
-            canvasRef.renderSize / canvasRef.size) + canvasRef.renderSize * 0.5f;
+        canvasRef.renderSize / canvasRef.size) + canvasRef.renderSize * 0.5f;
 }
 
 /// Change coordinate system from outside to inside the canvas.
@@ -368,20 +387,19 @@ Vec2f transformScale() {
 bool isVisible(const Vec2f targetPosition, const Vec2f targetSize) {
     const CanvasReference* canvasRef = &_canvases[$ - 1];
     return (((canvasRef.position.x - canvasRef.size.x * .5f) < (
-            targetPosition.x + targetSize.x * .5f))
-            && ((canvasRef.position.x + canvasRef.size.x * .5f) > (
-                targetPosition.x - targetSize.x * .5f))
-            && ((canvasRef.position.y - canvasRef.size.y * .5f) < (
-                targetPosition.y + targetSize.y * .5f))
-            && ((canvasRef.position.y + canvasRef.size.y * .5f) > (
-                targetPosition.y - targetSize.y * .5f)));
+            targetPosition.x + targetSize.x * .5f)) &&
+            ((canvasRef.position.x + canvasRef.size.x * .5f) > (targetPosition.x - targetSize.x *
+                .5f)) && ((canvasRef.position.y - canvasRef.size.y * .5f) < (
+                targetPosition.y + targetSize.y * .5f)) &&
+            ((canvasRef.position.y + canvasRef.size.y * .5f) > (targetPosition.y - targetSize.y *
+                .5f)));
 }
 
 /// Change the draw color, used internally. Don't bother use it.
 void setRenderColor(const Color color, float alpha = 1f) {
     const auto sdlColor = color.toSDL();
     SDL_SetRenderDrawColor(_sdlRenderer, sdlColor.r, sdlColor.g, sdlColor.b,
-            cast(ubyte)(clamp(alpha, 0f, 1f) * 255f));
+        cast(ubyte)(clamp(alpha, 0f, 1f) * 255f));
 }
 
 /// Draw a single point.
@@ -401,12 +419,12 @@ void drawLine(const Vec2f startPosition, const Vec2f endPosition, const Color co
 
     setRenderColor(color, alpha);
     SDL_RenderDrawLine(_sdlRenderer, cast(int) pos1.x, cast(int) pos1.y,
-            cast(int) pos2.x, cast(int) pos2.y);
+        cast(int) pos2.x, cast(int) pos2.y);
 }
 
 /// Draw an arrow with its head pointing at the end position.
 void drawArrow(const Vec2f startPosition, const Vec2f endPosition, const Color color,
-        float alpha = 1f) {
+    float alpha = 1f) {
     const Vec2f pos1 = transformRenderSpace(startPosition);
     const Vec2f pos2 = transformRenderSpace(endPosition);
     const Vec2f dir = (pos2 - pos1).normalized;
@@ -416,11 +434,11 @@ void drawArrow(const Vec2f startPosition, const Vec2f endPosition, const Color c
 
     setRenderColor(color, alpha);
     SDL_RenderDrawLine(_sdlRenderer, cast(int) pos1.x, cast(int) pos1.y,
-            cast(int) pos2.x, cast(int) pos2.y);
+        cast(int) pos2.x, cast(int) pos2.y);
     SDL_RenderDrawLine(_sdlRenderer, cast(int) pos2.x, cast(int) pos2.y,
-            cast(int) pos3.x, cast(int) pos3.y);
+        cast(int) pos3.x, cast(int) pos3.y);
     SDL_RenderDrawLine(_sdlRenderer, cast(int) pos2.x, cast(int) pos2.y,
-            cast(int) pos4.x, cast(int) pos4.y);
+        cast(int) pos4.x, cast(int) pos4.y);
 }
 
 /// Draw a vertical cross (like this: +) with the indicated size.
