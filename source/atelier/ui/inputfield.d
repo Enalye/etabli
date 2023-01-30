@@ -185,6 +185,9 @@ class InputField : GuiElement {
     }
 
     override void onEvent(Event event) {
+        if (isLocked)
+            return;
+
         if (hasFocus) {
             switch (event.type) with (Event.Type) {
             case keyInput:
@@ -267,7 +270,7 @@ class InputField : GuiElement {
 
     override void update(float deltaTime) {
         _caretPosition = Vec2f(_label.position.x + (_label.size.x / _text.length) * _caretIndex,
-                _label.origin.y);
+            _label.origin.y);
         _selectionPosition = Vec2f(_label.position.x + (
                 _label.size.x / _text.length) * _selectionIndex, _label.origin.y);
         _label.position = Vec2f(10f, 0f);
@@ -292,7 +295,7 @@ class InputField : GuiElement {
                 const float minPos = min(_selectionPosition.x, _caretPosition.x);
                 const float selectionSize = abs(_selectionPosition.x - _caretPosition.x);
                 drawFilledRect(Vec2f(minPos, _selectionPosition.y),
-                        Vec2f(selectionSize, _label.size.y), selectionColor, .7f);
+                    Vec2f(selectionSize, _label.size.y), selectionColor, .7f);
             }
             drawFilledRect(_caretPosition, Vec2f(2f, _label.size.y), caretColor, _caretAlpha);
         }
