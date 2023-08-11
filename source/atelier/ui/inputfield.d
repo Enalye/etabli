@@ -65,6 +65,15 @@ class InputField : GuiElement {
                 _caretIndex = _limit;
             return _limit;
         }
+
+        /// Color of the text
+        Color textColor() const {
+            return _label.color;
+        }
+        /// Ditto
+        Color textColor(Color color_) {
+            return _label.color = color_;
+        }
     }
 
     /// Color of the inputfield's selection area
