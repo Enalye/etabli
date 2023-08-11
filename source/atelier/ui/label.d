@@ -7,7 +7,7 @@ module atelier.ui.label;
 
 import std.algorithm.comparison : min;
 import std.string, std.conv;
-import bindbc.sdl, bindbc.sdl.ttf;
+import bindbc.sdl;
 import atelier.core, atelier.common, atelier.render;
 import atelier.ui.gui_element;
 

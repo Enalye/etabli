@@ -9,7 +9,7 @@ import std.conv : to;
 import std.algorithm.comparison : min;
 import std.exception;
 
-import bindbc.sdl, bindbc.sdl.image;
+import bindbc.sdl;
 
 import atelier.common, atelier.core;
 import atelier.render.drawable, atelier.render.texture, atelier.render.writabletexture, atelier

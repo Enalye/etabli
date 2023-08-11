@@ -7,7 +7,7 @@ module atelier.render.font.truetype;
 
 import std.conv : to;
 import std.string : toStringz, fromStringz;
-import bindbc.sdl, bindbc.sdl.ttf;
+import bindbc.sdl;
 import atelier.core;
 import atelier.render.texture;
 import atelier.render.font.font, atelier.render.font.glyph;

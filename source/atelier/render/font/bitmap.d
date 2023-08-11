@@ -5,7 +5,7 @@
  */
 module atelier.render.font.bitmap;
 
-import bindbc.sdl, bindbc.sdl.ttf;
+import bindbc.sdl;
 import atelier.core;
 import atelier.render.texture;
 import atelier.render.font.font, atelier.render.font.glyph;

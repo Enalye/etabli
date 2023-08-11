@@ -10,7 +10,7 @@ module atelier.audio.sound;
 
 import std.string : toStringz;
 import std.algorithm.comparison : clamp;
-import bindbc.sdl, bindbc.sdl.mixer;
+import bindbc.sdl;
 
 private {
     uint _topChannelIndex = 0u;

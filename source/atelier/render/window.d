@@ -8,7 +8,7 @@ module atelier.render.window;
 import std.stdio;
 import std.string;
 
-import bindbc.sdl, bindbc.sdl.image, bindbc.sdl.mixer, bindbc.sdl.ttf;
+import bindbc.sdl;
 
 import atelier.core;
 import atelier.common;

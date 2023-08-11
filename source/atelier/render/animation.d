@@ -7,7 +7,7 @@ module atelier.render.animation;
 
 import std.conv;
 
-import bindbc.sdl, bindbc.sdl.image;
+import bindbc.sdl;
 
 import atelier.common;
 import atelier.core;

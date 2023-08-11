@@ -10,7 +10,7 @@ module atelier.audio.music;
 
 import std.string : toStringz;
 
-import bindbc.sdl, bindbc.sdl.mixer;
+import bindbc.sdl;
 
 /// Music
 class Music {

@@ -9,7 +9,7 @@ import std.string;
 import std.exception;
 import std.algorithm.comparison : clamp;
 
-import bindbc.sdl, bindbc.sdl.image;
+import bindbc.sdl;
 
 import atelier.core;
 import atelier.render.window, atelier.render.drawable;
