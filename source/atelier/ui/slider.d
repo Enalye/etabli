@@ -17,8 +17,8 @@ import atelier.ui.button, atelier.ui.gui_element;
 /// Base abstract class for any vertical or horizontal slider/scrollbar.
 abstract class Slider : GuiElement {
     protected {
-        float _value = 0f, _offset = 0f, _step = 1f, _minValue = 0f, _maxValue = 1f,
-        _scrollLength = 1f, _minimalSliderSize = 25f, _scrollAngle = 0f;
+        float _value = 0f, _lastOffset = 0f, _offset = 0f, _step = 1f, _minValue = 0f,
+            _maxValue = 1f, _scrollLength = 1f, _minimalSliderSize = 25f, _scrollAngle = 0f;
         bool _isGrabbed = false;
     }
 
@@ -104,8 +104,14 @@ abstract class Slider : GuiElement {
             _value = (_offset < 0f) ? 0f : ((_offset > 1f) ? 1f : _offset); //Clamp the value.
             if (_step > 0f)
                 _value = std.math.round(_value / _step) * _step; //Snap the value.
-            if (!isClicked)
+            if (!isClicked) {
                 _offset = lerp(_offset, _value, deltaTime * 0.25f);
+
+                if (_lastOffset != _offset) {
+                    _lastOffset = _offset;
+                    triggerCallback();
+                }
+            }
         }
     }
 
@@ -117,6 +123,11 @@ abstract class Slider : GuiElement {
         case mouseWheel:
             _offset -= event.scroll.delta.y * _step;
             _offset = (_offset < -_step) ? -_step : ((_offset > 1f + _step) ? 1f + _step : _offset); //Clamp the value.
+
+            if (_lastOffset != _offset) {
+                _lastOffset = _offset;
+                triggerCallback();
+            }
             break;
         case mouseUpdate:
             if (!isClicked)
@@ -128,7 +139,6 @@ abstract class Slider : GuiElement {
             break;
         case mouseUp:
             relocateSlider(event);
-            triggerCallback();
             break;
         default:
             break;
@@ -144,19 +154,24 @@ abstract class Slider : GuiElement {
             _value = 0f;
             return;
         }
+
         const Vec2f direction = Vec2f.angled(_scrollAngle);
         const Vec2f startPos = center - direction * 0.5f * _scrollLength;
         const float coef = direction.y / direction.x;
         const float b = startPos.y - (coef * startPos.x);
 
         const Vec2f closestPoint = Vec2f(
-            (coef * event.mouse.position.y + event.mouse.position.x - coef * b) / (
-                coef * coef + 1f),
+            (coef * event.mouse.position.y + event.mouse.position.x - coef * b) / (coef * coef + 1f),
             (coef * coef * event.mouse.position.y + coef * event.mouse.position.x + b) / (
                 coef * coef + 1f));
 
         _offset = ((closestPoint.x - startPos.x) + (closestPoint.y - startPos.y)) / _scrollLength;
         _offset = (_offset < 0f) ? 0f : ((_offset > 1f) ? 1f : _offset); //Clamp the value.
+
+        if (_lastOffset != _offset) {
+            _lastOffset = _offset;
+            triggerCallback();
+        }
     }
 
     /// Current coordinate of the slider.

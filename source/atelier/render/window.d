@@ -82,12 +82,12 @@ import std.exception;
 
 /// Create the application window.
 void createWindow(const Vec2i windowSize, string title, uint initFlags = SDL_INIT_EVERYTHING) {
-    enforce(loadSDL() >= SDLSupport.sdl2010, "SDL support <= 2.0.10");
-    enforce(loadSDLImage() >= SDLImageSupport.sdlImage204, "SDL image support <= 2.0.4");
-    enforce(loadSDLTTF() >= SDLTTFSupport.sdlTTF2014, "SDL ttf support <= 2.0.14");
+    enforce(loadSDL() >= SDLSupport.v2_0_10, "SDL support <= 2.0.10");
+    enforce(loadSDLImage() >= SDLImageSupport.v2_0_4, "SDL image support <= 2.0.4");
+    enforce(loadSDLTTF() >= SDLTTFSupport.v2_0_14, "SDL ttf support <= 2.0.14");
 
     if (_hasAudio)
-        enforce(loadSDLMixer() >= SDLMixerSupport.sdlMixer204, "SDL mixer support <= 2.0.4");
+        enforce(loadSDLMixer() >= SDLMixerSupport.v2_0_4, "SDL mixer support <= 2.0.4");
 
     enforce(SDL_Init(initFlags) == 0, "SDL initialisation failure: " ~ fromStringz(SDL_GetError()));
 
