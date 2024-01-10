@@ -1,4 +1,4 @@
-Framework 2D Atelier
+# Établi
 
-Ce projet est déprécié, une nouvelle version d’Atelier lui fait suite ici: https://github.com/Enalye/atelier
-
+Framework pour faire des applications graphique en D basé sur la SDL.
+(Projet en cours de restructuration)
