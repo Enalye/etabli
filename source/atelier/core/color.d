@@ -169,10 +169,13 @@ struct Color {
     /// Binary operations
     Color opOpAssign(string op)(const Color c) {
         mixin("
-			_r = clamp(_r " ~ op ~ "c._r, 0f, 1f);
-			_g = clamp(_g " ~ op
+			_r = clamp(_r "
+                ~ op ~ "c._r, 0f, 1f);
+			_g = clamp(_g "
+                ~ op
                 ~ "c._g, 0f, 1f);
-			_b = clamp(_b " ~ op ~ "c._b, 0f, 1f);
+			_b = clamp(_b "
+                ~ op ~ "c._b, 0f, 1f);
 			");
         return this;
     }
@@ -203,6 +206,12 @@ struct Color {
             cast(ubyte)(_r * 255f), cast(ubyte)(_g * 255f), cast(ubyte)(_b * 255f)
         };
         return sdlColor;
+    }
+
+    /// Return a 0xFFFFFF color format.
+    int toHex() const {
+        SDL_Color color = toSDL();
+        return (color.r << 16) | (color.g << 8) | color.b;
     }
 }
 

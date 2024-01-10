@@ -7,7 +7,7 @@ module atelier.ui.label;
 
 import std.algorithm.comparison : min;
 import std.string, std.conv;
-import bindbc.sdl, bindbc.sdl.ttf;
+import bindbc.sdl;
 import atelier.core, atelier.common, atelier.render;
 import atelier.ui.gui_element;
 
@@ -101,9 +101,11 @@ final class Label : GuiElement {
             }
             else {
                 Glyph metrics = _font.getMetrics(ch);
+                if (!metrics.exists)
+                    continue;
                 pos.x += _font.getKerning(prevChar, ch) * _charScale;
                 Vec2f drawPos = Vec2f(pos.x + metrics.offsetX * _charScale,
-                        pos.y - metrics.offsetY * _charScale);
+                    pos.y - metrics.offsetY * _charScale);
                 metrics.draw(drawPos, _charScale, color, alpha);
                 pos.x += (metrics.advance + _charSpacing) * _charScale;
                 prevChar = ch;

@@ -7,7 +7,7 @@ module atelier.render.sprite;
 
 import std.conv;
 
-import bindbc.sdl, bindbc.sdl.image;
+import bindbc.sdl;
 
 import atelier.core;
 import atelier.render.window;

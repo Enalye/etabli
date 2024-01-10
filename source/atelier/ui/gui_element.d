@@ -667,12 +667,14 @@ class GuiElement {
 
     /// Add a gui as a child of this one.
     void prependChild(GuiElement child) {
+        child._isRegistered = true;
         _children = child ~ _children;
         updateRoots(child, this);
     }
 
     /// Add a gui as a child of this one.
     void appendChild(GuiElement child) {
+        child._isRegistered = true;
         _children ~= child;
         updateRoots(child, this);
     }

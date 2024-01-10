@@ -10,7 +10,7 @@ import std.string;
 import std.exception;
 import std.algorithm.comparison : clamp;
 
-import bindbc.sdl, bindbc.sdl.image;
+import bindbc.sdl;
 
 import atelier.core;
 import atelier.render.window, atelier.render.drawable, atelier.render.texture;
@@ -95,6 +95,22 @@ final class WritableTexture : Drawable {
         load(path);
     }
 
+    /// Ctor
+    this(uint width_, uint height_) {
+        enforce(null != _sdlRenderer, "the renderer does not exist");
+
+        _width = width_;
+        _height = height_;
+
+        if (null != _texture)
+            SDL_DestroyTexture(_texture);
+        _texture = SDL_CreateTexture(_sdlRenderer, SDL_PIXELFORMAT_RGBA8888,
+            SDL_TEXTUREACCESS_STREAMING, _width, _height);
+        enforce(null != _texture, "error occurred while converting a surface to a texture format.");
+
+        updateSettings();
+    }
+
     ~this() {
         unload();
     }
@@ -113,7 +129,7 @@ final class WritableTexture : Drawable {
             SDL_DestroyTexture(_texture);
         _texture = SDL_CreateTexture(_sdlRenderer, SDL_PIXELFORMAT_RGBA8888,
             SDL_TEXTUREACCESS_STREAMING, _width, _height);
-        enforce(null != _texture, "Error occurred while converting a surface to a texture format.");
+        enforce(null != _texture, "error occurred while converting a surface to a texture format.");
 
         updateSettings();
     }
@@ -148,11 +164,11 @@ final class WritableTexture : Drawable {
             SDL_DestroyTexture(_texture);
     }
 
-    void write(void function(uint*, uint*, uint, uint) writeFunc) {
+    void write(void function(uint*, uint*, uint, uint, void*) writeFunc, void* data = null) {
         uint* pixels;
         int pitch;
         if (SDL_LockTexture(_texture, null, cast(void**)&pixels, &pitch) == 0) {
-            writeFunc(pixels, cast(uint*) _surface.pixels, _width, _height);
+            writeFunc(pixels, _surface ? (cast(uint*) _surface.pixels) : null, _width, _height, data);
             SDL_UnlockTexture(_texture);
         }
         else {
@@ -160,6 +176,19 @@ final class WritableTexture : Drawable {
                     fromStringz(SDL_GetError())));
         }
     }
+
+    /*void write(void function(uint*, uint*, uint, uint) writeFunc) {
+        uint* pixels;
+        int pitch;
+        if (SDL_LockTexture(_texture, null, cast(void**)&pixels, &pitch) == 0) {
+            writeFunc(pixels, _surface ? (cast(uint*) _surface.pixels) : null, _width, _height);
+            SDL_UnlockTexture(_texture);
+        }
+        else {
+            throw new Exception("error while locking texture: " ~ to!string(
+                    fromStringz(SDL_GetError())));
+        }
+    }*/
 
     private void updateSettings() {
         auto sdlColor = _color.toSDL();

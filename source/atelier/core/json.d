@@ -41,6 +41,12 @@ JSONValue[] getJsonArray(JSONValue json, string tag) {
     return json.object[tag].array;
 }
 
+JSONValue[] getJsonArray(JSONValue json, string tag, JSONValue [] defValue) {
+    if ((tag in json.object) is null)
+        return defValue;
+    return json.object[tag].array;
+}
+
 string[] getJsonArrayStr(JSONValue json, string tag) {
     if ((tag in json.object) is null)
         throw new Exception("JSON: \'" ~ tag ~ "\'' does not exist in JSON.");

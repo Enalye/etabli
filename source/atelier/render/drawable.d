@@ -5,7 +5,7 @@
  */
 module atelier.render.drawable;
 
-import bindbc.sdl, bindbc.sdl.image;
+import bindbc.sdl;
 import atelier.core;
 
 /// Indicate if something is mirrored.

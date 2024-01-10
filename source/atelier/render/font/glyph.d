@@ -9,7 +9,30 @@ import atelier.core;
 import atelier.render.drawable, atelier.render.window;
 
 /// Information about a single character
-struct Glyph {
+interface Glyph {
+    @property {
+        /// Is the character defined ?
+        bool exists() const;
+        /// Width to advance cursor from previous position.
+        int advance() const;
+        /// Offset
+        int offsetX() const;
+        /// Ditto
+        int offsetY() const;
+        /// Character size
+        int width() const;
+        /// Ditto
+        int height() const;
+    }
+
+    /// Render glyph
+    void draw(Vec2f, int, Color, float);
+    /// Ditto
+    void draw(Vec2f, float, Color, float);
+}
+
+/// Ditto
+final class BasicGlyph : Glyph {
     @property {
         /// Is the character defined ?
         bool exists() const {
@@ -49,6 +72,24 @@ struct Glyph {
         int _packX, _packY, _packWidth, _packHeight;
         /// Drawable
         Drawable _drawable;
+    }
+
+    this() {
+        _exists = false;
+    }
+
+    this(bool exists_, int advance_, int offsetX_, int offsetY_, int width_, int height_, int packX_, int packY_, int packWidth_, int packHeight_, Drawable drawable_) {
+        _exists = exists_;
+        _advance = advance_;
+        _offsetX = offsetX_;
+        _offsetY = offsetY_;
+        _width = width_;
+        _height = height_;
+        _packX = packX_;
+        _packY = packY_;
+        _packWidth = packWidth_;
+        _packHeight = packHeight_;
+        _drawable = drawable_;
     }
 
     /// Render glyph

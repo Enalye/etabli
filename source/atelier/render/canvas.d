@@ -58,9 +58,8 @@ final class Canvas : Drawable {
         Vec2i renderSize(Vec2i renderSize_) {
             if (_isTargetOnStack)
                 throw new Exception("attempt to resize canvas while being rendered");
-            if (renderSize_.x >= 2048u || renderSize_.y >= 2048u
-                    || renderSize_.x <= 0 || renderSize_.y <= 0)
-                throw new Exception("canvas render size exceeds limits");
+            if (renderSize_.x <= 0 || renderSize_.y <= 0)
+                throw new Exception("canvas render size too small");
             _renderSize = renderSize_;
             if (_texture !is null)
                 SDL_DestroyTexture(_texture);
@@ -127,9 +126,8 @@ final class Canvas : Drawable {
     /// Ctor
     this(Vec2i renderSize_, bool isSmooth_ = false) {
         _isSmooth = isSmooth_;
-        if (renderSize_.x >= 2048u || renderSize_.y >= 2048u
-                || renderSize_.x <= 0 || renderSize_.y <= 0)
-            throw new Exception("Canvas render size exceeds limits.");
+        if (renderSize_.x <= 0 || renderSize_.y <= 0)
+            throw new Exception("canvas render size too small");
         _renderSize = renderSize_;
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
@@ -202,9 +200,9 @@ final class Canvas : Drawable {
     /// Toggle the canvas smoothing
     void setSmooth(bool isSmooth_) {
         if (isSmooth_ != _isSmooth) {
+            _isSmooth = isSmooth_;
             renderSize(_renderSize);
         }
-        _isSmooth = isSmooth_;
     }
 
     /// Draw the texture at the specified location.

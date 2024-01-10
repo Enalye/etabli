@@ -61,11 +61,11 @@ uint setNominalFPS(uint fps) {
 }
 
 /// Application startup
-void createApplication(Vec2i size, string title = "Atelier") {
+void createApplication(Vec2i size, string title = "Atelier", uint initFlags = SDL_INIT_EVERYTHING) {
     if (_isInitialized)
         throw new Exception("The application cannot be run twice.");
     _isInitialized = true;
-    createWindow(size, title);
+    createWindow(size, title, initFlags);
     initializeEvents();
     initFont();
     _tickStartFrame = Clock.currStdTime();

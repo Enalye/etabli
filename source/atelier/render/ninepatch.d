@@ -7,8 +7,13 @@ module atelier.render.ninepatch;
 
 import std.conv : to;
 import std.algorithm.comparison : min;
+import std.exception;
+
+import bindbc.sdl;
+
 import atelier.common, atelier.core;
-import atelier.render.drawable, atelier.render.canvas, atelier.render.window;
+import atelier.render.drawable, atelier.render.texture, atelier.render.writabletexture, atelier
+    .render.window;
 
 /// Render a resizable repeated sprite with borders. (ex: bubble speech).
 final class NinePatch {
@@ -19,22 +24,22 @@ final class NinePatch {
             return _size;
         }
         /// Ditto
-        Vec2f size(const Vec2f newSize) {
-            _size = newSize;
-            _cache = new Canvas(_size);
-            _isDirty = true;
+        Vec2f size(const Vec2f size_) {
+            if ((cast(Vec2i) _size) != (cast(Vec2i) size_))
+                _isDirty = true;
+            _size = size_;
             return _size;
         }
 
-        /// Drawable's region used.
+        /// Texture's region used.
         Vec4i clip() {
             return _clip;
         }
         /// Ditto
-        Vec4i clip(const Vec4i newClip) {
-            if (_clip == newClip)
+        Vec4i clip(const Vec4i clip_) {
+            if (_clip == clip_)
                 return _clip;
-            _clip = newClip;
+            _clip = clip_;
             _isDirty = true;
             return _clip;
         }
@@ -44,10 +49,10 @@ final class NinePatch {
             return _top;
         }
         /// Ditto
-        int top(int newTop) {
-            if (_top == newTop)
+        int top(int top_) {
+            if (_top == top_)
                 return _top;
-            _top = newTop;
+            _top = top_;
             _isDirty = true;
             return _top;
         }
@@ -57,10 +62,10 @@ final class NinePatch {
             return _bottom;
         }
         /// Ditto
-        int bottom(int newBottom) {
-            if (_bottom == newBottom)
+        int bottom(int bottom_) {
+            if (_bottom == bottom_)
                 return _bottom;
-            _bottom = newBottom;
+            _bottom = bottom_;
             _isDirty = true;
             return _bottom;
         }
@@ -70,10 +75,10 @@ final class NinePatch {
             return _left;
         }
         /// Ditto
-        int left(int newLeft) {
-            if (_left == newLeft)
+        int left(int left_) {
+            if (_left == left_)
                 return _left;
-            _left = newLeft;
+            _left = left_;
             _isDirty = true;
             return _left;
         }
@@ -83,35 +88,38 @@ final class NinePatch {
             return _right;
         }
         /// Ditto
-        int right(int newRight) {
-            if (_right == newRight)
+        int right(int right_) {
+            if (_right == right_)
                 return _right;
-            _right = newRight;
+            _right = right_;
             _isDirty = true;
             return _right;
         }
 
-        /// The drawable used to render.
-        Drawable drawable() {
-            return _drawable;
-        }
-        /// Ditto
-        Drawable drawable(Drawable newDrawable) {
-            if (_drawable == newDrawable)
-                return _drawable;
-            _drawable = newDrawable;
+        /// The texture used to render.
+        Texture texture(Texture texture_) {
+            if (_ownSurface && _surface)
+                SDL_FreeSurface(_surface);
+
+            _surface = SDL_ConvertSurfaceFormat(texture_.surface, SDL_PIXELFORMAT_RGBA8888, 0);
+            enforce(null != _surface, "can't format surface");
+            _surfaceWidth = texture_.width;
+            _surfaceHeight = texture_.height;
+            _ownSurface = true;
             _isDirty = true;
-            return _drawable;
+            return texture_;
         }
     }
 
     private {
-        Canvas _cache;
+        SDL_Surface* _surface;
+        int _surfaceWidth, _surfaceHeight;
+        WritableTexture _cache;
         Vec2f _size;
-        Drawable _drawable;
         Vec4i _clip;
         int _top, _bottom, _left, _right;
         bool _isDirty = true;
+        bool _ownSurface;
     }
 
     /// Mirroring property.
@@ -139,27 +147,37 @@ final class NinePatch {
     /// Copy ctor
     this(NinePatch ninePatch) {
         _size = ninePatch._size;
-        _drawable = ninePatch._drawable;
+        _surface = ninePatch._surface;
+        _surfaceWidth = ninePatch._surfaceWidth;
+        _surfaceHeight = ninePatch._surfaceHeight;
+        _ownSurface = false;
         _clip = ninePatch._clip;
         _top = ninePatch._top;
         _bottom = ninePatch._bottom;
         _left = ninePatch._left;
         _right = ninePatch._right;
-        _cache = new Canvas(_size);
         _isDirty = true;
     }
 
     /// Ctor
-    this(Drawable drawable_, Vec4i clip_, int top_, int bottom_, int left_, int right_) {
-        _drawable = drawable_;
+    this(Texture texture_, Vec4i clip_, int top_, int bottom_, int left_, int right_) {
+        _surface = SDL_ConvertSurfaceFormat(texture_.surface, SDL_PIXELFORMAT_RGBA8888, 0);
+        enforce(null != _surface, "can't format surface");
+        _surfaceWidth = texture_.width;
+        _surfaceHeight = texture_.height;
+        _ownSurface = true;
         _clip = clip_;
         _top = top_;
         _bottom = bottom_;
         _left = left_;
         _right = right_;
         _size = to!Vec2f(_clip.zw);
-        _cache = new Canvas(_clip.zw);
         _isDirty = true;
+    }
+
+    ~this() {
+        if (_ownSurface && _surface)
+            SDL_FreeSurface(_surface);
     }
 
     /// Set the ninepatch's size to fit inside the specified size.
@@ -171,150 +189,144 @@ final class NinePatch {
     /// Render to the canvas.
     private void renderToCache() {
         _isDirty = false;
-        if (_drawable is null || _clip.z <= (_left + _right) || _clip.w <= (_top + _bottom))
+        if (_surface is null || _clip.z <= (_left + _right) || _clip.w <= (_top + _bottom))
             return;
 
-        _drawable.color = Color.white;
-        _drawable.blend = Blend.alpha;
-        _drawable.alpha = 1f;
+        _cache = (_size.x >= 1f && _size.y >= 1f) ? new WritableTexture(cast(int) _size.x, cast(int) _size
+                .y) : null;
 
-        pushCanvas(_cache, true);
+        if (!_cache)
+            return;
 
-        Vec4i localClip;
-        Vec2i localSize;
+        struct RasterData {
+            int top, right, bottom, left;
+            int clipX, clipY, clipW, clipH;
+            int texW, texH;
+            uint* pixels;
+        }
 
-        //Center
-        if (_top > 0 && _bottom > 0 && _left > 0 && _right > 0) {
-            int fillWidth = to!int(_size.x) - _left - _right;
-            int fillHeight = to!int(_size.y) - _top - _bottom;
-            int filledWidth, filledHeight;
+        RasterData rasterData;
+        rasterData.top = _top;
+        rasterData.right = _right;
+        rasterData.bottom = _bottom;
+        rasterData.left = _left;
+        rasterData.clipX = _clip.x;
+        rasterData.clipY = _clip.y;
+        rasterData.clipW = _clip.z;
+        rasterData.clipH = _clip.w;
+        rasterData.texW = _surfaceWidth;
+        rasterData.texH = _surfaceHeight;
+        rasterData.pixels = cast(uint*) _surface.pixels;
 
-            while (filledHeight < fillHeight) {
-                int height = min(_clip.w - _top - _bottom, fillHeight - filledHeight);
-                if (height <= 0)
-                    break;
-                filledWidth = 0;
-                while (filledWidth < fillWidth) {
-                    const int width = min(_clip.z - _left - _right, fillWidth - filledWidth);
-                    if (width <= 0)
-                        break;
-                    localClip = Vec4i(_clip.x + _left, _clip.y + _top, width, height);
-                    _drawable.draw(Vec2f(_left + filledWidth, _top + filledHeight),
-                            Vec2f(width, height), localClip, 0f, Flip.none, Vec2f.zero);
-                    filledWidth += width;
+        _cache.write(
+            function(uint* dest, uint* src, uint texWidth, uint texHeight, void* data_) {
+            RasterData* data = cast(RasterData*) data_;
+            const offsetY = (texHeight - data.bottom) * texWidth;
+            const clipInternalH = data.clipH - (data.top + data.bottom);
+            const clipInternalW = data.clipW - (data.left + data.right);
+            const texInternalW = texWidth - (data.left + data.right);
+
+            // Top corners
+            for (int iy; iy < data.top; ++iy) {
+                // Top left corner
+                for (int ix; ix < data.left; ++ix) {
+                    dest[iy * texWidth + ix] =
+                        data.pixels[(data.clipY + iy) * data.texW + data.clipX + ix];
                 }
-                filledHeight += height;
+
+                // Top right corner
+                for (int ix; ix < data.right; ++ix) {
+                    dest[(iy + 1) * texWidth + (ix - data.right)] =
+                        data.pixels[(data.clipY + iy) * data.texW + data.clipX + ix + (
+                                data.clipW - data.right)];
+                }
             }
-        }
 
-        //Edges
+            // Bottom corners
+            for (int iy; iy < data.bottom; ++iy) {
+                // Bottom left corner
+                for (int ix; ix < data.left; ++ix) {
+                    dest[iy * texWidth + ix + offsetY] =
+                        data.pixels[(data.clipY + iy + (
+                                data.clipH - data.bottom)) * data.texW + data.clipX + ix];
+                }
 
-        //Top edge
-        if (_top > 0) {
-            int filled;
-            int fillWidth = to!int(_size.x) - _left - _right;
-            while (filled < fillWidth) {
-                const int width = min(_clip.z - _left - _right, fillWidth - filled);
-                if (width < 0)
-                    break;
-                const int height = _top;
-                localClip = Vec4i(_clip.x + _left, _clip.y, width, height);
-                _drawable.draw(Vec2f(_left + filled, 0f), Vec2f(width, height),
-                        localClip, 0f, Flip.none, Vec2f.zero);
-                filled += width;
+                // Bottom right corner
+                for (int ix; ix < data.right; ++ix) {
+                    dest[(iy + 1) * texWidth + ix + offsetY - data.right] =
+                        data.pixels[(data.clipY + iy + (
+                                data.clipH - data.bottom)) * data.texW + data.clipX + ix + (
+                                data.clipW - data.right)];
+                }
             }
-        }
 
-        //Bottom edge
-        if (_bottom > 0) {
-            int filled;
-            int fillWidth = to!int(_size.x) - _left - _right;
-            while (filled < fillWidth) {
-                const int width = min(_clip.z - _left - _right, fillWidth - filled);
-                if (width < 0)
-                    break;
-                const int height = _bottom;
-                localClip = Vec4i(_clip.x + _left, _clip.y + _clip.w - _bottom, width, height);
-                _drawable.draw(Vec2f(_left + filled, to!int(_size.y) - _bottom),
-                        Vec2f(width, height), localClip, 0f, Flip.none, Vec2f.zero);
-                filled += width;
+            if (clipInternalW > 0) {
+                // Top edge
+                for (int iy; iy < data.top; ++iy) {
+                    int ix;
+                    while (ix < texInternalW) {
+                        dest[iy * texWidth + ix + data.left] =
+                            data.pixels[(data.clipY + iy) * data.texW + data.clipX + (
+                                    ix % clipInternalW) + data.left];
+                        ix++;
+                    }
+                }
+
+                // Bottom edge
+                for (int iy; iy < data.bottom; ++iy) {
+                    int ix;
+                    while (ix < texInternalW) {
+                        dest[iy * texWidth + ix + data.left + offsetY] =
+                            data.pixels[(data.clipY + iy + (
+                                    data.clipH - data.bottom)) * data.texW + data.clipX + (
+                                    ix % clipInternalW) + data.left];
+                        ix++;
+                    }
+                }
             }
-        }
 
-        //Left edge
-        if (_left > 0) {
-            int filled;
-            int fillHeight = to!int(_size.y) - _top - _bottom;
-            while (filled < fillHeight) {
-                const int height = min(_clip.w - _top - _bottom, fillHeight - filled);
-                if (height < 0)
-                    break;
-                const int width = _top;
-                localClip = Vec4i(_clip.x, _clip.y + _top, width, height);
-                _drawable.draw(Vec2f(0f, _top + filled), Vec2f(width, height),
-                        localClip, 0f, Flip.none, Vec2f.zero);
-                filled += height;
+            // Left and right edges
+            if (clipInternalH > 0) {
+                for (int iy; iy < (texHeight - (data.top + data.bottom)); ++iy) {
+                    // Left edge
+                    for (int ix; ix < data.left; ++ix) {
+                        dest[(iy + data.top) * texWidth + ix] =
+                            data.pixels[(data.clipY + (
+                                    iy % clipInternalH) + data.top) * data.texW + data.clipX + ix];
+                    }
+
+                    // Right edge
+                    for (int ix; ix < data.right; ++ix) {
+                        dest[(iy + data.top + 1) * texWidth + (ix - data.right)] =
+                            data.pixels[(data.clipY + (
+                                    iy % clipInternalH) + data.top) * data.texW + data.clipX + ix + (
+                                    data.clipW - data.right)];
+                    }
+                }
             }
-        }
 
-        //Right edge
-        if (_left > 0) {
-            int filled;
-            int fillHeight = to!int(_size.y) - _top - _bottom;
-            while (filled < fillHeight) {
-                const int height = min(_clip.w - _top - _bottom, fillHeight - filled);
-                if (height < 0)
-                    break;
-                const int width = _top;
-                localClip = Vec4i(_clip.x + _clip.z - _right, _clip.y + _top, width, height);
-                _drawable.draw(Vec2f(to!int(_size.x) - _right, _top + filled),
-                        Vec2f(width, height), localClip, 0f, Flip.none, Vec2f.zero);
-                filled += height;
+            // Center
+            if (clipInternalW > 0 && clipInternalH > 0) {
+                for (int iy; iy < (texHeight - (data.top + data.bottom)); ++iy) {
+                    for (int ix; ix < (texWidth - (data.left + data.right)); ++ix) {
+                        dest[(iy + data.top) * texWidth + (ix + data.left)] =
+                            data.pixels[(data.clipY + (
+                                    iy % clipInternalH) + data.top) * data.texW + data.clipX + (
+                                    ix % clipInternalW) + data.left];
+                    }
+                }
             }
-        }
-
-        //Corners
-
-        //Top left corner
-        if (_top > 0 && _left > 0) {
-            localSize = Vec2i(_left, _top);
-            localClip = Vec4i(_clip.xy, localSize);
-            _drawable.draw(Vec2f.zero, to!Vec2f(localSize), localClip, 0f, Flip.none, Vec2f.zero);
-        }
-
-        //Top right corner
-        if (_top > 0 && _right > 0) {
-            localSize = Vec2i(_right, _top);
-            localClip = Vec4i(_clip.x + _clip.z - _right, _clip.y, localSize.x, localSize.y);
-            _drawable.draw(Vec2f(to!int(_size.x) - _right, 0f),
-                    to!Vec2f(localSize), localClip, 0f, Flip.none, Vec2f.zero);
-        }
-
-        //Bottom left corner
-        if (_bottom > 0 && _left > 0) {
-            localSize = Vec2i(_left, _top);
-            localClip = Vec4i(_clip.x, _clip.y + _clip.w - _bottom, localSize.x, localSize.y);
-            _drawable.draw(Vec2f(0f, to!int(_size.y) - _bottom),
-                    to!Vec2f(localSize), localClip, 0f, Flip.none, Vec2f.zero);
-        }
-
-        //Bottom right corner
-        if (_bottom > 0 && _right > 0) {
-            localSize = Vec2i(_right, _top);
-            localClip = Vec4i(_clip.x + _clip.z - _right,
-                    _clip.y + _clip.w - _bottom, localSize.x, localSize.y);
-            _drawable.draw(Vec2f(to!int(_size.x) - _right,
-                    to!int(_size.y) - _bottom), to!Vec2f(localSize),
-                    localClip, 0f, Flip.none, Vec2f.zero);
-        }
-
-        popCanvas();
+        }, &rasterData);
     }
 
     /// Render the NinePatch in this position.
     void draw(const Vec2f position) {
         if (_isDirty)
             renderToCache();
+
+        if (!_cache)
+            return;
+
         Vec2f finalSize = _size * transformScale();
         _cache.color = color;
         _cache.blend = blend;

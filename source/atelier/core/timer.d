@@ -8,6 +8,7 @@
 
 module atelier.core.timer;
 
+import std.algorithm.comparison : clamp;
 import atelier.common;
 
 /**
@@ -43,10 +44,18 @@ struct Timer {
         float value01() const {
             return _time;
         }
+        /// Ditto
+        float value01(float value_) {
+            return _time = clamp(value_, 0f, 1f);
+        }
 
         /// Time elapsed between 0 and the max duration.
         float value() const {
             return _time * _duration;
+        }
+        /// Ditto
+        float value(float value_) {
+            return _time = clamp(value_ / _duration, 0f, 1f);
         }
 
         /// Duration in seconds from witch the timer goes from 0 to 1 (framerate dependent). \
@@ -55,8 +64,8 @@ struct Timer {
             return _duration;
         }
         /// Ditto
-        float duration(float v) {
-            return _duration = v;
+        float duration(float duration_) {
+            return _duration = duration_;
         }
 
         /// Is the timer currently running ?

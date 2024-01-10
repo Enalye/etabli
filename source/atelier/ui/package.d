@@ -22,6 +22,7 @@ public {
     import atelier.ui.layout;
     import atelier.ui.container;
     import atelier.ui.inputfield;
+    import atelier.ui.numberfield;
     import atelier.ui.info;
     import atelier.ui.text;
     import atelier.ui.colorpicker;

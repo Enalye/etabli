@@ -1,12 +1,9 @@
-/**
-    Input field
-
-    Copyright: (c) Enalye 2017
-    License: Zlib
-    Authors: Enalye
-*/
-
-module atelier.ui.inputfield;
+/** 
+ * Copyright: Enalye
+ * License: Zlib
+ * Authors: Enalye
+ */
+module atelier.ui.numberfield;
 
 import std.utf;
 import std.conv : to;
@@ -15,30 +12,40 @@ import atelier.core, atelier.render, atelier.common;
 import atelier.ui.gui_element, atelier.ui.label;
 
 /// Editable field.
-class InputField : GuiElement {
+class NumberField : GuiElement {
     private {
         Label _label;
         Color _borderColor;
         float _caretAlpha = 1f;
-        dstring _text, _allowedCharacters;
+        string _text;
         Timer _timer;
         uint _caretIndex = 0U, _selectionIndex = 0u;
         Vec2f _caretPosition = Vec2f.zero, _selectionPosition = Vec2f.zero;
-        uint _limit = 80u;
+        int _maxValue = int.max;
+        bool _isUnsigned;
     }
 
     @property {
-        /// The displayed text.
-        string text() const {
-            return to!string(_text);
+        /// The field value
+        int value() const {
+            int value_;
+            try {
+                value_ = to!int(_text);
+            }
+            catch (Exception e) {
+            }
+            return value_;
         }
         /// Ditto
-        string text(string text_) {
-            _text = to!dstring(text_);
+        int value(int value_) {
+            if (_isUnsigned && value_ < 0)
+                value_ = -value_;
+
+            _text = to!string(value_);
             _caretIndex = to!uint(_text.length);
             _selectionIndex = _caretIndex;
-            _label.text = text_;
-            return text_;
+            _label.text = _text;
+            return value_;
         }
 
         /// Label font
@@ -50,46 +57,66 @@ class InputField : GuiElement {
             return _label.font = font_;
         }
 
-        /// Max number of characters.
-        uint limit() const {
-            return _limit;
+        /// Maximum value
+        int maxValue() const {
+            return _maxValue;
         }
         /// Ditto
-        uint limit(uint newLimit) {
-            _limit = newLimit;
-            if (_text.length > _limit) {
-                _text.length = _limit;
-                _label.text = to!string(_text);
+        int maxValue(int maxValue_) {
+            if (_isUnsigned && maxValue_ < 0)
+                maxValue_ = 0;
+            _maxValue = maxValue_;
+
+            int currentValue;
+            try {
+                currentValue = to!int(_text);
             }
-            if (_caretIndex > _limit)
-                _caretIndex = _limit;
-            return _limit;
+            catch (Exception e) {
+            }
+            if (currentValue > _maxValue) {
+                _text = to!string(_maxValue);
+                _label.text = _text;
+            }
+            if (_caretIndex > _text.length)
+                _caretIndex = cast(uint) _text.length;
+            return _maxValue;
         }
 
-        /// Color of the text
-        Color textColor() const {
-            return _label.color;
+        /// Does the field allow negative values or not ?
+        bool isUnsigned() const {
+            return _isUnsigned;
         }
         /// Ditto
-        Color textColor(Color color_) {
-            return _label.color = color_;
+        bool isUnsigned(bool isUnsigned_) {
+            _isUnsigned = isUnsigned_;
+
+            if (_isUnsigned) {
+                if (_maxValue < 0)
+                    _maxValue = 0;
+
+                int currentValue = value();
+                if (currentValue < 0)
+                    value = 0;
+            }
+            return _isUnsigned;
         }
     }
 
-    /// Color of the inputfield's selection area
+    /// Color of the numberfield's selection area
     Color selectionColor = Color(.23f, .30f, .37f);
-    /// Color of the inputfield's cursor
+    /// Color of the numberfield's cursor
     Color caretColor = Color.white;
 
     /// The size is used to setup a canvas, avoid resizing too often. \
-    /// Set startWithFocus to true if you want the inputfield to accept inputs immediatly.
-    this(Vec2f size_, string defaultText = "", bool startWithFocus = false) {
+    /// Set startWithFocus to true if you want the numberfield to accept inputs immediatly.
+    this(Vec2f size_, int defaultValue = 0, bool startWithFocus = false) {
         size = size_;
-        _label = new Label(defaultText, new TrueTypeFont(veraMonoFontData));
+        _text = to!string(defaultValue);
+        _label = new Label(_text, new TrueTypeFont(veraMonoFontData));
         _label.setAlign(GuiAlignX.left, GuiAlignY.center);
         appendChild(_label);
+
         hasFocus = startWithFocus;
-        _text = to!dstring(defaultText);
         _caretIndex = to!uint(_text.length);
         _selectionIndex = _caretIndex;
 
@@ -100,7 +127,38 @@ class InputField : GuiElement {
         hasCanvas(true);
     }
 
-    private void insertText(dstring textInput) {
+    private void insertText(string textInput_) {
+        string textInput;
+        foreach (ch; textInput_) {
+            if (ch >= '0' && ch <= '9') {
+                textInput ~= ch;
+            }
+            else if (ch == '-' && !_isUnsigned) {
+                if (_text.length) {
+                    if (_text[0] != '-') {
+                        _text = '-' ~ _text;
+                        _caretIndex++;
+                        _selectionIndex++;
+                    }
+                }
+                else {
+                    _text = '-' ~ _text;
+                    _caretIndex++;
+                    _selectionIndex++;
+                }
+            }
+            else if (ch == '+') {
+                if (_text.length) {
+                    if (_text[0] == '-') {
+                        _text = _text[1 .. $];
+                        if (_caretIndex > 0)
+                            _caretIndex--;
+                        if (_selectionIndex > 0)
+                            _selectionIndex--;
+                    }
+                }
+            }
+        }
         if (_caretIndex == _selectionIndex) {
             if (_caretIndex == _text.length)
                 _text ~= textInput;
@@ -132,6 +190,11 @@ class InputField : GuiElement {
         }
         _label.text = to!string(_text);
         _selectionIndex = _caretIndex;
+
+        int currentValue = value();
+        if (currentValue > _maxValue)
+            value = _maxValue;
+
         triggerCallback();
     }
 
@@ -183,34 +246,38 @@ class InputField : GuiElement {
     }
 
     private string getSelection() {
-        dstring txt = to!dstring(_label.text);
+        string txt = _label.text;
         if (_selectionIndex == _caretIndex || (txt.length == 0)) {
             return "";
         }
         const int minIndex = min(_selectionIndex, _caretIndex);
         const int maxIndex = max(_selectionIndex, _caretIndex);
         txt = txt[minIndex .. maxIndex];
-        return to!string(txt);
+        return txt;
     }
 
     override void onEvent(Event event) {
-        if (isLocked)
-            return;
-
         if (hasFocus) {
             switch (event.type) with (Event.Type) {
             case keyInput:
-                if (_caretIndex >= _limit)
-                    break;
-                const auto textInput = to!dstring(event.input.text);
-                if (_allowedCharacters.length) {
-                    if (indexOf(_allowedCharacters, textInput) == -1)
-                        break;
-                }
-                insertText(textInput);
+                insertText(event.input.text);
                 break;
             case keyDown:
                 switch (event.key.button) with (KeyButton) {
+                case up:
+                    int currentValue = value();
+                    if (currentValue < _maxValue) {
+                        value = currentValue + 1;
+                        triggerCallback();
+                    }
+                    break;
+                case down:
+                    int currentValue = value();
+                    if (!_isUnsigned || currentValue > 0) {
+                        value = currentValue - 1;
+                        triggerCallback();
+                    }
+                    break;
                 case right:
                     if (_caretIndex < _text.length)
                         _caretIndex++;
@@ -246,7 +313,7 @@ class InputField : GuiElement {
                 case v:
                     if (isButtonDown(KeyButton.leftControl) || isButtonDown(KeyButton.rightControl)) {
                         if (hasClipboard()) {
-                            insertText(to!dstring(getClipboard()));
+                            insertText(getClipboard());
                         }
                     }
                     break;
@@ -320,10 +387,5 @@ class InputField : GuiElement {
         _caretIndex = 0u;
         _selectionIndex = 0u;
         _label.text = "";
-    }
-
-    /// It will discard any characters from keyboard that aren't in this list.
-    void setAllowedCharacters(dstring allowedCharacters) {
-        _allowedCharacters = allowedCharacters;
     }
 }

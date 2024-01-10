@@ -7,7 +7,7 @@
 		"Enalye"
 	],
 	"dependencies": {
-		"bindbc-sdl": "~>1.2.4"
+		"bindbc-sdl": "~>1.4.0"
 	},
 	"versions": [
 		"SDL_2010",
