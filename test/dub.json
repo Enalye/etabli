@@ -2,7 +2,7 @@
 	"name": "test",
 	"targetType": "executable",
 	"dependencies": {
-		"atelier": {"path": "../"}
+		"etabli": {"path": "../"}
 	},
 	"targetPath": "bin",
 	"workingDirectory": "bin"

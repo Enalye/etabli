@@ -1,25 +1,46 @@
 {
-	"name": "atelier",
-	"description": "Atelier Framework",
+	"name": "etabli",
+	"description": "Pour faire des applications graphiques",
 	"copyright": "Copyright © 2018, Enalye",
 	"license": "Zlib",
 	"authors": [
 		"Enalye"
 	],
 	"dependencies": {
-		"bindbc-sdl": "~>1.4.0"
+        "bindbc-sdl": "~>1.4.2"
 	},
 	"versions": [
-		"SDL_2010",
-		"SDL_Image_204",
-		"SDL_TTF_2014",
-		"SDL_Mixer_204"
+        "BindSDL_Static",
+        "SDL_2_26",
+        "SDL_Image_2_6",
+        "SDL_TTF_2_20"
 	],
-	"targetName": "atelier",
+    "subConfigurations": {
+        "bindbc-sdl": "static"
+    },
+    "libs-windows": [
+        "libs/$PLATFORM/$ARCH/SDL2",
+        "libs/$PLATFORM/$ARCH/SDL2_image",
+        "libs/$PLATFORM/$ARCH/SDL2_ttf"
+    ],
+	"copyFiles-windows": [
+		"libs/$PLATFORM/$ARCH/SDL2.dll",
+		"libs/$PLATFORM/$ARCH/SDL2_image.dll",
+		"libs/$PLATFORM/$ARCH/SDL2_ttf.dll"
+	],
+    "lflags-posix": [
+        "-L-Llibs/$PLATFORM/$ARCH/",
+        "-L-lz"
+    ],
+    "libs-posix": [
+        "SDL2",
+        "SDL2_image",
+        "SDL2_ttf"
+    ],
+	"targetName": "etabli",
 	"targetType": "library",
 	"targetPath": "bin",
 	"workingDirectory": "bin",
-
 	"subPackages": [
 		"./test/"
 	]

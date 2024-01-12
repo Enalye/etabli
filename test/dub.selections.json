@@ -2,9 +2,11 @@
 	"fileVersion": 1,
 	"versions": {
 		"atelier": {"path":"../"},
-		"bindbc-loader": "1.0.3",
-		"bindbc-sdl": "1.2.4",
+		"bindbc-common": "0.1.2",
+		"bindbc-loader": "1.1.3",
+		"bindbc-sdl": "1.4.4",
 		"derelict-sdl2": "2.1.4",
-		"derelict-util": "2.0.6"
+		"derelict-util": "2.0.6",
+		"etabli": {"path":"../"}
 	}
 }

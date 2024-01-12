@@ -9,16 +9,27 @@
 import std.stdio : writeln;
 import std.file, std.path;
 
-import atelier;
+import etabli;
 
 void main() {
     try {
-        createApplication(Vec2i(1280, 300));
+        Etabli et = new Etabli(800, 600);
+
+        {
+            auto btn = new FilledButton("Bonjour");
+            et.ui.add(btn);
+        }
+
+
+
+        et.run();
+
+        /*createApplication(Vec2i(1280, 300));
 
         auto fontCache = new ResourceCache!TrueTypeFont;
         setResourceCache!TrueTypeFont(fontCache);
 
-        setWindowClearColor(Color.gray);
+        setWindowClearColor(Color.gray);*/
 
         /*auto files = dirEntries("../data/font/", "{*.ttf}", SpanMode.depth);
         foreach (file; files) {
@@ -36,7 +47,7 @@ dans un capharnaüm qui, pense-t-il, diminue çà et là la qualité de son œuv
         appendRoot(b);*/
 
         //setDebugGui(true);
-
+/*
         {
             a = new Label("élément 1\nsaucisse");
             b = new Label("élément 2");
@@ -44,37 +55,37 @@ dans un capharnaüm qui, pense-t-il, diminue çà et là la qualité de son œuv
 
             //auto l = new VContainer;
             l = new VList(Vec2f(150f, 200f));
-            l.appendChild(a);
-            l.appendChild(b);
-            l.appendChild(c);
-            l.appendChild(new Label("Yo1"));
-            l.appendChild(new Label("Yo2"));
-            l.appendChild(new Label("Yo3"));
-            l.appendChild(new Label("Yo4"));
-            l.appendChild(new Label("Yo5"));
-            l.appendChild(new Label("Yo6"));
-            l.appendChild(new Label("Yo7"));
-            l.appendChild(new Label("Yo8"));
-            l.appendChild(new Label("Yo9"));
-            l.appendChild(new Label("Yo10"));
-            l.appendChild(new Label("Yo11"));
+            l.appendNode(a);
+            l.appendNode(b);
+            l.appendNode(c);
+            l.appendNode(new Label("Yo1"));
+            l.appendNode(new Label("Yo2"));
+            l.appendNode(new Label("Yo3"));
+            l.appendNode(new Label("Yo4"));
+            l.appendNode(new Label("Yo5"));
+            l.appendNode(new Label("Yo6"));
+            l.appendNode(new Label("Yo7"));
+            l.appendNode(new Label("Yo8"));
+            l.appendNode(new Label("Yo9"));
+            l.appendNode(new Label("Yo10"));
+            l.appendNode(new Label("Yo11"));
             appendRoot(l);
         }
         appendRoot(new TestUi);
 
-        runApplication();
+        runApplication();*/
     }
     catch (Exception e) {
         writeln(e.msg);
     }
 }
-
-GuiElement a, b, c;
+/*
+UIElement a, b, c;
 VList l;
 
-class TestUi : GuiElement {
+class TestUi : UIElement {
     override void update(float) {
         import std.stdio;
         //writeln(l.size, ", ", l._container.size, ", ", l._container.container.size);
     }
-}
+}*/
