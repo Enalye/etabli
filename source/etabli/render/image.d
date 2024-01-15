@@ -21,7 +21,7 @@ abstract class Image {
 
     Vec2f anchor = Vec2f.half;
 
-    Vec2f pivot = Vec2f.zero;
+    Vec2f pivot = Vec2f.half;
 
     Blend blend = Blend.alpha;
 

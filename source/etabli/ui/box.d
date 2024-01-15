@@ -11,45 +11,73 @@ import etabli.common;
 import etabli.render;
 
 abstract class Box : UIElement {
-    Vec2f padding = Vec2f.zero;
-    Vec2f margin = Vec2f.zero;
-    float spacing = 0f;
-}
+    private {
+        Vec2f _padding = Vec2f.zero;
+        Vec2f _margin = Vec2f.zero;
+        float _spacing = 0f;
+    }
 
-class HBox : Box {
-    override void update() {
-        float x = margin.x, y = padding.y;
+    final Vec2f getPadding() const {
+        return _padding;
+    }
 
-        foreach (UIElement child; children) {
-            child.alignX = UIElement.AlignX.left;
-            child.alignY = UIElement.AlignY.top;
-            child.position.y = margin.y;
-            child.position.x = x;
-            x += child.size.x + spacing;
-            y = max(y, child.size.y + margin.y * 2f);
-        }
-        x = max(padding.x, x + margin.x);
+    final void setPadding(Vec2f padding) {
+        _padding = padding;
+    }
 
-        size.x = x;
-        size.y = y;
+    final Vec2f getMargin() const {
+        return _margin;
+    }
+
+    final void setMargin(Vec2f margin) {
+        _margin = margin;
+    }
+
+    final float getSpacing() const {
+        return _spacing;
+    }
+
+    final void setSpacing(float spacing) {
+        _spacing = spacing;
     }
 }
 
-class VBox : Box {
-    override void update() {
-        float x = padding.x, y = margin.y;
+final class HBox : Box {
+    this() {
+        addEventListener("update", &_onUpdate);
+    }
 
-        foreach (UIElement child; children) {
-            child.alignX = UIElement.AlignX.left;
-            child.alignY = UIElement.AlignY.top;
-            child.position.x = margin.x;
-            child.position.y = y;
-            y += child.size.y + spacing;
-            x = max(x, child.size.x + margin.x * 2f);
+    private void _onUpdate() {
+        Vec2f newSize = Vec2f(_margin.x, _padding.y);
+
+        foreach (UIElement child; getChildren()) {
+            child.setAlign(UIAlignX.left, UIAlignY.top);
+            child.setPosition(Vec2f(newSize.x, _margin.y));
+            newSize.x += child.getWidth() + _spacing;
+            newSize.y = max(newSize.y, child.getHeight() + _margin.y * 2f);
         }
-        y = max(padding.y, y + margin.y);
+        newSize.x = max(_padding.x, newSize.x + _margin.x);
 
-        size.x = x;
-        size.y = y;
+        setSize(newSize);
+    }
+}
+
+final class VBox : Box {
+    this() {
+        addEventListener("update", &_onUpdate);
+    }
+
+    private void _onUpdate() {
+        Vec2f newSize = Vec2f(_padding.x, _margin.y);
+
+        foreach (UIElement child; getChildren()) {
+            child.setAlign(UIAlignX.left, UIAlignY.top);
+            child.setPosition(Vec2f(_margin.x, newSize.y));
+            newSize.y += child.getHeight() + _spacing;
+            newSize.x = max(newSize.x, child.getWidth() + _margin.x * 2f);
+        }
+        newSize.y = max(_padding.y, newSize.y + _margin.y);
+
+        setSize(newSize);
     }
 }

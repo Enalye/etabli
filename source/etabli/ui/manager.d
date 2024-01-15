@@ -15,10 +15,7 @@ import etabli.common;
 import etabli.input;
 import etabli.render;
 import etabli.runtime;
-import etabli.ui.box;
-import etabli.ui.button;
 import etabli.ui.element;
-import etabli.ui.label;
 
 /// UI children manager
 class UIManager {
@@ -115,8 +112,8 @@ class UIManager {
     /// Process a mouse down event down the tree.
     private void dispatchMouseDownEvent(Vec2f position, UIElement element, UIElement parent = null) {
         position = _getPointInElement(position, element, parent);
-        Vec2f elementSize = element.size * element.scale;
-        element.mousePosition = position;
+        Vec2f elementSize = element.getSize() * element.scale;
+        element.setMousePosition(position);
 
         bool isInside = position.isBetween(Vec2f.zero, elementSize);
         if (!element.isEnabled || !isInside) {
@@ -133,7 +130,7 @@ class UIManager {
             _grabbedElementPosition = _pressedElementPosition;
         }
 
-        foreach (child; element.children)
+        foreach (child; element.getChildren())
             dispatchMouseDownEvent(position, child, element);
 
         element.dispatchEvent("mousedown", false);
@@ -142,15 +139,15 @@ class UIManager {
     /// Process a mouse up event down the tree.
     private void dispatchMouseUpEvent(Vec2f position, UIElement element, UIElement parent = null) {
         position = _getPointInElement(position, element, parent);
-        Vec2f elementSize = element.size * element.scale;
-        element.mousePosition = position;
+        Vec2f elementSize = element.getSize() * element.scale;
+        element.setMousePosition(position);
 
         bool isInside = position.isBetween(Vec2f.zero, elementSize);
         if (!element.isEnabled || !isInside) {
             return;
         }
 
-        foreach (child; element.children)
+        foreach (child; element.getChildren())
             dispatchMouseUpEvent(position, child, element);
 
         element.dispatchEvent("mouseup", false);
@@ -172,8 +169,8 @@ class UIManager {
     /// Process a mouse update event down the tree.
     private void dispatchMouseUpdateEvent(Vec2f position, UIElement element, UIElement parent = null) {
         position = _getPointInElement(position, element, parent);
-        Vec2f elementSize = element.size * element.scale;
-        element.mousePosition = position;
+        Vec2f elementSize = element.getSize() * element.scale;
+        element.setMousePosition(position);
 
         bool isInside = position.isBetween(Vec2f.zero, elementSize);
 
@@ -186,13 +183,13 @@ class UIManager {
             else {
                 Vec2f delta = position - _grabbedElementPosition;
 
-                if (element.alignX == UIElement.AlignX.right)
+                if (element.getAlignX() == UIAlignX.right)
                     delta.x = -delta.x;
 
-                if (element.alignY == UIElement.AlignY.bottom)
+                if (element.getAlignY() == UIAlignY.bottom)
                     delta.y = -delta.y;
 
-                element.position += delta;
+                element.setPosition(element.getPosition() + delta);
 
                 _grabbedElementPosition = position;
             }
@@ -211,7 +208,7 @@ class UIManager {
                 element.isHovered = false;
                 if (_hoveredElement == element)
                     _hoveredElement = null;
-                foreach (child; element.children)
+                foreach (child; element.getChildren())
                     unhoverElement(child);
             }
 
@@ -219,7 +216,7 @@ class UIManager {
             return;
         }
 
-        foreach (child; element.children)
+        foreach (child; element.getChildren())
             dispatchMouseUpdateEvent(position, child, element);
     }
 
@@ -238,35 +235,38 @@ class UIManager {
             element.alpha = lerp(element.initState.alpha, element.targetState.alpha, t);
         }
 
-        sort!((a, b) => (a.zOrder > b.zOrder), SwapStrategy.stable)(element.images.array);
-        foreach (i, image; element.images) {
+        /// Màj des images
+        Array!Image images = element.getImages();
+        sort!((a, b) => (a.zOrder > b.zOrder), SwapStrategy.stable)(images.array);
+        foreach (i, image; images) {
             image.update();
 
             if (!image.isAlive) {
-                element.images.mark(i);
+                images.mark(i);
             }
         }
-        element.images.sweep();
+        images.sweep();
 
-        // Update children
-        sort!((a, b) => (a.zOrder > b.zOrder), SwapStrategy.stable)(element.children.array);
-        foreach (i, child; element.children) {
+        /// Màj des enfants
+        Array!UIElement children = element.getChildren();
+        sort!((a, b) => (a.zOrder > b.zOrder), SwapStrategy.stable)(children.array);
+        foreach (i, child; children) {
             update(child);
 
             if (!child.isAlive) {
-                element.children.mark(i);
+                children.mark(i);
             }
         }
-        element.children.sweep();
+        children.sweep();
 
-        element.update();
+        element.dispatchEvent("update", false);
     }
 
     pragma(inline) private Vec2f _getPointInElement(Vec2f position,
         UIElement element, UIElement parent = null) {
         Vec2f elementPos = _getElementOrigin(element, parent);
-        Vec2f elementSize = element.size * element.scale;
-        Vec2f pivot = elementPos + elementSize * element.pivot;
+        Vec2f elementSize = element.getSize() * element.scale;
+        Vec2f pivot = elementPos + elementSize * element.getPivot();
 
         if (element.angle != 0.0) {
             Vec2f mouseDelta = position - pivot;
@@ -278,29 +278,31 @@ class UIManager {
     }
 
     pragma(inline) private Vec2f _getElementOrigin(UIElement element, UIElement parent = null) {
-        Vec2f position = element.position + element.offset;
-        const Vec2f parentSize = parent ? parent.size
-            : Vec2f(Etabli.window.width, Etabli.window.height);
+        Vec2f position = element.getPosition() + element.offset;
+        const Vec2f parentSize = parent ? parent.getSize() : Vec2f(Etabli.window.width,
+            Etabli.window.height);
 
-        final switch (element.alignX) with (UIElement.AlignX) {
+        final switch (element.getAlignX()) with (UIAlignX) {
         case left:
             break;
         case right:
-            position.x = parentSize.x - (position.x + (element.size.x * element.scale.x));
+            position.x = parentSize.x - (position.x + (element.getWidth() * element.scale.x));
             break;
         case center:
-            position.x = (parentSize.x / 2f + position.x) - (element.size.x * element.scale.x) / 2f;
+            position.x = (parentSize.x / 2f + position.x) - (element.getSize()
+                    .x * element.scale.x) / 2f;
             break;
         }
 
-        final switch (element.alignY) with (UIElement.AlignY) {
+        final switch (element.getAlignY()) with (UIAlignY) {
         case top:
             break;
         case bottom:
-            position.y = parentSize.y - (position.y + (element.size.y * element.scale.y));
+            position.y = parentSize.y - (position.y + (element.getHeight() * element.scale.y));
             break;
         case center:
-            position.y = (parentSize.y / 2f + position.y) - (element.size.y * element.scale.y) / 2f;
+            position.y = (parentSize.y / 2f + position.y) - (element.getSize()
+                    .y * element.scale.y) / 2f;
             break;
         }
 
@@ -317,21 +319,24 @@ class UIManager {
     private void draw(UIElement element, UIElement parent = null) {
         Vec2f position = _getElementOrigin(element, parent).round();
 
-        Etabli.renderer.pushCanvas(cast(uint) element.size.x, cast(uint) element.size.y);
+        if (element.getWidth() <= 0f || element.getHeight() <= 0f)
+            return;
 
-        foreach (Image image; element.images) {
+        Etabli.renderer.pushCanvas(cast(uint) element.getWidth(), cast(uint) element.getHeight());
+
+        foreach (Image image; element.getImages()) {
             image.draw(Vec2f.zero);
         }
 
-        element.draw();
+        element.dispatchEvent("draw", false);
 
-        foreach (UIElement child; element.children) {
+        foreach (UIElement child; element.getChildren()) {
             draw(child, element);
         }
 
-        Vec2f size = element.scale * element.size;
+        Vec2f size = element.scale * element.getSize();
         Etabli.renderer.popCanvasAndDraw(position, size, element.angle,
-            element.pivot * size, element.color, element.alpha);
+            element.getPivot() * size, element.color, element.alpha);
 
         if (isDebug)
             Etabli.renderer.drawRect(position, size, Color.blue, 1f, false);

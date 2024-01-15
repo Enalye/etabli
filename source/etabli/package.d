@@ -10,6 +10,7 @@ module etabli;
 
 public {
 	import etabli.common;
+	import etabli.ciel;
 	import etabli.render;
 	import etabli.ui;
 	import etabli.runtime;

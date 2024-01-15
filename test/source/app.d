@@ -14,13 +14,45 @@ import etabli;
 void main() {
     try {
         Etabli et = new Etabli(800, 600);
+        initThemes();
+
+        auto vbox = new VBox;
+        vbox.setAlign(UIAlignX.left, UIAlignY.top);
+        vbox.setSpacing(8f);
+        vbox.setPosition(Vec2f(10f, 10f));
+        et.ui.add(vbox);
 
         {
-            auto btn = new FilledButton("Bonjour");
-            et.ui.add(btn);
+            auto btn = new FilledButton("Primary");
+            vbox.addElement(btn);
         }
+        {
+            auto btn = new OutlinedButton("Outlined");
+            vbox.addElement(btn);
+        }
+        {
+            auto btn = new TextButton("Text");
+            vbox.addElement(btn);
+        }
+        {
+            auto slider = new HSlider();
+            slider.minValue = 0;
+            slider.maxValue = 200;
+            slider.steps = 2;
+            slider.ivalue = 100;
+            slider.setPosition(Vec2f(0f, 200f));
+            et.ui.add(slider);
 
+            auto slider2 = new VSlider();
+            slider2.minValue = 0;
+            slider2.maxValue = 200;
+            slider2.steps = 200;
+            slider2.ivalue = 100;
+            slider2.setPosition(Vec2f(200f, 0f));
+            et.ui.add(slider2);
 
+            slider.addEventListener("value", { writeln(slider.value01); });
+        }
 
         et.run();
 
@@ -47,7 +79,7 @@ dans un capharnaüm qui, pense-t-il, diminue çà et là la qualité de son œuv
         appendRoot(b);*/
 
         //setDebugGui(true);
-/*
+        /*
         {
             a = new Label("élément 1\nsaucisse");
             b = new Label("élément 2");

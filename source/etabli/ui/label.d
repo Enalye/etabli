@@ -23,7 +23,7 @@ final class Label : UIElement {
         /// Ditto
         string text(string text_) {
             _text = to!dstring(text_);
-            reload();
+            _reload();
             return text_;
         }
 
@@ -34,7 +34,7 @@ final class Label : UIElement {
         /// Ditto
         Font font(Font font_) {
             _font = font_;
-            reload();
+            _reload();
             return _font;
         }
 
@@ -52,10 +52,12 @@ final class Label : UIElement {
     this(string text_ = "", Font font_ = getDefaultFont()) {
         _text = to!dstring(text_);
         _font = font_;
-        reload();
+        _reload();
+
+        addEventListener("draw", &_onDraw);
     }
 
-    override void draw() {
+    private void _onDraw() {
         Vec2f pos = Vec2f.zero;
         dchar prevChar;
         foreach (dchar ch; _text) {
@@ -80,7 +82,7 @@ final class Label : UIElement {
         }
     }
 
-    private void reload() {
+    private void _reload() {
         Vec2f totalSize_ = Vec2f(0f, _font.ascent - _font.descent) * _charScale;
         float lineWidth = 0f;
 
@@ -100,7 +102,6 @@ final class Label : UIElement {
             }
         }
 
-        size.x = totalSize_.x;
-        size.y = totalSize_.y;
+        setSize(totalSize_);
     }
 }

@@ -8,6 +8,20 @@ module etabli.ui.element;
 import etabli.common;
 import etabli.render;
 
+/// Alignement horizontal
+enum UIAlignX {
+    left,
+    center,
+    right
+}
+
+/// Alignement vertical
+enum UIAlignY {
+    top,
+    center,
+    bottom
+}
+
 /// Élément d’interface
 abstract class UIElement {
     alias EventListener = void delegate();
@@ -17,38 +31,22 @@ abstract class UIElement {
         Array!UIElement _children;
         Array!Image _images;
         Array!EventListener[string] _eventListener;
-    }
 
-    private {
+        UIAlignX _alignX = UIAlignX.center;
+        UIAlignY _alignY = UIAlignY.center;
+
+        Vec2f _position = Vec2f.zero;
+        Vec2f _size = Vec2f.zero;
+        Vec2f _pivot = Vec2f.half;
+        Vec2f _mousePosition = Vec2f.zero;
+
         bool _isHovered, _hasFocus, _isPressed, _isSelected, _isActive, _isGrabbed;
         bool _isEnabled = true;
         bool _isAlive = true;
-        Vec2f _mousePosition = Vec2f.zero;
     }
-
-    Vec2f position = Vec2f.zero;
-    Vec2f size = Vec2f.zero;
-    Vec2f pivot = Vec2f.half;
 
     /// Ordenancement
     int zOrder = 0;
-
-    /// Alignment horizontal
-    enum AlignX {
-        left,
-        center,
-        right
-    }
-
-    /// Alignment vertical
-    enum AlignY {
-        top,
-        center,
-        bottom
-    }
-
-    AlignX alignX = AlignX.center;
-    AlignY alignY = AlignY.center;
 
     /// Transitions
     Vec2f offset = Vec2f.zero;
@@ -74,30 +72,9 @@ abstract class UIElement {
     Timer timer;
 
     // Propriétés
-
     @property {
-        bool isAlive() const {
+        package final bool isAlive() const {
             return _isAlive;
-        }
-
-        UIElement parent() {
-            return _parent;
-        }
-
-        Array!UIElement children() {
-            return _children;
-        }
-
-        Array!Image images() {
-            return _images;
-        }
-
-        Vec2f mousePosition() const {
-            return _mousePosition;
-        }
-
-        package Vec2f mousePosition(Vec2f mousePosition_) {
-            return _mousePosition = mousePosition_;
         }
 
         final bool isHovered() const {
@@ -128,7 +105,7 @@ abstract class UIElement {
             return _isPressed;
         }
 
-        final bool isPressed(bool isPressed_) {
+        package final bool isPressed(bool isPressed_) {
             if (_isPressed != isPressed_) {
                 _isPressed = isPressed_;
             }
@@ -163,7 +140,7 @@ abstract class UIElement {
             return _isGrabbed;
         }
 
-        final bool isGrabbed(bool isGrabbed_) {
+        package final bool isGrabbed(bool isGrabbed_) {
             if (_isGrabbed != isGrabbed_) {
                 _isGrabbed = isGrabbed_;
                 dispatchEvent(_isGrabbed ? "grab" : "ungrab", false);
@@ -191,10 +168,82 @@ abstract class UIElement {
         _images = new Array!Image;
     }
 
-    void update() {
+    final UIElement getParent() {
+        return _parent;
     }
 
-    void draw() {
+    final Array!UIElement getChildren() {
+        return _children;
+    }
+
+    final Array!Image getImages() {
+        return _images;
+    }
+
+    final Vec2f getMousePosition() const {
+        return _mousePosition;
+    }
+
+    final package Vec2f setMousePosition(Vec2f mousePosition) {
+        return _mousePosition = mousePosition;
+    }
+
+    final void setAlign(UIAlignX alignX, UIAlignY alignY) {
+        _alignX = alignX;
+        _alignY = alignY;
+    }
+
+    final UIAlignX getAlignX() {
+        return _alignX;
+    }
+
+    final UIAlignY getAlignY() {
+        return _alignY;
+    }
+
+    final Vec2f getPosition() const {
+        return _position;
+    }
+
+    final void setPosition(Vec2f position_) {
+        if (_position == position_)
+            return;
+        _position = position_;
+        dispatchEvent("position");
+    }
+
+    final Vec2f getSize() const {
+        return _size;
+    }
+
+    final float getWidth() const {
+        return _size.x;
+    }
+
+    final float getHeight() const {
+        return _size.y;
+    }
+
+    final void setSize(Vec2f size_) {
+        if (_size == size_)
+            return;
+        _size = size_;
+        dispatchEvent("size");
+    }
+
+    final Vec2f getCenter() const {
+        return _size / 2f;
+    }
+
+    final Vec2f getPivot() const {
+        return _pivot;
+    }
+
+    final void setPivot(Vec2f pivot_) {
+        if (_pivot == pivot_)
+            return;
+        _pivot = pivot_;
+        dispatchEvent("pivot");
     }
 
     final void addEventListener(string type, EventListener listener) {

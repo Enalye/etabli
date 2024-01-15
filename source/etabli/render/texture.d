@@ -183,14 +183,14 @@ final class Texture : ImageData, Resource!Texture {
 
     /// Dessine la texture
     override void draw(Vec2f position, Vec2f size, Vec4i clip, double angle,
-        Vec2f pivot = Vec2f.zero, bool flipX = false, bool flipY = false) {
+        Vec2f pivot = Vec2f.half, bool flipX = false, bool flipY = false) {
 
         SDL_Rect sdlSrc = clip.toSdlRect();
         SDL_FRect sdlDest = {position.x, position.y, size.x, size.y};
-        SDL_FPoint sdlPivot = {pivot.x, pivot.y};
+        SDL_FPoint sdlPivot = {size.x * pivot.x, size.y * pivot.y};
 
         SDL_RenderCopyExF(Etabli.renderer.sdlRenderer, _texture, &sdlSrc, //
-            &sdlDest, angle, null, //
+            &sdlDest, angle, &sdlPivot, //
             (flipX ? SDL_FLIP_HORIZONTAL
                 : SDL_FLIP_NONE) | //
             (flipY ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE));

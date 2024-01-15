@@ -17,7 +17,7 @@ private {
 
 /// Initialize the default font
 void initFont() {
-    _veraFont = new TrueTypeFont(veraFontData);
+    _veraFont = new TrueTypeFont(veraFontData, 16);
     _defaultFont = _veraFont;
 }
 

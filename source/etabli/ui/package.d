@@ -7,8 +7,8 @@ module etabli.ui;
 
 public {
     import etabli.ui.box;
-    import etabli.ui.button;
     import etabli.ui.label;
     import etabli.ui.manager;
     import etabli.ui.element;
+    import etabli.ui.slider;
 }

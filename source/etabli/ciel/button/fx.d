@@ -3,14 +3,14 @@
  * License: Zlib
  * Authors: Enalye
  */
-module etabli.ui.button;
+module etabli.ciel.button.fx;
 
-import etabli.ui.element;
+import etabli.ui;
 
 import etabli.common;
 import etabli.runtime;
 import etabli.render;
-import etabli.ui.label;
+import etabli.ciel.theme;
 
 final class RippleEffect {
     private {
@@ -142,14 +142,14 @@ final class ButtonFx {
 
     this(UIElement element) {
         _element = element;
-        _background = new RoundedRectangle(_element.size, 8f, true, 0f);
+        _background = new RoundedRectangle(_element.getSize(), 8f, true, 0f);
         _background.anchor = Vec2f.zero;
 
-        _mask = new RoundedRectangle(_element.size, 8f, true, 0f);
+        _mask = new RoundedRectangle(_element.getSize(), 8f, true, 0f);
         _mask.anchor = Vec2f.zero;
         _mask.blend = Blend.mask;
 
-        _rippleEffect = new RippleEffect(_element.size.x);
+        _rippleEffect = new RippleEffect(_element.getSize().x);
     }
 
     void update() {
@@ -181,7 +181,7 @@ final class ButtonFx {
         _background.alpha = _alpha;
         _background.draw(Vec2f.zero);
 
-        Etabli.renderer.pushCanvas(cast(int) _element.size.x, cast(int) _element.size.y);
+        Etabli.renderer.pushCanvas(cast(int) _element.getSize().x, cast(int) _element.getSize().y);
 
         _rippleEffect.color = Color.fromHex(0xff0000);
         _rippleEffect.draw();
@@ -190,7 +190,8 @@ final class ButtonFx {
         _background.alpha = 1f;
         _background.draw(Vec2f.zero);
 
-        Etabli.renderer.popCanvasAndDraw(Vec2f.zero, _element.size, 0f, Vec2f.zero, color, 1f);
+        Etabli.renderer.popCanvasAndDraw(Vec2f.zero, _element.getSize(), 0f,
+            Vec2f.zero, color, 1f);
     }
 
     void onClick(Vec2f position) {
@@ -203,166 +204,5 @@ final class ButtonFx {
 
     void onUpdate(Vec2f position) {
         _rippleEffect.onUpdate(position);
-    }
-}
-
-Color color_primary = Color.fromHex(0x6750A4);
-Color color_outline = Color.fromHex(0x79747E);
-Color color_onPrimary = Color.fromHex(0xFFFFFF);
-Color color_onSurface = Color.fromHex(0x1C1B1F);
-
-final class FilledButton : UIElement {
-    private {
-        RoundedRectangle _background;
-        ButtonFx _fx;
-        Label _text;
-    }
-
-    this(string text_) {
-        _text = new Label(text_);
-        addElement(_text);
-
-        size.x = _text.size.x + 48f;
-        size.y = 40f;
-
-        _fx = new ButtonFx(this);
-
-        _background = new RoundedRectangle(size, 8f, true, 0f);
-        _background.anchor = Vec2f.zero;
-        addImage(_background);
-
-        addEventListener("enable", &onEnable);
-        addEventListener("disable", &onDisable);
-        addEventListener("mousedown", { _fx.onClick(mousePosition); });
-        addEventListener("mouseup", { _fx.onUnclick(); });
-        addEventListener("mousemove", { _fx.onUpdate(mousePosition); });
-
-        onEnable();
-    }
-
-    void onEnable() {
-        _background.color = color_primary;
-        _text.color = color_onPrimary;
-        _fx.color = color_onPrimary;
-
-        _background.alpha = 1f;
-        _text.alpha = 1f;
-    }
-
-    void onDisable() {
-        _background.color = color_onSurface;
-        _text.color = color_onSurface;
-
-        _background.alpha = 0.12f;
-        _text.alpha = 0.38f;
-    }
-
-    override void update() {
-        _fx.update();
-    }
-
-    override void draw() {
-        _fx.draw();
-    }
-}
-
-final class OutlinedButton : UIElement {
-    private {
-        RoundedRectangle _background;
-        ButtonFx _fx;
-        Label _text;
-    }
-
-    this(string text_) {
-        _text = new Label(text_);
-        addElement(_text);
-
-        size.x = _text.size.x + 48f;
-        size.y = 40f;
-
-        _fx = new ButtonFx(this);
-
-        _background = new RoundedRectangle(size, 8f, false, 1f);
-        _background.anchor = Vec2f.zero;
-        addImage(_background);
-
-        addEventListener("enable", &onEnable);
-        addEventListener("disable", &onDisable);
-        addEventListener("mousedown", { _fx.onClick(mousePosition); });
-        addEventListener("mouseup", { _fx.onUnclick(); });
-        addEventListener("mousemove", { _fx.onUpdate(mousePosition); });
-
-        onEnable();
-    }
-
-    void onEnable() {
-        _background.color = color_outline;
-        _text.color = color_primary;
-        _fx.color = color_primary;
-
-        _background.alpha = 1f;
-        _text.alpha = 1f;
-    }
-
-    void onDisable() {
-        _background.color = color_onSurface;
-        _text.color = color_onSurface;
-
-        _background.alpha = 0.12f;
-        _text.alpha = 0.38f;
-    }
-
-    override void update() {
-        _fx.update();
-    }
-
-    override void draw() {
-        _fx.draw();
-    }
-}
-
-final class TextButton : UIElement {
-    private {
-        ButtonFx _fx;
-        Label _text;
-    }
-
-    this(string text_) {
-        _text = new Label(text_);
-        addElement(_text);
-
-        size.x = _text.size.x + 48f;
-        size.y = 40f;
-
-        _fx = new ButtonFx(this);
-
-        addEventListener("enable", &onEnable);
-        addEventListener("disable", &onDisable);
-        addEventListener("mousedown", { _fx.onClick(mousePosition); });
-        addEventListener("mouseup", { _fx.onUnclick(); });
-        addEventListener("mousemove", { _fx.onUpdate(mousePosition); });
-
-        onEnable();
-    }
-
-    void onEnable() {
-        _text.color = color_primary;
-        _fx.color = color_primary;
-
-        _text.alpha = 1f;
-    }
-
-    void onDisable() {
-        _text.color = color_onSurface;
-
-        _text.alpha = 0.38f;
-    }
-
-    override void update() {
-        _fx.update();
-    }
-
-    override void draw() {
-        _fx.draw();
     }
 }
