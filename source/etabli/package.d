@@ -1,16 +1,12 @@
-/**
-    Include all the etabli files.
-
-    Copyright: (c) Enalye 2017
-    License: Zlib
-    Authors: Enalye
-*/
-
+/** 
+ * Copyright: Enalye
+ * License: Zlib
+ * Authors: Enalye
+ */
 module etabli;
 
 public {
 	import etabli.common;
-	import etabli.ciel;
 	import etabli.render;
 	import etabli.ui;
 	import etabli.runtime;
