@@ -10,6 +10,7 @@ public {
     import etabli.common.array;
     import etabli.common.cli;
     import etabli.common.color;
+    import etabli.common.hslcolor;
     import etabli.common.constants;
     import etabli.common.json;
     import etabli.common.mat3;

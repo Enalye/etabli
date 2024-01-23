@@ -20,7 +20,7 @@ import etabli.ui.element;
 /// UI children manager
 class UIManager {
     private {
-        UIElement[] _children;
+        UIElement[] _elements;
 
         UIElement _pressedElement;
         Vec2f _pressedElementPosition = Vec2f.zero;
@@ -45,7 +45,7 @@ class UIManager {
 
     /// Update
     void update() {
-        foreach (UIElement element; _children) {
+        foreach (UIElement element; _elements) {
             update(element);
         }
     }
@@ -59,7 +59,7 @@ class UIManager {
                     _tempGrabbedElement = null;
                     _pressedElement = null;
 
-                    foreach (UIElement element; _children) {
+                    foreach (UIElement element; _elements) {
                         dispatchMouseDownEvent(mouseButtonEvent.position, element);
                     }
 
@@ -74,7 +74,7 @@ class UIManager {
                 else {
                     _grabbedElement = null;
 
-                    foreach (UIElement element; _children) {
+                    foreach (UIElement element; _elements) {
                         dispatchMouseUpEvent(mouseButtonEvent.position, element);
                     }
 
@@ -95,7 +95,7 @@ class UIManager {
                 break;
             case mouseMotion:
                 auto mouseMotionEvent = event.asMouseMotion();
-                foreach (UIElement element; _children) {
+                foreach (UIElement element; _elements) {
                     dispatchMouseUpdateEvent(mouseMotionEvent.position, element);
                 }
 
@@ -311,7 +311,7 @@ class UIManager {
 
     /// Draw
     void draw() {
-        foreach (UIElement element; _children) {
+        foreach (UIElement element; _elements) {
             draw(element);
         }
     }
@@ -325,7 +325,8 @@ class UIManager {
         Etabli.renderer.pushCanvas(cast(uint) element.getWidth(), cast(uint) element.getHeight());
 
         foreach (Image image; element.getImages()) {
-            image.draw(Vec2f.zero);
+            if (image.isEnabled)
+                image.draw(Vec2f.zero);
         }
 
         element.dispatchEvent("draw", false);
@@ -342,13 +343,26 @@ class UIManager {
             Etabli.renderer.drawRect(position, size, Color.blue, 1f, false);
     }
 
+    void dispatchEvent(string type) {
+        foreach (UIElement child; _elements) {
+            _dispatchEvent(type, child);
+        }
+    }
+
+    private void _dispatchEvent(string type, UIElement element) {
+        foreach (UIElement child; element.getChildren()) {
+            _dispatchEvent(type, child);
+        }
+        element.dispatchEvent(type);
+    }
+
     /// Ajoute un element
-    void add(UIElement element) {
-        _children ~= element;
+    void addElement(UIElement element) {
+        _elements ~= element;
     }
 
     /// Supprime tous les children
-    void clear() {
-        _children.length = 0;
+    void clearElements() {
+        _elements.length = 0;
     }
 }

@@ -27,7 +27,7 @@ class Button : UIElement {
 }
 
 /// Button with a label.
-class TextButton : Button {
+class GhostButton : Button {
     /// The text of the button.
     Label label;
 

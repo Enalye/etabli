@@ -23,7 +23,7 @@ void main() {
         et.ui.add(vbox);
 
         {
-            auto btn = new FilledButton("Primary");
+            auto btn = new PrimaryButton("Primary");
             vbox.addElement(btn);
         }
         {
@@ -31,7 +31,7 @@ void main() {
             vbox.addElement(btn);
         }
         {
-            auto btn = new TextButton("Text");
+            auto btn = new GhostButton("Text");
             vbox.addElement(btn);
         }
         {

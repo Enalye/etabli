@@ -11,6 +11,10 @@ import etabli.common;
 import etabli.render.util;
 
 abstract class Image {
+    private {
+        bool _isAlive = true;
+    }
+
     Vec4i clip;
 
     Vec2f position = Vec2f.zero;
@@ -31,7 +35,14 @@ abstract class Image {
 
     int zOrder;
 
-    bool isAlive = true;
+    bool isEnabled = true;
+
+    // Propriétés
+    @property {
+        final bool isAlive() const {
+            return _isAlive;
+        }
+    }
 
     this() {
     }
@@ -47,6 +58,10 @@ abstract class Image {
         blend = image.blend;
         color = image.color;
         alpha = image.alpha;
+    }
+
+    final void remove() {
+        _isAlive = false;
     }
 
     /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée

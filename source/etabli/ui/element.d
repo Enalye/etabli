@@ -108,6 +108,7 @@ abstract class UIElement {
         package final bool isPressed(bool isPressed_) {
             if (_isPressed != isPressed_) {
                 _isPressed = isPressed_;
+                dispatchEvent(_isPressed ? "press" : "unpress", true);
             }
             return _isPressed;
         }

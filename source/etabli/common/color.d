@@ -15,7 +15,7 @@ import bindbc.sdl;
 import etabli.common.stream;
 import etabli.common.vec3;
 
-/// An RGB color structure.
+/// Couleur dans un espace RVB
 struct Color {
     /// Basic color.
     static const Color red = Color(1f, 0f, 0f);

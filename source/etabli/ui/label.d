@@ -53,6 +53,7 @@ final class Label : UIElement {
         _text = to!dstring(text_);
         _font = font_;
         _reload();
+        isEnabled = false;
 
         addEventListener("draw", &_onDraw);
     }
