@@ -24,15 +24,15 @@ void main() {
 
         {
             auto btn = new PrimaryButton("Primary");
-            vbox.addElement(btn);
+            vbox.addUI(btn);
         }
         {
             auto btn = new OutlinedButton("Outlined");
-            vbox.addElement(btn);
+            vbox.addUI(btn);
         }
         {
             auto btn = new GhostButton("Text");
-            vbox.addElement(btn);
+            vbox.addUI(btn);
         }
         {
             auto slider = new HSlider();

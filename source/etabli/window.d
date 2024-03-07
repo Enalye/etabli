@@ -25,7 +25,7 @@ final class Window {
         SDL_Window* _sdlWindow;
         SDL_Surface* _icon;
         string _title;
-        int _width, _height;
+        Vec2i _size;
     }
 
     @property {
@@ -45,17 +45,21 @@ final class Window {
         }
 
         int width() const {
-            return _width;
+            return _size.x;
         }
 
         int height() const {
-            return _height;
+            return _size.y;
+        }
+
+        Vec2i size() const {
+            return _size;
         }
     }
 
     this(int width_, int height_, string title_) {
-        _width = width_;
-        _height = height_;
+        _size.x = width_;
+        _size.y = height_;
         _title = title_;
 
         enforce(SDL_Init(SDL_INIT_EVERYTHING) == 0,
@@ -64,12 +68,12 @@ final class Window {
         enforce(TTF_Init() != -1, "SDL ttf initialisation failure");
 
         _sdlWindow = SDL_CreateWindow(toStringz(_title), SDL_WINDOWPOS_CENTERED,
-            SDL_WINDOWPOS_CENTERED, _width, _height, SDL_WINDOW_RESIZABLE);
+            SDL_WINDOWPOS_CENTERED, _size.x, _size.y, SDL_WINDOW_RESIZABLE);
         enforce(_sdlWindow, "window initialisation failure");
     }
 
     void update() {
-        SDL_GetWindowSize(_sdlWindow, &_width, &_height);
+        SDL_GetWindowSize(_sdlWindow, &_size.x, &_size.y);
     }
 
     void close() {
@@ -87,11 +91,32 @@ final class Window {
         SDL_SetWindowIcon(_sdlWindow, _icon);
     }
 
+    void setIconFromMemory(const(ubyte[]) data) {
+        if (_icon) {
+            SDL_FreeSurface(_icon);
+            _icon = null;
+        }
+        SDL_RWops* rw = SDL_RWFromConstMem(cast(const(void)*) data.ptr, cast(int) data.length);
+        _icon = IMG_Load_RW(rw, 1);
+
+        SDL_SetWindowIcon(_sdlWindow, _icon);
+        
+        if (_icon) {
+            SDL_FreeSurface(_icon);
+            _icon = null;
+        }
+        rw = SDL_RWFromConstMem(cast(const(void)*) data.ptr, cast(int) data.length);
+        _icon = IMG_Load_RW(rw, 1);
+
+        SDL_SetWindowIcon(_sdlWindow, _icon);
+    }
+
     void onSize(int width_, int height_) {
-        if (_width == width_ && _height == height_)
+        if (_size.x == width_ && _size.y == height_)
             return;
 
-        _width = width_;
-        _height = height_;
+        _size.x = width_;
+        _size.y = height_;
+        Etabli.ui.dispatchEvent("windowSize");
     }
 }

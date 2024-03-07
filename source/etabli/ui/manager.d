@@ -357,12 +357,12 @@ class UIManager {
     }
 
     /// Ajoute un element
-    void addElement(UIElement element) {
+    void addUI(UIElement element) {
         _elements ~= element;
     }
 
-    /// Supprime tous les children
-    void clearElements() {
+    /// Supprime tous les éléments
+    void clearUI() {
         _elements.length = 0;
     }
 }

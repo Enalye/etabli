@@ -19,17 +19,17 @@
         "bindbc-sdl": "static"
     },
     "libs-windows": [
-        "libs/$PLATFORM/$ARCH/SDL2",
-        "libs/$PLATFORM/$ARCH/SDL2_image",
-        "libs/$PLATFORM/$ARCH/SDL2_ttf"
+        "$PACKAGE_DIR/libs/$PLATFORM/$ARCH/SDL2",
+        "$PACKAGE_DIR/libs/$PLATFORM/$ARCH/SDL2_image",
+        "$PACKAGE_DIR/libs/$PLATFORM/$ARCH/SDL2_ttf"
     ],
 	"copyFiles-windows": [
-		"libs/$PLATFORM/$ARCH/SDL2.dll",
-		"libs/$PLATFORM/$ARCH/SDL2_image.dll",
-		"libs/$PLATFORM/$ARCH/SDL2_ttf.dll"
+		"$PACKAGE_DIR/libs/$PLATFORM/$ARCH/SDL2.dll",
+		"$PACKAGE_DIR/libs/$PLATFORM/$ARCH/SDL2_image.dll",
+		"$PACKAGE_DIR/libs/$PLATFORM/$ARCH/SDL2_ttf.dll"
 	],
     "lflags-posix": [
-        "-L-Llibs/$PLATFORM/$ARCH/",
+        "-L-L$PACKAGE_DIR/libs/$PLATFORM/$ARCH/",
         "-L-lz"
     ],
     "libs-posix": [

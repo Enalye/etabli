@@ -280,12 +280,12 @@ abstract class UIElement {
         }
     }
 
-    final void addElement(UIElement element) {
+    final void addUI(UIElement element) {
         element._parent = this;
         _children ~= element;
     }
 
-    final void clearChildren() {
+    final void clearUI() {
         foreach (child; _children) {
             child._parent = null;
             child.remove();
@@ -304,7 +304,7 @@ abstract class UIElement {
     final void remove() {
         _isAlive = false;
         _parent = null;
-        clearChildren();
+        clearUI();
         clearImages();
     }
 }
