@@ -106,7 +106,7 @@ struct HSLColor {
     }
 
     /// Binary operations
-    HSLColor opBinary(string op)(const Color c) const {
+    HSLColor opBinary(string op)(const HSLColor c) const {
         return mixin("HSLColor(_h ", op, " c._h, _s ", op, " c._s, _l ", op, " c._l)");
     }
 
@@ -121,13 +121,17 @@ struct HSLColor {
     }
 
     /// Binary operations
-    HSLColor opOpAssign(string op)(const Color c) {
+    HSLColor opOpAssign(string op)(const HSLColor c) {
         mixin("
 			_h = clamp(_h ", op, "c._h, 0f, 360f);
 			_s = clamp(_s " ~ op ~ "c._s, 0f, 1f);
 			_l = clamp(_l ", op, "c._l, 0f, 1f);
 			");
         return this;
+    }
+
+    HSLColor lerp(HSLColor end, float t) const {
+        return (this * (1f - t)) + (end * t);
     }
 
     Color toColor() const {

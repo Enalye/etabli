@@ -179,6 +179,10 @@ struct Color {
         return this;
     }
 
+    Color lerp(Color end, float t) const {
+        return (this * (1f - t)) + (end * t);
+    }
+
     /// Read from an InStream.
     void load(InStream stream) {
         _r = stream.read!float;

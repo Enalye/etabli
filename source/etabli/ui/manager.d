@@ -162,6 +162,7 @@ class UIManager {
             _hoveredElement = _pressedElement;
             element.isHovered = true;
 
+            dispatchEventExclude("clickoutside", _pressedElement);
             _pressedElement.dispatchEvent("click");
         }
     }
@@ -233,6 +234,10 @@ class UIManager {
             element.color = lerp(element.initState.color, element.targetState.color, t);
             element.angle = lerp(element.initState.angle, element.targetState.angle, t);
             element.alpha = lerp(element.initState.alpha, element.targetState.alpha, t);
+
+            if(!element.timer.isRunning) {
+                element.dispatchEvent("state", false);
+            }
         }
 
         /// Màj des images
@@ -343,9 +348,47 @@ class UIManager {
             Etabli.renderer.drawRect(position, size, Color.blue, 1f, false);
     }
 
-    void dispatchEvent(string type) {
-        foreach (UIElement child; _elements) {
+    void dispatchEvent(string type, bool bubbleDown = true) {
+        if (bubbleDown) {
+            foreach (UIElement child; _elements) {
+                _dispatchEvent(type, child);
+            }
+        }
+        else {
+            foreach (UIElement child; _elements) {
+                child.dispatchEvent(type, false);
+            }
+        }
+    }
+
+    void dispatchEventExclude(string type, UIElement excludedElement) {
+        foreach (UIElement child; excludedElement.getChildren()) {
             _dispatchEvent(type, child);
+        }
+
+        _dispatchEventExclude(type, excludedElement);
+    }
+
+    private void _dispatchEventExclude(string type, UIElement excludedElement) {
+        UIElement parent = excludedElement.getParent();
+        if (parent) {
+            foreach (UIElement child; parent.getChildren()) {
+                if (child == excludedElement) {
+                    continue;
+                }
+
+                _dispatchEvent(type, child);
+            }
+            _dispatchEventExclude(type, parent);
+        }
+        else {
+            foreach (UIElement element; _elements) {
+                if (element == excludedElement) {
+                    continue;
+                }
+
+                _dispatchEvent(type, element);
+            }
         }
     }
 
@@ -353,12 +396,14 @@ class UIManager {
         foreach (UIElement child; element.getChildren()) {
             _dispatchEvent(type, child);
         }
-        element.dispatchEvent(type);
+        element.dispatchEvent(type, false);
     }
 
     /// Ajoute un element
     void addUI(UIElement element) {
+        element.isAlive = true;
         _elements ~= element;
+        element.dispatchEvent("register", false);
     }
 
     /// Supprime tous les éléments

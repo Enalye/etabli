@@ -13,6 +13,7 @@ import etabli.common;
 import etabli.window;
 import etabli.render.canvas;
 import etabli.render.sprite;
+import etabli.render.util;
 
 final class Renderer {
     private {
@@ -77,7 +78,7 @@ final class Renderer {
         SDL_RenderClear(_sdlRenderer);
     }
 
-    void pushCanvas(uint width, uint height) {
+    void pushCanvas(uint width, uint height, Blend blend = Blend.canvas) {
         CanvasContext context;
         _idxContext++;
 
@@ -98,11 +99,11 @@ final class Renderer {
                     max(context.canvas.height, height));
             }
         }
-
-        SDL_Color sdlColor = context.canvas.color.toSDL();
+        context.canvas.blend = blend;
 
         SDL_SetRenderTarget(_sdlRenderer, context.canvas.target);
-        SDL_SetRenderDrawColor(_sdlRenderer, sdlColor.r, sdlColor.g, sdlColor.b, 0);
+        SDL_SetRenderDrawBlendMode(_sdlRenderer, getSDLBlend(Blend.none));
+        SDL_SetRenderDrawColor(_sdlRenderer, 0, 0, 0, 0);
         SDL_RenderClear(_sdlRenderer);
     }
 

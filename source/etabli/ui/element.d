@@ -42,7 +42,7 @@ abstract class UIElement {
 
         bool _isHovered, _hasFocus, _isPressed, _isSelected, _isActive, _isGrabbed;
         bool _isEnabled = true;
-        bool _isAlive = true;
+        bool _isAlive;
     }
 
     /// Ordenancement
@@ -64,17 +64,27 @@ abstract class UIElement {
         double angle = 0.0;
         int time = 60;
         Spline spline = Spline.linear;
+
+        this(string name_) {
+            name = name_;
+        }
     }
 
-    State[string] states;
-    string currentStateName;
-    State initState, targetState;
-    Timer timer;
+    package {
+        State[string] states;
+        string currentStateName;
+        State initState, targetState;
+        Timer timer;
+    }
 
     // Propriétés
     @property {
         package final bool isAlive() const {
             return _isAlive;
+        }
+
+        package final bool isAlive(bool isAlive_) {
+            return _isAlive = isAlive_;
         }
 
         final bool isHovered() const {
@@ -230,6 +240,7 @@ abstract class UIElement {
             return;
         _size = size_;
         dispatchEvent("size");
+        dispatchEventChildren("parentSize", false);
     }
 
     final Vec2f getCenter() const {
@@ -245,6 +256,48 @@ abstract class UIElement {
             return;
         _pivot = pivot_;
         dispatchEvent("pivot");
+    }
+
+    void addState(State state) {
+        states[state.name] = state;
+    }
+
+    string getState() {
+        return currentStateName;
+    }
+
+    void setState(string name) {
+        const auto ptr = name in states;
+        if (!ptr) {
+            return;
+        }
+
+        currentStateName = ptr.name;
+        initState = null;
+        targetState = null;
+        offset = ptr.offset;
+        scale = ptr.scale;
+        color = ptr.color;
+        angle = ptr.angle;
+        alpha = ptr.alpha;
+        timer.stop();
+    }
+
+    void runState(string name) {
+        auto ptr = name in states;
+        if (!ptr) {
+            return;
+        }
+
+        currentStateName = ptr.name;
+        initState = new State("");
+        initState.offset = offset;
+        initState.scale = scale;
+        initState.angle = angle;
+        initState.alpha = alpha;
+        initState.time = timer.duration;
+        targetState = *ptr;
+        timer.start(ptr.time);
     }
 
     final void addEventListener(string type, EventListener listener) {
@@ -266,7 +319,7 @@ abstract class UIElement {
         });
     }
 
-    final void dispatchEvent(string type, bool bubbling = true) {
+    final void dispatchEvent(string type, bool bubbleUp = true) {
         auto p = type in _eventListener;
         if (p) {
             Array!EventListener evllist = *p;
@@ -275,14 +328,30 @@ abstract class UIElement {
             }
         }
 
-        if (bubbling && _parent) {
+        if (bubbleUp && _parent) {
             _parent.dispatchEvent(type);
         }
     }
 
+    final void dispatchEventChildren(string type, bool bubbleDown = true) {
+        if (bubbleDown) {
+            foreach (UIElement child; _children) {
+                child.dispatchEvent(type, false);
+                child.dispatchEventChildren(type, bubbleDown);
+            }
+        }
+        else {
+            foreach (UIElement child; _children) {
+                child.dispatchEvent(type, false);
+            }
+        }
+    }
+
     final void addUI(UIElement element) {
+        element._isAlive = true;
         element._parent = this;
         _children ~= element;
+        element.dispatchEvent("register", false);
     }
 
     final void clearUI() {
@@ -304,7 +373,5 @@ abstract class UIElement {
     final void remove() {
         _isAlive = false;
         _parent = null;
-        clearUI();
-        clearImages();
     }
 }

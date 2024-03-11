@@ -18,6 +18,7 @@ enum Blend {
     additive,
     modular,
     multiply,
+    canvas,
     mask
 }
 
@@ -34,6 +35,10 @@ package SDL_BlendMode getSDLBlend(Blend blend) {
         return SDL_BLENDMODE_MOD;
     case multiply:
         return SDL_BLENDMODE_MUL;
+    case canvas:
+        return SDL_ComposeCustomBlendMode(SDL_BLENDFACTOR_ONE,
+            SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDOPERATION_ADD,
+            SDL_BLENDFACTOR_ONE, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDOPERATION_ADD);
     case mask:
         return SDL_ComposeCustomBlendMode(SDL_BLENDFACTOR_ONE, SDL_BLENDFACTOR_ZERO, SDL_BLENDOPERATION_ADD,
             SDL_BLENDFACTOR_DST_ALPHA, SDL_BLENDFACTOR_ZERO, SDL_BLENDOPERATION_ADD);

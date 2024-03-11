@@ -118,5 +118,6 @@ final class Window {
         _size.x = width_;
         _size.y = height_;
         Etabli.ui.dispatchEvent("windowSize");
+        Etabli.ui.dispatchEvent("parentSize", false);
     }
 }
