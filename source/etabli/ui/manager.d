@@ -235,7 +235,7 @@ class UIManager {
             element.angle = lerp(element.initState.angle, element.targetState.angle, t);
             element.alpha = lerp(element.initState.alpha, element.targetState.alpha, t);
 
-            if(!element.timer.isRunning) {
+            if (!element.timer.isRunning) {
                 element.dispatchEvent("state", false);
             }
         }
@@ -401,13 +401,15 @@ class UIManager {
 
     /// Ajoute un element
     void addUI(UIElement element) {
-        element.isAlive = true;
         _elements ~= element;
-        element.dispatchEvent("register", false);
+        element.isAlive = true;
     }
 
     /// Supprime tous les éléments
     void clearUI() {
         _elements.length = 0;
+        foreach (UIElement element; _elements) {
+            element.remove();
+        }
     }
 }

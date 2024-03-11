@@ -7,11 +7,29 @@ module etabli.render.util;
 
 import bindbc.sdl;
 
-/// Blending algorithm \
-/// none: Paste everything without transparency \
-/// modular: Multiply color value with the destination \
-/// additive: Add color value with the destination \
-/// alpha: Paste everything with transparency (Default one)
+/** Algorithme de composition
+none:
+    dC = sC \
+    dA = sA
+alpha:
+    dC = sC * sA + dC * (1 - sA) \
+    dA = sA + dA * (1 - sA)
+additive:
+    dC = sC * sA + dC \
+    dA = dA
+modular:
+    dC = sC * dC \
+    dA = dA
+multiply:
+    dC = sC * dC + dC * (1 - sA) \
+    dA = sA * dA + dA * (1 - sA)
+canvas:
+    dC = sC + dC * (1 - sA) \
+    dA = sA + dA * (1 - sA)
+mask:
+    dC = sC \
+    dA = dA
+*/
 enum Blend {
     none,
     alpha,
@@ -22,7 +40,7 @@ enum Blend {
     mask
 }
 
-/// Returns the SDL blend flag.
+/// Récupère l’option SDL de composition
 package SDL_BlendMode getSDLBlend(Blend blend) {
     final switch (blend) with (Blend) {
     case none:

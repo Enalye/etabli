@@ -84,6 +84,10 @@ abstract class UIElement {
         }
 
         package final bool isAlive(bool isAlive_) {
+            if (_isAlive != isAlive_) {
+                _isAlive = isAlive_;
+                dispatchEvent(_isAlive ? "register" : "unregister", false);
+            }
             return _isAlive = isAlive_;
         }
 
@@ -348,15 +352,16 @@ abstract class UIElement {
     }
 
     final void addUI(UIElement element) {
-        element._isAlive = true;
+        if (element.isAlive)
+            return;
+
+        element.isAlive = true;
         element._parent = this;
         _children ~= element;
-        element.dispatchEvent("register", false);
     }
 
     final void clearUI() {
         foreach (child; _children) {
-            child._parent = null;
             child.remove();
         }
         _children.clear();
@@ -371,7 +376,7 @@ abstract class UIElement {
     }
 
     final void remove() {
-        _isAlive = false;
+        isAlive = false;
         _parent = null;
     }
 }
