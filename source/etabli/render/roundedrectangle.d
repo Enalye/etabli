@@ -75,7 +75,15 @@ final class RoundedRectangle : Image {
         }
     }
 
-    this(Vec2f size_, float radius_, bool filled_, float thickness_) {
+    static RoundedRectangle fill(Vec2f size_, float radius_) {
+        return new RoundedRectangle(size_, radius_, true, 1f);
+    }
+
+    static RoundedRectangle outline(Vec2f size_, float radius_, float thickness_) {
+        return new RoundedRectangle(size_, radius_, false, thickness_);
+    }
+
+    private this(Vec2f size_, float radius_, bool filled_, float thickness_) {
         _size = size_;
         _radius = radius_;
         _filled = filled_;
@@ -308,7 +316,7 @@ final class RoundedRectangle : Image {
         _cache.color = color;
         _cache.blend = blend;
         _cache.alpha = alpha;
-        _cache.draw(origin + (position - anchor * size), _size, Vec4i(0, 0, _cache.width,
-                _cache.height), angle, pivot, flipX, flipY);
+        _cache.draw(origin + (position - anchor * size), _size, Vec4i(0, 0,
+                _cache.width, _cache.height), angle, pivot, flipX, flipY);
     }
 }

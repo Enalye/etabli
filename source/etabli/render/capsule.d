@@ -63,7 +63,15 @@ final class Capsule : Image {
         }
     }
 
-    this(Vec2f size_, bool filled_, float thickness_) {
+    static Capsule fill(Vec2f size_) {
+        return new Capsule(size_, true, 1f);
+    }
+
+    static Capsule outline(Vec2f size_, float thickness_) {
+        return new Capsule(size_, false, thickness_);
+    }
+
+    private this(Vec2f size_, bool filled_, float thickness_) {
         _size = size_;
         _filled = filled_;
         _thickness = thickness_;
@@ -290,7 +298,7 @@ final class Capsule : Image {
         _cache.color = color;
         _cache.blend = blend;
         _cache.alpha = alpha;
-        _cache.draw(origin + (position - anchor * size), _size, Vec4i(0, 0, _cache.width,
-                _cache.height), angle, pivot, flipX, flipY);
+        _cache.draw(origin + (position - anchor * size), _size, Vec4i(0, 0,
+                _cache.width, _cache.height), angle, pivot, flipX, flipY);
     }
 }

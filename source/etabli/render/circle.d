@@ -65,7 +65,15 @@ final class Circle : Image {
         }
     }
 
-    this(float radius_, bool filled_, float thickness_) {
+    static Circle fill(float radius_) {
+        return new Circle(radius_, true, 1f);
+    }
+
+    static Circle outline(float radius_, float thickness_) {
+        return new Circle(radius_, false, thickness_);
+    }
+
+    private this(float radius_, bool filled_, float thickness_) {
         _radius = radius_;
         _filled = filled_;
         _thickness = thickness_;
