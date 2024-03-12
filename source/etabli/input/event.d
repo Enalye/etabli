@@ -24,28 +24,6 @@ enum KeyState {
     pressed = down | held
 }
 
-pragma(inline) {
-    /// Dans le cas d’une touche ou d’un bouton, est-il appuyé ?
-    bool pressed(KeyState state) {
-        return cast(bool)(state & KeyState.pressed);
-    }
-
-    /// Dans le cas d’une touche ou d’un bouton, est-il maintenu enfoncé ?
-    bool held(KeyState state) {
-        return cast(bool)(state & KeyState.held);
-    }
-
-    /// Dans le cas d'une touche ou d'un bouton, a-t-il été appuyé cette frame ?
-    bool down(KeyState state) {
-        return cast(bool)(state & KeyState.down);
-    }
-
-    /// Dans le cas d'une touche ou d'un bouton, a-t-on arreté d'appuyer dessus cette frame ?
-    bool up(KeyState state) {
-        return cast(bool)(state & KeyState.up);
-    }
-}
-
 alias InputState = BitFlags!(KeyState, Yes.unsafe);
 
 /// Événement utilisateur
@@ -619,23 +597,23 @@ final class InputEvent {
         }
 
         /// Dans le cas d’une touche ou d’un bouton, est-il appuyé ?
-        bool pressed() const {
-            return state.pressed();
+        bool isPressed() const {
+            return cast(bool) (state & KeyState.pressed);
         }
 
         /// Dans le cas d’une touche ou d’un bouton, est-il maintenu enfoncé ?
         bool held() const {
-            return state.held();
+            return cast(bool) (state & KeyState.held);
         }
 
         /// Dans le cas d'une touche ou d'un bouton, a-t-il été appuyé cette frame ?
         bool down() const {
-            return state.down();
+            return cast(bool) (state & KeyState.down);
         }
 
         /// Dans le cas d'une touche ou d'un bouton, a-t-on arreté d'appuyer dessus cette frame ?
         bool up() const {
-            return state.held();
+            return cast(bool) (state & KeyState.up);
         }
 
         /// L’événement est-il un écho ?
@@ -654,7 +632,7 @@ final class InputEvent {
             case keyButton:
             case mouseButton:
             case controllerButton:
-                return pressed ? 1.0 : .0;
+                return isPressed() ? 1.0 : .0;
             case controllerAxis:
                 return _controllerAxis.value;
             default:

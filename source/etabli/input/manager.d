@@ -478,17 +478,17 @@ final class InputManager {
 
     /// Est-ce que la touche est appuyée ?
     bool isPressed(InputEvent.KeyButton.Button button) const {
-        return _keyButtonStates[button].pressed();
+        return cast(bool)(_keyButtonStates[button] & KeyState.pressed);
     }
 
     /// Ditto
     bool isPressed(InputEvent.MouseButton.Button button) const {
-        return _mouseButtonStates[button].pressed();
+        return cast(bool)(_mouseButtonStates[button] & KeyState.pressed);
     }
 
     /// Ditto
     bool isPressed(InputEvent.ControllerButton.Button button) const {
-        return _controllerButtonStates[button].pressed();
+        return cast(bool)(_controllerButtonStates[button] & KeyState.pressed);
     }
 
     /// Retourne la valeur de l’axe

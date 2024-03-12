@@ -33,11 +33,16 @@ class UIManager {
         Vec2f _hoveredElementPosition = Vec2f.zero;
 
         UIElement _focusedElement;
+        InputEvent _inputEvent;
     }
 
     @property {
         Vec2f pressedElementPosition() const {
             return _pressedElementPosition;
+        }
+
+        InputEvent input() {
+            return _inputEvent;
         }
     }
 
@@ -52,7 +57,15 @@ class UIManager {
 
     void dispatch(InputEvent[] events) {
         foreach (InputEvent event; events) {
-            switch (event.type) with (InputEvent.Type) {
+            _inputEvent = event;
+            final switch (event.type) with (InputEvent.Type) {
+            case none:
+                break;
+            case keyButton:
+                if (_focusedElement) {
+                    _focusedElement.dispatchEvent("key");
+                }
+                break;
             case mouseButton:
                 auto mouseButtonEvent = event.asMouseButton();
                 if (mouseButtonEvent.state.down()) {
@@ -103,7 +116,30 @@ class UIManager {
                     _hoveredElement.isHovered = true;
                 }
                 break;
-            default:
+            case mouseWheel:
+                if (_hoveredElement) {
+                    _hoveredElement.dispatchEvent("wheel");
+                }
+                break;
+            case controllerButton:
+                if (_focusedElement) {
+                    _focusedElement.dispatchEvent("button");
+                }
+                break;
+            case controllerAxis:
+                if (_focusedElement) {
+                    _focusedElement.dispatchEvent("axis");
+                }
+                break;
+            case textInput:
+                if (_focusedElement) {
+                    _focusedElement.dispatchEvent("text");
+                }
+                break;
+            case dropFile:
+                if (_focusedElement) {
+                    _focusedElement.dispatchEvent("file");
+                }
                 break;
             }
         }

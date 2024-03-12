@@ -110,7 +110,7 @@ abstract class UIElement {
         final bool hasFocus(bool hasFocus_) {
             if (_hasFocus != hasFocus_) {
                 _hasFocus = hasFocus_;
-                dispatchEvent(_hasFocus ? "focus" : "unfocus", false);
+                dispatchEvent(_hasFocus ? "focus" : "blur", false);
             }
             return _hasFocus;
         }
