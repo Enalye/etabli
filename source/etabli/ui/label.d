@@ -2,6 +2,7 @@ module etabli.ui.label;
 
 import std.algorithm.comparison : min;
 import std.conv : to;
+import std.math : abs;
 import std.stdio;
 
 import etabli.common, etabli.render;
@@ -81,6 +82,62 @@ final class Label : UIElement {
                 prevChar = ch;
             }
         }
+    }
+
+    size_t getIndexOf(Vec2f position_) {
+        size_t index;
+        Vec2f currentPosition = Vec2f(0f, _font.ascent - _font.descent) * _charScale / 2f;
+        Vec2f nearestDelta = Vec2f.zero;
+        size_t nearestIndex = 0;
+        bool isInit = true;
+
+        dchar prevChar;
+        float advance = 0f;
+        for (; index < _text.length; ++index) {
+            dchar ch = _text[index];
+
+            if (ch == '\n') {
+                currentPosition.y += _font.lineSkip * _charScale;
+                if (!isInit && abs(position_.y - currentPosition.y) > nearestDelta.y) {
+                    break;
+                }
+                currentPosition.x = 0f;
+            }
+            else {
+                const Glyph metrics = _font.getMetrics(ch);
+                bool half;
+                if (currentPosition.x == 0f) {
+                    half = true;
+                }
+                advance = 0f;
+                advance += _font.getKerning(prevChar, ch) * _charScale;
+                advance += metrics.advance * _charScale;
+                currentPosition.x += advance;
+                if (half) {
+                    currentPosition.x /= 2f;
+                }
+
+                Vec2f delta = Vec2f(abs(position_.y - currentPosition.y),
+                    abs(position_.x - currentPosition.x));
+
+                if (isInit) {
+                    isInit = false;
+                    nearestDelta = delta;
+                }
+
+                if (delta.x <= nearestDelta.x && delta.y <= nearestDelta.y) {
+                    nearestDelta = delta;
+                    nearestIndex = index;
+                }
+                prevChar = ch;
+            }
+        }
+
+        if (_text.length && position_.x > (currentPosition.x + advance / 2f)) {
+            nearestIndex ++;
+        }
+
+        return nearestIndex;
     }
 
     Vec2f getTextSize(size_t start = 0, size_t end = size_t.max) {

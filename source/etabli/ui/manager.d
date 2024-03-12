@@ -34,6 +34,8 @@ class UIManager {
 
         UIElement _focusedElement;
         InputEvent _inputEvent;
+
+        UIElement[] _mouseDownElements;
     }
 
     @property {
@@ -90,6 +92,11 @@ class UIManager {
                     foreach (UIElement element; _elements) {
                         dispatchMouseUpEvent(mouseButtonEvent.position, element);
                     }
+
+                    foreach (UIElement element; _mouseDownElements) {
+                        element.dispatchEvent("mouserelease", false);
+                    }
+                    _mouseDownElements.length = 0;
 
                     if (_focusedElement && _focusedElement != _pressedElement) {
                         _focusedElement.hasFocus = false;
@@ -170,6 +177,7 @@ class UIManager {
             dispatchMouseDownEvent(position, child, element);
 
         element.dispatchEvent("mousedown", false);
+        _mouseDownElements ~= element;
     }
 
     /// Process a mouse up event down the tree.
