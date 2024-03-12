@@ -83,12 +83,17 @@ final class Label : UIElement {
         }
     }
 
-    private void _reload() {
+    Vec2f getTextSize(size_t start = 0, size_t end = size_t.max) {
+        start = min(start, _text.length);
+        end = min(end, _text.length);
+
         Vec2f totalSize_ = Vec2f(0f, _font.ascent - _font.descent) * _charScale;
         float lineWidth = 0f;
 
         dchar prevChar;
-        foreach (dchar ch; _text) {
+        for (; start < end; ++start) {
+            dchar ch = _text[start];
+
             if (ch == '\n') {
                 lineWidth = 0f;
                 totalSize_.y += _font.lineSkip * _charScale;
@@ -103,6 +108,10 @@ final class Label : UIElement {
             }
         }
 
-        setSize(totalSize_);
+        return totalSize_;
+    }
+
+    private void _reload() {
+        setSize(getTextSize());
     }
 }
