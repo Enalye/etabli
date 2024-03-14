@@ -181,6 +181,16 @@ struct Vec3(T) {
         return Vec3!T(x > v.x ? x : v.x, y > v.y ? y : v.y, z > v.z ? z : v.z);
     }
 
+    /// Retourne la valeur la plus petite valeur
+    T min() const {
+        return x < y ? (x < z ? x : z) : (y < z ? y : z);
+    }
+
+    /// Retourne la valeur la plus grande valeur
+    T max() const {
+        return x > y ? (x > z ? x : z) : (y > z ? y : z);
+    }
+
     /// Remove negative components.
     Vec3!T abs() const {
         static if (__traits(isFloating, T))

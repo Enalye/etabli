@@ -165,6 +165,16 @@ struct Vec2(T) {
         return Vec2!T(x > v.x ? x : v.x, y > v.y ? y : v.y);
     }
 
+    /// Retourne la valeur la plus petite valeur
+    T min() const {
+        return x < y ? x : y;
+    }
+
+    /// Retourne la valeur la plus grande valeur
+    T max() const {
+        return x > y ? x : y;
+    }
+
     /// Remove negative components.
     Vec2!T abs() const {
         static if (__traits(isFloating, T))
