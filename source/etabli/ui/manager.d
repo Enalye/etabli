@@ -82,9 +82,20 @@ class UIManager {
                         _grabbedElement = _tempGrabbedElement;
                     }
 
+                    if (_focusedElement && _focusedElement != _pressedElement) {
+                        _focusedElement.hasFocus = false;
+                    }
+                    _focusedElement = null;
+
                     if (_pressedElement) {
                         _pressedElement.isPressed = true;
+
+                        if (_pressedElement.focusable) {
+                            _focusedElement = _pressedElement;
+                            _focusedElement.hasFocus = true;
+                        }
                     }
+
                 }
                 else {
                     _grabbedElement = null;
@@ -98,18 +109,8 @@ class UIManager {
                     }
                     _mouseDownElements.length = 0;
 
-                    if (_focusedElement && _focusedElement != _pressedElement) {
-                        _focusedElement.hasFocus = false;
-                    }
-                    _focusedElement = null;
-
                     if (_pressedElement) {
                         _pressedElement.isPressed = false;
-                    }
-
-                    if (_pressedElement && _pressedElement.focusable) {
-                        _focusedElement = _pressedElement;
-                        _focusedElement.hasFocus = true;
                     }
                 }
                 break;

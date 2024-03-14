@@ -23,7 +23,7 @@ enum UIAlignY {
 }
 
 /// Élément d’interface
-abstract class UIElement {
+class UIElement {
     alias EventListener = void delegate();
 
     private {
