@@ -6,7 +6,9 @@
 module etabli.ui.element;
 
 import etabli.common;
+import etabli.window;
 import etabli.render;
+import etabli.runtime;
 
 /// Alignement horizontal
 enum UIAlignX {
@@ -185,6 +187,27 @@ class UIElement {
 
     final UIElement getParent() {
         return _parent;
+    }
+
+    final Vec2f getParentSize() const {
+        if (_parent) {
+            return _parent._size;
+        }
+        return cast(Vec2f) Etabli.window.size();
+    }
+
+    final float getParentWidth() const {
+        if (_parent) {
+            return _parent._size.x;
+        }
+        return cast(float) Etabli.window.width();
+    }
+
+    final float getParentHeight() const {
+        if (_parent) {
+            return _parent._size.y;
+        }
+        return cast(float) Etabli.window.height();
     }
 
     final Array!UIElement getChildren() {
