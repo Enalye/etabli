@@ -20,7 +20,7 @@ import etabli.ui.element;
 /// UI children manager
 class UIManager {
     private {
-        UIElement[] _elements;
+        Array!UIElement _elements;
 
         UIElement _pressedElement;
         Vec2f _pressedElementPosition = Vec2f.zero;
@@ -50,11 +50,21 @@ class UIManager {
 
     bool isDebug;
 
+    this() {
+        _elements = new Array!UIElement;
+    }
+
     /// Update
     void update() {
-        foreach (UIElement element; _elements) {
+        sort!((a, b) => (a.zOrder > b.zOrder), SwapStrategy.stable)(_elements.array);
+        foreach (i, element; _elements) {
             update(element);
+
+            if (!element.isAlive) {
+                _elements.mark(i);
+            }
         }
+        _elements.sweep();
     }
 
     void dispatch(InputEvent[] events) {
@@ -452,9 +462,9 @@ class UIManager {
 
     /// Supprime tous les éléments
     void clearUI() {
-        _elements.length = 0;
         foreach (UIElement element; _elements) {
             element.remove();
         }
+        _elements.clear();
     }
 }
