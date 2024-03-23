@@ -36,6 +36,8 @@ class UIManager {
         InputEvent _inputEvent;
 
         UIElement[] _mouseDownElements;
+
+        UIElement[] _modalStack;
     }
 
     @property {
@@ -56,6 +58,21 @@ class UIManager {
 
     /// Update
     void update() {
+        UIElement[] modalElements;
+        bool isDirty;
+        for (size_t i; i < _modalStack.length; ++i) {
+            update(_modalStack[i]);
+            if (_modalStack[i].isAlive) {
+                modalElements ~= _modalStack[i];
+            }
+            else {
+                isDirty = true;
+            }
+        }
+        if (isDirty) {
+            _modalStack = modalElements;
+        }
+
         sort!((a, b) => (a.zOrder > b.zOrder), SwapStrategy.stable)(_elements.array);
         foreach (i, element; _elements) {
             update(element);
@@ -84,7 +101,7 @@ class UIManager {
                     _tempGrabbedElement = null;
                     _pressedElement = null;
 
-                    foreach (UIElement element; _elements) {
+                    foreach (UIElement element; _getActiveElements()) {
                         dispatchMouseDownEvent(mouseButtonEvent.position, element);
                     }
 
@@ -110,7 +127,7 @@ class UIManager {
                 else {
                     _grabbedElement = null;
 
-                    foreach (UIElement element; _elements) {
+                    foreach (UIElement element; _getActiveElements()) {
                         dispatchMouseUpEvent(mouseButtonEvent.position, element);
                     }
 
@@ -126,7 +143,7 @@ class UIManager {
                 break;
             case mouseMotion:
                 auto mouseMotionEvent = event.asMouseMotion();
-                foreach (UIElement element; _elements) {
+                foreach (UIElement element; _getActiveElements()) {
                     dispatchMouseUpdateEvent(mouseMotionEvent.position, element);
                 }
 
@@ -165,6 +182,7 @@ class UIManager {
 
     /// Process a mouse down event down the tree.
     private void dispatchMouseDownEvent(Vec2f position, UIElement element, UIElement parent = null) {
+        Vec2f parentPosition = position;
         position = _getPointInElement(position, element, parent);
         Vec2f elementSize = element.getSize() * element.scale;
         element.setMousePosition(position);
@@ -181,7 +199,7 @@ class UIManager {
 
         if (element.movable && !_grabbedElement) {
             _tempGrabbedElement = element;
-            _grabbedElementPosition = _pressedElementPosition;
+            _grabbedElementPosition = parentPosition;
         }
 
         foreach (child; element.getChildren())
@@ -224,6 +242,7 @@ class UIManager {
 
     /// Process a mouse update event down the tree.
     private void dispatchMouseUpdateEvent(Vec2f position, UIElement element, UIElement parent = null) {
+        Vec2f parentPosition = position;
         position = _getPointInElement(position, element, parent);
         Vec2f elementSize = element.getSize() * element.scale;
         element.setMousePosition(position);
@@ -237,7 +256,7 @@ class UIManager {
                 _grabbedElement = null;
             }
             else {
-                Vec2f delta = position - _grabbedElementPosition;
+                Vec2f delta = parentPosition - _grabbedElementPosition;
 
                 if (element.getAlignX() == UIAlignX.right)
                     delta.x = -delta.x;
@@ -247,7 +266,7 @@ class UIManager {
 
                 element.setPosition(element.getPosition() + delta);
 
-                _grabbedElementPosition = position;
+                _grabbedElementPosition = parentPosition;
             }
         }
 
@@ -374,6 +393,10 @@ class UIManager {
         foreach (UIElement element; _elements) {
             draw(element);
         }
+
+        foreach (UIElement element; _modalStack) {
+            draw(element);
+        }
     }
 
     private void draw(UIElement element, UIElement parent = null) {
@@ -405,13 +428,21 @@ class UIManager {
 
     void dispatchEvent(string type, bool bubbleDown = true) {
         if (bubbleDown) {
-            foreach (UIElement child; _elements) {
-                _dispatchEvent(type, child);
+            foreach_reverse (UIElement element; _modalStack) {
+                _dispatchEvent(type, element);
+            }
+
+            foreach (UIElement element; _elements) {
+                _dispatchEvent(type, element);
             }
         }
         else {
-            foreach (UIElement child; _elements) {
-                child.dispatchEvent(type, false);
+            foreach_reverse (UIElement element; _modalStack) {
+                element.dispatchEvent(type, false);
+            }
+
+            foreach (UIElement element; _elements) {
+                element.dispatchEvent(type, false);
             }
         }
     }
@@ -454,14 +485,38 @@ class UIManager {
         element.dispatchEvent(type, false);
     }
 
+    private UIElement[] _getActiveElements() {
+        if (_modalStack.length) {
+            return _modalStack[$ - 1 .. $];
+        }
+        return _elements.array;
+    }
+
     /// Ajoute un element
     void addUI(UIElement element) {
         _elements ~= element;
         element.isAlive = true;
     }
 
+    void pushModalUI(UIElement element) {
+        _modalStack ~= element;
+        element.isAlive = true;
+    }
+
+    void popModalUI() {
+        if (!_modalStack.length)
+            return;
+        _modalStack[$ - 1].remove();
+        _modalStack.length--;
+    }
+
     /// Supprime tous les éléments
     void clearUI() {
+        foreach (UIElement element; _modalStack) {
+            element.remove();
+        }
+        _modalStack.length = 0;
+
         foreach (UIElement element; _elements) {
             element.remove();
         }
