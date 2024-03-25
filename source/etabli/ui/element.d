@@ -45,6 +45,7 @@ class UIElement {
         bool _isHovered, _hasFocus, _isPressed, _isSelected, _isActive, _isGrabbed;
         bool _isEnabled = true;
         bool _isAlive;
+        bool _widthLock, _heightLock;
     }
 
     /// Ordenancement
@@ -265,9 +266,44 @@ class UIElement {
     final void setSize(Vec2f size_) {
         if (_size == size_)
             return;
-        _size = size_;
+
+        bool isDirty;
+
+        if (!_widthLock && _size.x != size_.x) {
+            isDirty = true;
+            _size.x = size_.x;
+        }
+
+        if (!_heightLock && _size.y != size_.y) {
+            isDirty = true;
+            _size.y = size_.y;
+        }
+
+        if (isDirty) {
+            dispatchEvent("size");
+            dispatchEventChildren("parentSize", false);
+        }
+    }
+
+    final void setWidth(float width_) {
+        if (_widthLock || _size.x == width_)
+            return;
+        _size.x = width_;
         dispatchEvent("size");
         dispatchEventChildren("parentSize", false);
+    }
+
+    final void setHeight(float height_) {
+        if (_heightLock || _size.y == height_)
+            return;
+        _size.y = height_;
+        dispatchEvent("size");
+        dispatchEventChildren("parentSize", false);
+    }
+
+    final void setSizeLock(bool width, bool height) {
+        _widthLock = width;
+        _heightLock = height;
     }
 
     final Vec2f getCenter() const {

@@ -122,7 +122,6 @@ class UIManager {
                             _focusedElement.hasFocus = true;
                         }
                     }
-
                 }
                 else {
                     _grabbedElement = null;
@@ -180,6 +179,15 @@ class UIManager {
         }
     }
 
+    private void updateMousePosition(Vec2f position, UIElement element, UIElement parent = null) {
+        position = _getPointInElement(position, element, parent);
+        element.setMousePosition(position);
+
+        foreach (child; element.getChildren()) {
+            updateMousePosition(position, child, element);
+        }
+    }
+
     /// Process a mouse down event down the tree.
     private void dispatchMouseDownEvent(Vec2f position, UIElement element, UIElement parent = null) {
         Vec2f parentPosition = position;
@@ -189,6 +197,9 @@ class UIManager {
 
         bool isInside = position.isBetween(Vec2f.zero, elementSize);
         if (!element.isEnabled || !isInside) {
+            foreach (child; element.getChildren()) {
+                updateMousePosition(position, child, element);
+            }
             return;
         }
 
@@ -217,6 +228,9 @@ class UIManager {
 
         bool isInside = position.isBetween(Vec2f.zero, elementSize);
         if (!element.isEnabled || !isInside) {
+            foreach (child; element.getChildren()) {
+                updateMousePosition(position, child, element);
+            }
             return;
         }
 
@@ -236,7 +250,8 @@ class UIManager {
             element.isHovered = true;
 
             dispatchEventExclude("clickoutside", _pressedElement);
-            _pressedElement.dispatchEvent("click");
+            _pressedElement.dispatchEvent("click", false);
+            _pressedElement.dispatchEvent("clickinside");
         }
     }
 
@@ -288,6 +303,10 @@ class UIManager {
             }
 
             unhoverElement(element);
+
+            foreach (child; element.getChildren()) {
+                updateMousePosition(position, child, element);
+            }
             return;
         }
 
