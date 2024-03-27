@@ -84,6 +84,20 @@ class UIManager {
         _elements.sweep();
     }
 
+    void setFocus(UIElement element) {
+        if (_focusedElement && _focusedElement != element) {
+            _focusedElement.hasFocus = false;
+        }
+        _focusedElement = null;
+
+        if (element) {
+            if (element.focusable) {
+                _focusedElement = element;
+                _focusedElement.hasFocus = true;
+            }
+        }
+    }
+
     void dispatch(InputEvent[] events) {
         foreach (InputEvent event; events) {
             _inputEvent = event;

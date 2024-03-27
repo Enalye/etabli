@@ -124,7 +124,7 @@ abstract class Slider : UIElement {
 
             if (_lastOffset != _offset) {
                 _lastOffset = _offset;
-                dispatchEvent("value");
+                dispatchEvent("value", false);
             }
         }
     }
@@ -140,7 +140,7 @@ abstract class Slider : UIElement {
 
             if (_lastOffset != _offset) {
                 _lastOffset = _offset;
-                dispatchEvent("value");
+                dispatchEvent("value", false);
             }
             break;
         case mouseUpdate:
@@ -187,7 +187,7 @@ abstract class Slider : UIElement {
 
         if (_lastOffset != _offset) {
             _lastOffset = _offset;
-            dispatchEvent("value");
+            dispatchEvent("value", false);
         }
     }
 

@@ -5,7 +5,7 @@
  */
 module etabli.ui.scrollbar;
 
-import std.algorithm.comparison : clamp;
+import std.algorithm.comparison : clamp, max;
 import etabli.ui.element;
 
 abstract class Scrollbar : UIElement {
@@ -35,7 +35,7 @@ abstract class Scrollbar : UIElement {
     }
 
     final void setHandlePosition(float position) {
-        position = clamp(position, 0f, _getScrollLength() - _handleSize);
+        position = clamp(position, 0f, max(0f, _getScrollLength() - _handleSize));
         if (_handlePosition == position)
             return;
 
@@ -54,7 +54,12 @@ abstract class Scrollbar : UIElement {
     final void setContentSize(float size) {
         _contentSize = size;
         float handleSize = _getScrollLength();
-        handleSize = (handleSize * handleSize) / _contentSize;
+        if (_contentSize < handleSize) {
+            handleSize = _contentSize;
+        }
+        else {
+            handleSize = (handleSize * handleSize) / _contentSize;
+        }
 
         if (_handleSize != handleSize) {
             _handleSize = handleSize;
