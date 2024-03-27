@@ -427,7 +427,7 @@ class UIManager {
         Etabli.renderer.pushCanvas(cast(uint) element.getWidth(), cast(uint) element.getHeight());
 
         foreach (Image image; element.getImages()) {
-            if (image.isEnabled)
+            if (image.isVisible)
                 image.draw(Vec2f.zero);
         }
 

@@ -17,6 +17,18 @@ abstract class Scrollbar : UIElement {
         float _grabPosition;
     }
 
+    @property {
+        bool isHandleGrabbed() const {
+            return _isGrabbed;
+        }
+
+        bool isHandleHovered() const {
+            float mousePosition = _getScrollMousePosition();
+            return isHovered && mousePosition >= _handlePosition &&
+                mousePosition <= _handlePosition + _handleSize;
+        }
+    }
+
     this() {
         addEventListener("mousedown", &_onMouseDown);
         addEventListener("mouserelease", &_onMouseUp);
@@ -50,6 +62,10 @@ abstract class Scrollbar : UIElement {
         }
     }
 
+    final void setContentPosition(float position) {
+        setHandlePosition(position * (_getScrollLength() / _contentSize));
+    }
+
     final float getContentPosition() const {
         return _handlePosition * (_contentSize / _getScrollLength());
     }
@@ -62,7 +78,9 @@ abstract class Scrollbar : UIElement {
             _grabPosition = mousePosition - _handlePosition;
         }
         else {
+            _isGrabbed = true;
             setHandlePosition(mousePosition - _handleSize / 2f);
+            _grabPosition = mousePosition - _handlePosition;
         }
         addEventListener("update", &_onMouseUpdate);
     }

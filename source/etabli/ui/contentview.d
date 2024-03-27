@@ -42,7 +42,7 @@ abstract class ContentView : UIElement {
     }
 
     final void setContentPosition(float position) {
-        _contentPosition = position;
+        _contentPosition = clamp(position, 0f, _getContentLength());
     }
 
     final float getChildOffset() const {
@@ -60,6 +60,8 @@ abstract class ContentView : UIElement {
     final void setSpacing(float spacing) {
         _spacing = spacing;
     }
+
+    protected abstract float _getContentLength() const;
 }
 
 final class HContentView : ContentView {
@@ -91,6 +93,10 @@ final class HContentView : ContentView {
 
         setContentSize(contentSize);
     }
+
+    protected override float _getContentLength() const {
+        return max(0f, _contentSize.x - getWidth());
+    }
 }
 
 final class VContentView : ContentView {
@@ -121,5 +127,9 @@ final class VContentView : ContentView {
         }
 
         setContentSize(contentSize);
+    }
+
+    protected override float _getContentLength() const {
+        return max(0f, _contentSize.y - getHeight());
     }
 }

@@ -23,7 +23,7 @@ void main() {
         et.ui.add(vbox);
 
         {
-            auto btn = new PrimaryButton("Primary");
+            auto btn = new AccentButton("Primary");
             vbox.addUI(btn);
         }
         {

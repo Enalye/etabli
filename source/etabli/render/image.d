@@ -35,7 +35,7 @@ abstract class Image {
 
     int zOrder;
 
-    bool isEnabled = true;
+    bool isVisible = true;
 
     // Propriétés
     @property {
