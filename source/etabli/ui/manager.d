@@ -376,7 +376,7 @@ class UIManager {
 
     pragma(inline) private Vec2f _getPointInElement(Vec2f position,
         UIElement element, UIElement parent = null) {
-        Vec2f elementPos = _getElementOrigin(element, parent);
+        Vec2f elementPos = getElementOrigin(element, parent);
         Vec2f elementSize = element.getSize() * element.scale;
         Vec2f pivot = elementPos + elementSize * element.getPivot();
 
@@ -389,7 +389,8 @@ class UIManager {
         return position;
     }
 
-    pragma(inline) private Vec2f _getElementOrigin(UIElement element, UIElement parent = null) {
+    pragma(inline) package Vec2f getElementOrigin(const UIElement element,
+        const UIElement parent = null) {
         Vec2f position = element.getPosition() + element.offset;
         const Vec2f parentSize = parent ? parent.getSize() : Vec2f(Etabli.window.width,
             Etabli.window.height);
@@ -433,9 +434,9 @@ class UIManager {
     }
 
     private void draw(UIElement element, UIElement parent = null) {
-        Vec2f position = _getElementOrigin(element, parent).round();
+        Vec2f position = getElementOrigin(element, parent).round();
 
-        if (element.getWidth() <= 0f || element.getHeight() <= 0f)
+        if (!element.isVisible || element.getWidth() <= 0f || element.getHeight() <= 0f)
             return;
 
         Etabli.renderer.pushCanvas(cast(uint) element.getWidth(), cast(uint) element.getHeight());

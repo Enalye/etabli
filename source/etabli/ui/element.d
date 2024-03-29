@@ -46,6 +46,7 @@ class UIElement {
         bool _isEnabled = true;
         bool _isAlive;
         bool _widthLock, _heightLock;
+        bool _isVisible = true;
     }
 
     /// Ordenancement
@@ -177,6 +178,18 @@ class UIElement {
             }
             return _isEnabled;
         }
+
+        final bool isVisible() const {
+            return _isVisible;
+        }
+
+        final bool isVisible(bool isVisible_) {
+            if (_isVisible != isVisible_) {
+                _isVisible = isVisible_;
+                dispatchEvent(_isVisible ? "visible" : "hidden", false);
+            }
+            return _isVisible;
+        }
     }
 
     bool focusable, movable;
@@ -232,12 +245,21 @@ class UIElement {
         _alignY = alignY;
     }
 
-    final UIAlignX getAlignX() {
+    final UIAlignX getAlignX() const {
         return _alignX;
     }
 
-    final UIAlignY getAlignY() {
+    final UIAlignY getAlignY() const {
         return _alignY;
+    }
+
+    final Vec2f getAbsolutePosition() const {
+        Vec2f position = Vec2f.zero;
+        if (_parent) {
+            position = _parent.getAbsolutePosition();
+        }
+        position += Etabli.ui.getElementOrigin(this, _parent);
+        return position;
     }
 
     final Vec2f getPosition() const {
