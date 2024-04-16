@@ -1,13 +1,13 @@
 /** 
- * Copyright: Enalye
- * License: Zlib
- * Authors: Enalye
+ * Droits d’auteur: Enalye
+ * Licence: Zlib
+ * Auteur: Enalye
  */
 module etabli.render.font.glyph;
 
-import etabli.common;
+import etabli.common, etabli.core;
 
-import etabli.render.texture;
+import etabli.render.imagedata;
 import etabli.render.util;
 
 /// Information about a single character
@@ -70,8 +70,8 @@ final class BasicGlyph : Glyph {
         int _width, _height;
         /// Coordinates in texture
         int _packX, _packY, _packWidth, _packHeight;
-        /// Texture
-        Texture _texture;
+        /// ImageData
+        ImageData _imageData;
     }
 
     this() {
@@ -79,7 +79,7 @@ final class BasicGlyph : Glyph {
     }
 
     this(bool exists_, int advance_, int offsetX_, int offsetY_, int width_,
-        int height_, int packX_, int packY_, int packWidth_, int packHeight_, Texture texture_) {
+        int height_, int packX_, int packY_, int packWidth_, int packHeight_, ImageData imageData_) {
         _exists = exists_;
         _advance = advance_;
         _offsetX = offsetX_;
@@ -90,15 +90,15 @@ final class BasicGlyph : Glyph {
         _packY = packY_;
         _packWidth = packWidth_;
         _packHeight = packHeight_;
-        _texture = texture_;
+        _imageData = imageData_;
     }
 
     /// Render glyph
     void draw(Vec2f position, float scale, Color color, float alpha) {
-        _texture.color = color;
-        _texture.blend = Blend.alpha;
-        _texture.alpha = alpha;
-        _texture.draw(position, Vec2f(_width * scale, _height * scale),
-            Vec4i(_packX, _packY, _packWidth, _packHeight), 0f);
+        _imageData.color = color;
+        _imageData.blend = Blend.alpha;
+        _imageData.alpha = alpha;
+        _imageData.draw(position, Vec2f(_width * scale, _height * scale),
+            Vec4u(_packX, _packY, _packWidth, _packHeight), 0f);
     }
 }

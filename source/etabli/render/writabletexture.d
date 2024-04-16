@@ -1,7 +1,7 @@
 /** 
- * Copyright: Enalye
- * License: Zlib
- * Authors: Enalye
+ * Droits d’auteur: Enalye
+ * Licence: Zlib
+ * Auteur: Enalye
  */
 module etabli.render.writabletexture;
 
@@ -13,7 +13,7 @@ import std.algorithm.comparison : clamp;
 import bindbc.sdl;
 
 import etabli.common;
-import etabli.runtime;
+import etabli.core;
 import etabli.render.imagedata;
 import etabli.render.renderer;
 import etabli.render.texture;
@@ -23,7 +23,6 @@ import etabli.render.util;
 final class WritableTexture : ImageData {
     private {
         SDL_Texture* _texture = null;
-        SDL_Surface* _surface = null;
         uint _width, _height;
         Color _color = Color.white;
         float _alpha = 1f;
@@ -78,25 +77,6 @@ final class WritableTexture : ImageData {
             SDL_SetTextureBlendMode(_texture, getSDLBlend(_blend));
             return _blend;
         }
-
-        uint* pixels() {
-            return cast(uint*) _surface.pixels;
-        }
-    }
-
-    /// Ctor
-    this(const Texture texture) {
-        load(texture.surface);
-    }
-
-    /// Ctor
-    this(SDL_Surface* surface) {
-        load(surface);
-    }
-
-    /// Ctor
-    this(string path) {
-        load(path);
     }
 
     /// Ctor
@@ -116,67 +96,15 @@ final class WritableTexture : ImageData {
     }
 
     ~this() {
-        unload();
-    }
-
-    package void load(SDL_Surface* surface) {
-        enforce(Etabli.renderer.sdlRenderer, "the renderer does not exist");
-        enforce(surface, "invalid surface");
-
-        _surface = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGBA8888, 0);
-        enforce(_surface, "can't format surface");
-
-        _width = _surface.w;
-        _height = _surface.h;
-
-        if (_texture)
-            SDL_DestroyTexture(_texture);
-
-        _texture = SDL_CreateTexture(Etabli.renderer.sdlRenderer,
-            SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, _width, _height);
-
-        enforce(_texture, "error occurred while converting a surface to a texture format.");
-
-        updateSettings();
-    }
-
-    /// Load from file
-    void load(string path) {
-        enforce(Etabli.renderer.sdlRenderer, "the renderer does not exist.");
-
-        SDL_Surface* surface = IMG_Load(toStringz(path));
-        enforce(surface, "can't load image file `" ~ path ~ "`");
-
-        _surface = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGBA8888, 0);
-        enforce(_surface, "can't format image file `" ~ path ~ "`");
-
-        _width = _surface.w;
-        _height = _surface.h;
-
-        _texture = SDL_CreateTexture(Etabli.renderer.sdlRenderer,
-            SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, _width, _height);
-
-        enforce(_texture, "error occurred while converting `" ~ path ~ "` to a texture format.");
-
-        updateSettings();
-        SDL_FreeSurface(surface);
-    }
-
-    /// Free image data
-    void unload() {
-        if (_surface)
-            SDL_FreeSurface(_surface);
-
         if (_texture)
             SDL_DestroyTexture(_texture);
     }
 
-    void write(void function(uint*, uint*, uint, uint, void*) writeFunc, void* data = null) {
+    void update(void function(uint*, uint, uint, void*) writeFunc, void* data = null) {
         uint* pixels;
         int pitch;
         if (SDL_LockTexture(_texture, null, cast(void**)&pixels, &pitch) == 0) {
-            writeFunc(pixels, _surface ? (cast(uint*) _surface.pixels) : null,
-                _width, _height, data);
+            writeFunc(pixels, _width, _height, data);
             SDL_UnlockTexture(_texture);
         }
         else {
@@ -185,18 +113,28 @@ final class WritableTexture : ImageData {
         }
     }
 
-    /*void write(void function(uint*, uint*, uint, uint) writeFunc) {
-        uint* pixels;
+    void update(Vec4u clip, uint[] texels) {
+        uint* dest;
         int pitch;
-        if (SDL_LockTexture(_texture, null, cast(void**)&pixels, &pitch) == 0) {
-            writeFunc(pixels, _surface ? (cast(uint*) _surface.pixels) : null, _width, _height);
+        SDL_Rect sdlClip = clip.toSdlRect();
+
+        if (SDL_LockTexture(_texture, &sdlClip, cast(void**)&dest, &pitch) == 0) {
+            size_t i, j;
+            for (size_t y; y < clip.w; y++) {
+                for (size_t x; x < clip.z; x++) {
+                    dest[i] = texels[j];
+                    ++i;
+                    ++j;
+                }
+                i += (pitch >> 2) - clip.z;
+            }
             SDL_UnlockTexture(_texture);
         }
         else {
             throw new Exception("error while locking texture: " ~ to!string(
                     fromStringz(SDL_GetError())));
         }
-    }*/
+    }
 
     private void updateSettings() {
         auto sdlColor = _color.toSDL();
@@ -206,15 +144,16 @@ final class WritableTexture : ImageData {
     }
 
     /// Render a section of the texture here
-    override void draw(Vec2f position, Vec2f size, Vec4i clip, double angle,
+    override void draw(Vec2f position, Vec2f size, Vec4u clip, double angle,
         Vec2f pivot = Vec2f.half, bool flipX = false, bool flipY = false) {
 
         SDL_Rect sdlSrc = clip.toSdlRect();
         SDL_FRect sdlDest = {position.x, position.y, size.x, size.y};
         SDL_FPoint sdlPivot = {size.x * pivot.x, size.y * pivot.y};
+        SDL_RendererFlip flip = flipX ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+        flip |= flipY ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE;
 
-        SDL_RenderCopyExF(Etabli.renderer.sdlRenderer, _texture, &sdlSrc, &sdlDest, angle, &sdlPivot,
-            (flipX ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE) | (flipY ?
-    SDL_FLIP_VERTICAL : SDL_FLIP_NONE));
+        SDL_RenderCopyExF(Etabli.renderer.sdlRenderer, _texture, &sdlSrc,
+            &sdlDest, angle, &sdlPivot, flip);
     }
 }

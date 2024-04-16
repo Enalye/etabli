@@ -1,13 +1,14 @@
 /** 
- * Copyright: Enalye
- * License: Zlib
- * Authors: Enalye
+ * Droits d’auteur: Enalye
+ * Licence: Zlib
+ * Auteur: Enalye
  */
 module etabli.render.rectangle;
 
 import std.conv : to;
 
 import etabli.common;
+import etabli.core;
 
 import etabli.render.image;
 import etabli.render.renderer;
@@ -106,7 +107,7 @@ final class Rectangle : Image {
         rasterData.filled = _filled;
         rasterData.thickness = _thickness;
 
-        _cache.write(function(uint* dest, uint*, uint texWidth, uint texHeight, void* data_) {
+        _cache.update(function(uint* dest, uint texWidth, uint texHeight, void* data_) {
             RasterData* data = cast(RasterData*) data_;
 
             if (data.filled) {
@@ -169,7 +170,7 @@ final class Rectangle : Image {
         _cache.color = color;
         _cache.blend = blend;
         _cache.alpha = alpha;
-        _cache.draw(origin + (position - anchor * size), _size, Vec4i(0, 0,
+        _cache.draw(origin + (position - anchor * size), _size, Vec4u(0, 0,
                 _cache.width, _cache.height), angle, pivot, flipX, flipY);
     }
 }

@@ -1,7 +1,7 @@
 /** 
- * Copyright: Enalye
- * License: Zlib
- * Authors: Enalye
+ * Droits d’auteur: Enalye
+ * Licence: Zlib
+ * Auteur: Enalye
  */
 module etabli.render.canvas;
 
@@ -11,7 +11,7 @@ import std.exception : enforce;
 import bindbc.sdl;
 
 import etabli.common;
-import etabli.runtime;
+import etabli.core;
 import etabli.render.imagedata;
 import etabli.render.renderer;
 import etabli.render.texture;
@@ -93,7 +93,7 @@ final class Canvas : ImageData {
         _width = width_;
         _height = height_;
 
-        assert(_width > 0 && _height > 0, "canvas render size too small");
+        enforce(_width > 0 && _height > 0, "canvas render size too small");
 
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
@@ -167,7 +167,7 @@ final class Canvas : ImageData {
         _width = width_;
         _height = height_;
 
-        assert(_width > 0 && _height > 0, "canvas render size too small");
+        enforce(_width > 0 && _height > 0, "canvas render size too small");
 
         if (_texture !is null)
             SDL_DestroyTexture(_texture);
@@ -200,16 +200,15 @@ final class Canvas : ImageData {
     }
 
     /// Dessine le canvas
-    override void draw(Vec2f position, Vec2f size, Vec4i clip, double angle,
+    override void draw(Vec2f position, Vec2f size, Vec4u clip, double angle,
         Vec2f pivot = Vec2f.half, bool flipX = false, bool flipY = false) {
         SDL_Rect sdlSrc = clip.toSdlRect();
         SDL_FRect sdlDest = {position.x, position.y, size.x, size.y};
         SDL_FPoint sdlPivot = {size.x * pivot.x, size.y * pivot.y};
+        SDL_RendererFlip flip = flipX ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+        flip |= flipY ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE;
 
-        SDL_RenderCopyExF(Etabli.renderer.sdlRenderer, _texture, &sdlSrc, //
-            &sdlDest, angle, &sdlPivot, //
-            (flipX ? SDL_FLIP_HORIZONTAL
-                : SDL_FLIP_NONE) | //
-            (flipY ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE));
+        SDL_RenderCopyExF(Etabli.renderer.sdlRenderer, _texture, &sdlSrc,
+            &sdlDest, angle, &sdlPivot, flip);
     }
 }

@@ -1,7 +1,7 @@
 /** 
- * Copyright: Enalye
- * License: Zlib
- * Authors: Enalye
+ * Droits d’auteur: Enalye
+ * Licence: Zlib
+ * Auteur: Enalye
  */
 module etabli.render.circle;
 
@@ -10,6 +10,7 @@ import std.algorithm.comparison : min, max;
 import std.math : ceil, abs;
 
 import etabli.common;
+import etabli.core;
 
 import etabli.render.image;
 import etabli.render.renderer;
@@ -114,7 +115,7 @@ final class Circle : Image {
         rasterData.thickness = _thickness;
         rasterData.center = Vec2f.one * _radius;
 
-        _cache.write(function(uint* dest, uint*, uint texWidth, uint texHeight, void* data_) {
+        _cache.update(function(uint* dest, uint texWidth, uint texHeight, void* data_) {
             RasterData* data = cast(RasterData*) data_;
             if (data.filled) {
                 for (int iy; iy < texHeight; ++iy) {
@@ -163,6 +164,6 @@ final class Circle : Image {
         _cache.blend = blend;
         _cache.alpha = alpha;
         _cache.draw(origin + position - (anchor * _radius), Vec2f(_radius,
-                _radius), Vec4i(0, 0, _cache.width, _cache.height), angle, pivot, flipX, flipY);
+                _radius), Vec4u(0, 0, _cache.width, _cache.height), angle, pivot, flipX, flipY);
     }
 }

@@ -1,12 +1,15 @@
 {
 	"name": "etabli",
-	"description": "Pour faire des applications graphiques",
-	"copyright": "Copyright © 2018, Enalye",
+	"description": "Outil d’interface graphique",
+	"copyright": "Copyright © 2024, Enalye",
 	"license": "Zlib",
 	"authors": [
 		"Enalye"
 	],
 	"dependencies": {
+        "farfadet": {
+            "path": "farfadet"
+        },
         "bindbc-sdl": "~>1.4.2"
 	},
 	"versions": [

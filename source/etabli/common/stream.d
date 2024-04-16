@@ -1,7 +1,7 @@
 /** 
- * Copyright: Enalye
- * License: Zlib
- * Authors: Enalye
+ * Droits d’auteur: Enalye
+ * Licence: Zlib
+ * Auteur: Enalye
  */
 module etabli.common.stream;
 
@@ -47,26 +47,25 @@ class OutStream {
         write!(dchar[])(cast(dchar[]) values);
     }
 
+    /// Ajoute une structure
+    void write(T)(const ref T value) if (is(T == struct)) {
+        static foreach (i, field; value.tupleof) {
+            write!(typeof(field))(value.tupleof[i]);
+        }
+    }
+
     /// Ajoute une liste
-    void write(T : T[])(T[] values) if (isScalarType!T) {
-        // Taille de la liste
-        ubyte[size_t.sizeof] sizeValues = nativeToBigEndian!size_t(values.length);
-        foreach (ubyte b; sizeValues)
-            _buffer.append!ubyte(b);
-        // Liste des valeurs
-        foreach (T v; values)
-            foreach (ubyte b; nativeToBigEndian(v))
-                _buffer.append!ubyte(b);
+    void write(T : T[])(T[] values) {
+        write!size_t(values.length);
+        foreach (T value; values) {
+            write!T(value);
+        }
     }
 
     /// Ajoute une valeur
     void write(T)(T value) if (isScalarType!T) {
-        // Taille de la valeur
-        ubyte[size_t.sizeof] sizeValues = nativeToBigEndian!size_t(1u);
-        foreach (ubyte b; sizeValues)
-            _buffer.append!ubyte(b);
-        // Liste des valeurs
-        foreach (ubyte b; nativeToBigEndian(value))
+        ubyte[T.sizeof] bytes = nativeToBigEndian!T(value);
+        foreach (ubyte b; bytes)
             _buffer.append!ubyte(b);
     }
 }
@@ -115,21 +114,28 @@ class InStream {
         return to!dstring(read!(dchar[])());
     }
 
+    /// Extrait une structure
+    T read(T)() if (is(T == struct)) {
+        T value;
+        static foreach (i, field; value.tupleof) {
+            value.tupleof[i] = read!(typeof(field))();
+        }
+        return value;
+    }
+
     /// Extrait une liste
-    T[] read(T : T[])() if (isScalarType!T) {
+    T[] read(T : T[])() {
         T[] values;
         const size_t size = _buffer.read!size_t();
         if (size == 0)
             return values;
         foreach (_; 0 .. size)
-            values ~= _buffer.read!T();
+            values ~= read!T();
         return values;
     }
 
     /// Extrait une valeur
     T read(T)() if (isScalarType!T) {
-        const size_t size = _buffer.read!size_t();
-        enforce(size == 1uL, "impossible de désérialiser");
         return _buffer.read!T();
     }
 }

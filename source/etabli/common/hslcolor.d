@@ -1,7 +1,7 @@
 /** 
- * Copyright: Enalye
- * License: Zlib
- * Authors: Enalye
+ * Droits d’auteur: Enalye
+ * Licence: Zlib
+ * Auteur: Enalye
  */
 module etabli.common.hslcolor;
 
@@ -60,7 +60,9 @@ struct HSLColor {
         }
         /// Ditto
         float h(float hue) {
-            if (hue < 0f)
+            while (hue >= 360f)
+                hue -= 360f;
+            while (hue < 0f)
                 hue += 360f;
             return _h = clamp(hue, 0f, 360f);
         }
@@ -100,6 +102,10 @@ struct HSLColor {
 
     /// Assigne les valeurs
     void set(float hue, float saturation, float light) {
+        while (hue >= 360f)
+            hue -= 360f;
+        while (hue < 0f)
+            hue += 360f;
         _h = clamp(hue, 0f, 360f);
         _s = clamp(saturation, 0f, 1f);
         _l = clamp(light, 0f, 1f);
@@ -135,37 +141,43 @@ struct HSLColor {
     }
 
     Color toColor() const {
+        float hue = _h;
+        while (hue >= 360f)
+            hue -= 360f;
+        while (hue < 0f)
+            hue += 360f;
+
         float c = (1f - abs(2f * _l - 1f)) * _s;
-        float x = c * (1 - abs((_h / 60f) % 2f - 1f));
+        float x = c * (1 - abs((hue / 60f) % 2f - 1f));
         float m = _l - c / 2f;
         float r = 0f, g = 0f, b = 0f;
 
-        if (0f <= _h && _h < 60f) {
+        if (0f <= hue && hue < 60f) {
             r = c;
             g = x;
             b = 0f;
         }
-        else if (60f <= _h && _h < 120f) {
+        else if (60f <= hue && hue < 120f) {
             r = x;
             g = c;
             b = 0f;
         }
-        else if (120f <= _h && _h < 180f) {
+        else if (120f <= hue && hue < 180f) {
             r = 0f;
             g = c;
             b = x;
         }
-        else if (180f <= _h && _h < 240f) {
+        else if (180f <= hue && hue < 240f) {
             r = 0f;
             g = x;
             b = c;
         }
-        else if (240f <= _h && _h < 300f) {
+        else if (240f <= hue && hue < 300f) {
             r = x;
             g = 0f;
             b = c;
         }
-        else if (300f <= _h && _h < 360f) {
+        else if (300f <= hue && hue < 360f) {
             r = c;
             g = 0f;
             b = x;

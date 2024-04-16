@@ -1,3 +1,8 @@
+/** 
+ * Droits d’auteur: Enalye
+ * Licence: Zlib
+ * Auteur: Enalye
+ */
 module etabli.common.resource;
 
 import std.typecons;
@@ -6,7 +11,7 @@ import std.conv : to;
 import std.exception : enforce;
 import std.traits : isCopyable;
 
-import etabli.common.json;
+import farfadet;
 import etabli.common.stream;
 
 /// Type gérée par le système de ressource
@@ -19,7 +24,7 @@ interface Resource(T) {
 final class ResourceManager {
     /// Logique de chargement d’une ressource d’un type donné
     static struct Loader {
-        alias CompilerFunc = void function(string, Json, OutStream);
+        alias CompilerFunc = void function(string, const Farfadet, OutStream);
         alias LoaderFunc = void function(InStream);
         /// Fonction de sérialisation
         CompilerFunc compile;
@@ -123,7 +128,8 @@ final class ResourceManager {
 
         if (p) {
             cache = cast(Cache!T)*p;
-        } else {
+        }
+        else {
             cache = new Cache!T;
             _caches[T.stringof] = cast(void*) cache;
         }

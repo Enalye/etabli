@@ -1,7 +1,7 @@
 /** 
- * Copyright: Enalye
- * License: Zlib
- * Authors: Enalye
+ * Droits d’auteur: Enalye
+ * Licence: Zlib
+ * Auteur: Enalye
  */
 module etabli.render.ninepatch;
 
@@ -12,6 +12,7 @@ import std.exception;
 import bindbc.sdl;
 
 import etabli.common;
+import etabli.core;
 
 import etabli.render.image;
 import etabli.render.texture;
@@ -24,7 +25,7 @@ final class NinePatch : Image, Resource!NinePatch {
         SDL_Surface* _surface;
         int _surfaceWidth, _surfaceHeight;
         WritableTexture _cache;
-        Vec4i _clip;
+        Vec4u _clip;
         int _top, _bottom, _left, _right;
         bool _isDirty = true;
         bool _ownSurface;
@@ -55,11 +56,11 @@ final class NinePatch : Image, Resource!NinePatch {
         }
 
         /// Texture's region used.
-        Vec4i clip() {
+        Vec4u clip() {
             return _clip;
         }
         /// Ditto
-        Vec4i clip(const Vec4i clip_) {
+        Vec4u clip(const Vec4u clip_) {
             if (_clip == clip_)
                 return _clip;
             _clip = clip_;
@@ -135,7 +136,7 @@ final class NinePatch : Image, Resource!NinePatch {
     }
 
     /// Ctor
-    this(Texture texture, Vec4i clip_, int top_, int bottom_, int left_, int right_) {
+    this(Texture texture, Vec4u clip_, int top_, int bottom_, int left_, int right_) {
         _surface = SDL_ConvertSurfaceFormat(texture.surface, SDL_PIXELFORMAT_RGBA8888, 0);
         enforce(_surface, "can't format surface");
         _surfaceWidth = texture.width;
@@ -212,7 +213,7 @@ final class NinePatch : Image, Resource!NinePatch {
         rasterData.texH = _surfaceHeight;
         rasterData.pixels = cast(uint*) _surface.pixels;
 
-        _cache.write(function(uint* dest, uint* src, uint texWidth, uint texHeight, void* data_) {
+        _cache.update(function(uint* dest, uint texWidth, uint texHeight, void* data_) {
             RasterData* data = cast(RasterData*) data_;
             const offsetY = (texHeight - data.bottom) * texWidth;
             const clipInternalH = data.clipH - (data.top + data.bottom);
@@ -328,7 +329,7 @@ final class NinePatch : Image, Resource!NinePatch {
         _cache.color = color;
         _cache.blend = blend;
         _cache.alpha = alpha;
-        _cache.draw(origin + position, _size, Vec4i(0, 0, _cache.width,
+        _cache.draw(origin + position, _size, Vec4u(0, 0, _cache.width,
                 _cache.height), angle, pivot, flipX, flipY);
     }
 }

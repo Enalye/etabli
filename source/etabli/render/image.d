@@ -1,7 +1,7 @@
 /** 
- * Copyright: Enalye
- * License: Zlib
- * Authors: Enalye
+ * Droits d’auteur: Enalye
+ * Licence: Zlib
+ * Auteur: Enalye
  */
 module etabli.render.image;
 
@@ -11,11 +11,7 @@ import etabli.common;
 import etabli.render.util;
 
 abstract class Image {
-    private {
-        bool _isAlive = true;
-    }
-
-    Vec4i clip;
+    Vec4u clip;
 
     Vec2f position = Vec2f.zero;
 
@@ -37,9 +33,10 @@ abstract class Image {
 
     bool isVisible = true;
 
-    // Propriétés
+    private bool _isAlive = true;
+
     @property {
-        final bool isAlive() const {
+        bool isAlive() const {
             return _isAlive;
         }
     }
@@ -60,7 +57,7 @@ abstract class Image {
         alpha = image.alpha;
     }
 
-    final void remove() {
+    void remove() {
         _isAlive = false;
     }
 

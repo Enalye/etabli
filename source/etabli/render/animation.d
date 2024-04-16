@@ -1,7 +1,7 @@
 /** 
- * Copyright: Enalye
- * License: Zlib
- * Authors: Enalye
+ * Droits d’auteur: Enalye
+ * Licence: Zlib
+ * Auteur: Enalye
  */
 module etabli.render.animation;
 
@@ -11,7 +11,7 @@ import std.exception : enforce;
 import bindbc.sdl;
 
 import etabli.common;
-import etabli.runtime;
+import etabli.core;
 
 import etabli.render.image;
 import etabli.render.sprite;
@@ -55,7 +55,7 @@ final class Animation : Image, Resource!Animation {
     }
 
     /// Ctor
-    this(ImageData imageData, Vec4i clip_, uint columns_, uint lines_, uint maxCount_ = 0) {
+    this(ImageData imageData, Vec4u clip_, uint columns_, uint lines_, uint maxCount_ = 0) {
         _imageData = imageData;
         clip = clip_;
         size = to!Vec2f(clip_.zw);
@@ -160,12 +160,13 @@ final class Animation : Image, Resource!Animation {
 
         Vec2i coord = Vec2i(id % columns, id / columns);
 
-        Vec4i imageClip = Vec4i(clip.x + coord.x * (clip.z + margin.x),
+        Vec4u imageClip = Vec4u(clip.x + coord.x * (clip.z + margin.x),
             clip.y + coord.y * (clip.w + margin.y), clip.z, clip.w);
 
         _imageData.color = color;
         _imageData.blend = blend;
         _imageData.alpha = alpha;
-        _imageData.draw(origin + (position - anchor * size), size, imageClip, angle, pivot, flipX, flipY);
+        _imageData.draw(origin + (position - anchor * size), size, imageClip,
+            angle, pivot, flipX, flipY);
     }
 }

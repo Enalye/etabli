@@ -2,8 +2,10 @@ module etabli.common.cli;
 
 import std.conv : to;
 import std.exception : enforce;
-import std.stdio : writeln;
 import std.string;
+import std.stdio : writeln;
+
+import etabli.core;
 
 /// Décrit une erreur syntaxique
 private final class CliException : Exception {

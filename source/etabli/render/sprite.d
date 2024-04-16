@@ -1,13 +1,14 @@
 /** 
- * Copyright: Enalye
- * License: Zlib
- * Authors: Enalye
+ * Droits d’auteur: Enalye
+ * Licence: Zlib
+ * Auteur: Enalye
  */
 module etabli.render.sprite;
 
 import std.conv : to;
 
 import etabli.common;
+import etabli.core;
 
 import etabli.render.image;
 import etabli.render.imagedata;
@@ -31,10 +32,10 @@ final class Sprite : Image, Resource!Sprite {
     }
 
     this(ImageData imagedata) {
-        this(imagedata, Vec4i(0, 0, imagedata.width, imagedata.height));
+        this(imagedata, Vec4u(0, 0, imagedata.width, imagedata.height));
     }
 
-    this(ImageData imagedata, Vec4i clip_) {
+    this(ImageData imagedata, Vec4u clip_) {
         _imageData = imagedata;
         clip = clip_;
         size = cast(Vec2f) clip_.zw;
@@ -68,6 +69,7 @@ final class Sprite : Image, Resource!Sprite {
         _imageData.color = color;
         _imageData.blend = blend;
         _imageData.alpha = alpha;
-        _imageData.draw(origin + (position - anchor * size), size, clip, angle, pivot, flipX, flipY);
+        _imageData.draw(origin + (position - anchor * size), size, clip,
+            angle, pivot, flipX, flipY);
     }
 }

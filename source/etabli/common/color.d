@@ -1,7 +1,7 @@
 /** 
- * Copyright: Enalye
- * License: Zlib
- * Authors: Enalye
+ * Droits d’auteur: Enalye
+ * Licence: Zlib
+ * Auteur: Enalye
  */
 module etabli.common.color;
 
@@ -15,7 +15,7 @@ import bindbc.sdl;
 import etabli.common.stream;
 import etabli.common.vec3;
 
-/// Couleur dans un espace RVB
+/// An RGB color structure.
 struct Color {
     /// Basic color.
     static const Color red = Color(1f, 0f, 0f);
@@ -65,7 +65,7 @@ struct Color {
 
     static {
         /// Take a 0xFFFFFF color format.
-        Color fromHex(int rgbValue) {
+        Color fromHex(uint rgbValue) {
             return Color((rgbValue >> 16) & 0xFF, (rgbValue >> 8) & 0xFF, rgbValue & 0xFF);
         }
     }
@@ -173,14 +173,14 @@ struct Color {
         return this;
     }
 
+    Color lerp(Color end, float t) const {
+        return (this * (1f - t)) + (end * t);
+    }
+
     /// Assignment
     Color opOpAssign(string op)(float s) {
         mixin("s = clamp(s, 0f, 1f);_r = _r", op, "s;_g = _g", op, "s;_b = _b", op, "s;");
         return this;
-    }
-
-    Color lerp(Color end, float t) const {
-        return (this * (1f - t)) + (end * t);
     }
 
     /// Read from an InStream.
@@ -203,6 +203,11 @@ struct Color {
             cast(ubyte)(_r * 255f), cast(ubyte)(_g * 255f), cast(ubyte)(_b * 255f)
         };
         return sdlColor;
+    }
+
+    uint toHex() const {
+        return (((cast(uint)(_r * 255f)) & 0xff) << 16) | (
+            ((cast(uint)(_g * 255f)) & 0xff) << 8) | ((cast(uint)(_b * 255f)) & 0xff);
     }
 }
 

@@ -290,7 +290,7 @@ final class Json {
     }
 
     /// Récupère les enfants d’un objet sous forme de tableau associatif
-    Json[string] getElements() {
+    Json[string] getChildren() {
         Json[string] result;
         foreach (string key, ref JSONValue value; _json.object) {
             result[key] = new Json(value);

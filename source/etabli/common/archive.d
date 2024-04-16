@@ -1,10 +1,12 @@
 module etabli.common.archive;
 
 import std.file;
+import std.format;
 import std.path;
-import std.stdio;
-import std.exception : enforce;
+import std.zlib;
+import std.exception : enforce, basicExceptionCtors;
 
+import etabli.core;
 import etabli.common.stream;
 
 /// Modèle d’archivage
@@ -20,6 +22,11 @@ interface IArchive {
 
     /// Enregistre une archive
     void save(string);
+}
+
+/// Décrit une erreur d’archive
+class ArchiveException : Exception {
+    mixin basicExceptionCtors;
 }
 
 /// Conteneur permettant de sérialiser les fichiers d’un dossier
@@ -70,7 +77,7 @@ final class Archive : IArchive {
                     }
                 }
                 catch (Exception e) {
-                    writeln("Erreur d’archivage: ", entry.name, " - ", e.msg);
+                    throw new ArchiveException(format!"Erreur d’archivage: %s - %s"(entry.name, e.msg));
                 }
             }
         }
@@ -248,7 +255,7 @@ final class Archive : IArchive {
     /// Charge une archive
     void load(string path) {
         InStream stream = new InStream;
-        stream.data = cast(ubyte[]) std.file.read(path);
+        stream.data = cast(ubyte[]) uncompress(std.file.read(path));
         enforce(stream.read!string() == MagicWord);
         string name = stream.read!string();
         _rootDir = new Directory("", name);
@@ -263,7 +270,7 @@ final class Archive : IArchive {
             stream.write!string(_rootDir.name);
             _rootDir.save(stream);
         }
-        std.file.write(path, stream.data);
+        std.file.write(path, compress(stream.data));
     }
 
     /// Itérateur

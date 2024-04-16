@@ -1,0 +1,3 @@
+[submodule "farfadet"]
+	path = farfadet
+	url = https://github.com/enalye/farfadet

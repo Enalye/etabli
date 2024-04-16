@@ -1,7 +1,7 @@
 /** 
- * Copyright: Enalye
- * License: Zlib
- * Authors: Enalye
+ * Droits d’auteur: Enalye
+ * Licence: Zlib
+ * Auteur: Enalye
  */
 module etabli.render.capsule;
 
@@ -10,6 +10,7 @@ import std.algorithm.comparison : min, max;
 import std.math : ceil, abs;
 
 import etabli.common;
+import etabli.core;
 
 import etabli.render.image;
 import etabli.render.renderer;
@@ -109,7 +110,7 @@ final class Capsule : Image {
         rasterData.filled = _filled;
         rasterData.thickness = _thickness;
 
-        _cache.write(function(uint* dest, uint*, uint texWidth, uint texHeight, void* data_) {
+        _cache.update(function(uint* dest, uint texWidth, uint texHeight, void* data_) {
             RasterData* data = cast(RasterData*) data_;
             int corner = cast(int) data.radius;
             const offsetY = (texHeight - corner) * texWidth;
@@ -298,7 +299,7 @@ final class Capsule : Image {
         _cache.color = color;
         _cache.blend = blend;
         _cache.alpha = alpha;
-        _cache.draw(origin + (position - anchor * size), _size, Vec4i(0, 0,
+        _cache.draw(origin + (position - anchor * size), _size, Vec4u(0, 0,
                 _cache.width, _cache.height), angle, pivot, flipX, flipY);
     }
 }

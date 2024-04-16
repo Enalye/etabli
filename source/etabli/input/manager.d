@@ -18,14 +18,11 @@ import std.conv : to, parse;
 import std.math : abs;
 import std.path, std.string, std.utf;
 import std.stdio;
-
 import bindbc.sdl;
 
 import etabli.common;
-import etabli.runtime;
+import etabli.core;
 import etabli.render;
-import etabli.window;
-
 import etabli.input.event;
 import etabli.input.map;
 import etabli.input.data;
